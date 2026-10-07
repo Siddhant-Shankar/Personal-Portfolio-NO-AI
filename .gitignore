@@ -1,0 +1,4 @@
+# Public clones require a separately approved resume. Sites already tracks its private copy.
+dist/resume.pdf
+node_modules/
+.DS_Store

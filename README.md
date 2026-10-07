@@ -1,14 +1,51 @@
-# Siddhant Shankar — Follow the Signal
+# Siddhant Shankar — A Living Body of Work
 
-A dependency-free static portfolio with an experience ledger, interactive conceptual engineering stories, public project index, research and teaching context, and a résumé download.
+An explorable illustrated tree connecting eight professional chapters, five public projects, and ongoing research. HTML, CSS, and browser JavaScript; no build step or framework.
 
-## Source and publication
+## Explore
 
-The deployed source is `dist/`. Edit `dist/index.html` for the professional history, `dist/app.js` for case-study content and interactions, and `dist/style.css` for presentation. The Sites manifest identifies the existing site; preserve that identity when updating.
+Drag or swipe to pan; scroll, pinch, or use the zoom controls. Select a light to open its story. The index gives direct access to all eleven places. An eight-stop guided trail connects the background, work, and open questions.
 
-Content was assembled in October 2026 from user-provided engineering accounts, the October 5 Khan Academy résumé, the October 2 Amazon résumé, the September IAPS CV, an earlier research résumé, the saved LinkedIn profile, and public GitHub repository metadata, READMEs, and commit history. The latest résumé is included at `dist/resume.pdf` without changing its contents. The Rare Billions account comes from prior user-provided experience; dates were not supplied and are not invented. Parasol start dates differ across older documents, so only the year is shown. No undisclosed employer implementation details are included.
+Three fictional demonstrations let visitors trace a telemetry signal, reconcile duplicate transactions, and explore parallel speedup. The full text-based portfolio remains in `field-notes.html`.
 
-The three interactive traces are conceptual teaching models, not live systems or reproductions of employer infrastructure. The hypothetical Flux failure is explicitly labeled as an illustration. The financial-record count is conceptual, not a measured performance result. The learning-product exploration is customer discovery, not a launched product.
+The tree illustration is generated artwork. Camera movement, labels, particles, and stories are implemented in code. This is an illustrated world, not a 3D simulation.
+
+## Run locally
+
+```sh
+python3 -m http.server 8000 --directory dist
+```
+
+Open http://localhost:8000. No dependencies are required. Optional Google Fonts have local fallbacks.
+
+The public repository intentionally excludes `dist/resume.pdf`; the PDF remains on the owner-private Site. To enable local résumé links, supply an approved PDF at that path. Publishing that PDF to public GitHub requires the owner's explicit approval.
+
+## Source map
+
+| File | Purpose |
+| --- | --- |
+| `dist/index.html` | Scene, controls, and dialogs |
+| `dist/world.css` | Styling and responsive layouts |
+| `dist/world.js` | Camera, inputs, stories, and index |
+| `dist/discoveries.js` | Guided trail, demonstrations, and ambient motes |
+| `dist/career-data.js` | Experience, projects, and research |
+| `dist/field-notes.html` | Complete text-based portfolio |
+| `dist/app.js`, `dist/style.css` | Field-guide behavior and presentation |
+| `dist/living-tree.webp` | Optimized illustrated artwork |
+
+## Content
+
+Career content was assembled in October 2026 from user-provided résumés, engineering accounts, and public GitHub history. Rare Billions dates were not supplied and are not invented. Parasol is shown at year precision because older documents differ. Employer code, live telemetry, and customer data are not included. Demonstrations use fictional records and simplified models. The AI learning-product exploration is customer discovery, not a launched product.
+
+## Incremental workflow
+
+Complete a meaningful feature or fix, validate it, commit with a descriptive message, and push before beginning the next milestone. Do not squash unrelated features into a final bulk commit or create unfinished commits simply to increase their number. Preserve concurrent remote changes.
+
+Sites publishes this workspace using its existing identity and access settings. GitHub receives corresponding incremental snapshots through the connected API; Sites and GitHub commit hashes differ. Exclude the résumé PDF from GitHub snapshots.
+
+## Validation
+
+JavaScript syntax, DOM references, local assets, field-guide links, script loading order, and demo calculations were checked. Native dialogs, keyboard controls, visible focus, reduced-motion handling, and a text-based alternative are included. Browser visual and interaction QA was unavailable in the managed static-site preview environment. Responsive layouts and touch interactions still need a real-browser review.
 
 ## Design references
 
@@ -22,8 +59,3 @@ The three interactive traces are conceptual teaching models, not live systems or
 
 The user-supplied AI Tool Pick checklist could not be retrieved; no claim is made that its content was reviewed.
 
-## Validation
-
-JavaScript syntax, fragment links, local assets, the PDF, role count, and JavaScript element references were checked. Responsive CSS, keyboard tab navigation, native dialogs, native disclosures, visible focus, and reduced-motion rules are included. Browser visual QA was unavailable in the static-site preview environment.
-
-No backend, analytics, API keys, or external application connections are required. Google Fonts is optional; local font fallbacks are supplied.

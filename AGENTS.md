@@ -7,3 +7,7 @@
 - Never commit credentials, source write tokens, temporary transfer helpers, or private employer code/data.
 - Keep conceptual demonstrations clearly distinguished from actual production systems.
 - Retain the direct résumé and text-based field guide alongside the explorable portfolio world.
+
+- Push each completed milestone to `Siddhant-Shankar/Personal-Portfolio-NO-AI` before starting the next feature. Use the connected GitHub API where authenticated CLI access is unavailable. Preserve concurrent remote changes.
+- Exclude `dist/resume.pdf` from public GitHub snapshots until the user explicitly approves publishing that PDF. Preserve its existing owner-private Sites copy.
+- Report source validation separately from browser QA; do not claim browser testing when it was unavailable.
