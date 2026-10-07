@@ -35,6 +35,9 @@
     state.won=to==='crown';return {ok:true,found,won:state.won};
   }
   function direction(id,dx,dy){const n=byId[id];return neighbors(id).map(to=>{const t=byId[to],x=t.x-n.x,y=t.y-n.y;return {to,score:(x*dx+y*dy)/Math.hypot(x,y)};}).filter(v=>v.score>.25).sort((a,b)=>b.score-a.score)[0]?.to;}
-  const api={nodes,links,byId,neighbors,create,hop,direction};
+  const windy=[['rootfork','parasol'],['trunk','boring'],['eastbridge','hyphenate'],['rare','projects'],['zaap','crown']];
+  function wind(a,b,time){const index=windy.findIndex(e=>e.includes(a)&&e.includes(b));if(index<0)return {windy:false,safe:true};const phase=((time+index*1170)%5200+5200)%5200;return {windy:true,safe:phase>=1800&&phase<4600,phase};}
+  function fall(state){state.at=state.checkpoint;state.falls++;state.won=false;}
+  const api={nodes,links,byId,neighbors,create,hop,direction,wind,fall};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.TrailModel=api;
 })(typeof window!=='undefined'?window:globalThis);

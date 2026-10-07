@@ -14,3 +14,12 @@ assert.equal(M.direction('apac',0,1),undefined);
 const duplicate=M.create();for(const stop of ['rootfork','parasol','rootfork','parasol'])M.hop(duplicate,stop);
 assert.equal(duplicate.collected.length,1,'Revisiting never duplicates rewards');
 console.log('Graph connectivity, legal movement, directional selection, rewards, and win conditions pass.');
+
+assert.equal(M.wind('rootfork','parasol',0).safe,false);
+assert.equal(M.wind('rootfork','parasol',1800).safe,true);
+assert.equal(M.wind('rootfork','parasol',4599).safe,true);
+assert.equal(M.wind('rootfork','parasol',4600).safe,false);
+assert.deepEqual(M.wind('rootfork','parasol',2000),M.wind('parasol','rootfork',2000));
+assert.equal(M.wind('apac','rootfork',0).safe,true);
+const rewards=[...s.collected];M.fall(s);assert.equal(s.at,'hyphenate');assert.equal(s.falls,1);assert.deepEqual(s.collected,rewards);assert.equal(s.won,false);
+console.log('Wind timing boundaries, reverse crossings, and checkpoint reward preservation pass.');
