@@ -4,7 +4,7 @@ A playable fox adventure through an illustrated tree: eighteen connected stops, 
 
 ## Explore
 
-Choose **Play the fox trail**. Use arrow keys, WASD, or the visible route buttons to hop between connected branches. Collect the research firefly at Parasol Lab, the systems firefly at The Boring Company, and the product firefly at Hyphenate, then bring them to the crown.
+Choose **Play the fox trail**. Use arrow keys, WASD, or the visible route buttons to hop between connected branches. A close camera follows the fox continuously through a tilted illustrated world. Select **Fox-eye view** for the closer viewpoint, or **Follow behind** to see the fox. This uses CSS perspective over the illustration, not a fully modeled 3D environment. Collect the research firefly at Parasol Lab, the systems firefly at The Boring Company, and the product firefly at Hyphenate, then bring them to the crown.
 
 Five wind crossings alternate between GUST and CLEAR. A gust returns the fox to its last checkpoint without losing collected fireflies. **Calm mode** removes the timing challenge and is enabled automatically for reduced-motion visitors. The game pauses its wind clock when a dialog is open or the tab is hidden.
 
@@ -50,7 +50,13 @@ Complete a meaningful feature or fix, validate it, commit with a descriptive mes
 
 Sites publishes this workspace using its existing identity and access settings. GitHub receives corresponding incremental snapshots through the connected API; Sites and GitHub commit hashes differ. Exclude the résumé PDF from GitHub snapshots.
 
+## Motion
+
+Hops use eased movement, a separate body-lift arc, and distance-based duration. The camera tracks ground position with frame-rate-independent damping, preventing jump height from shaking the view. One subsequent hop can be buffered during movement. Reduced-motion preferences disable the hop animation and camera easing.
+
 ## Validation
+
+Run `node tests/trail-motion.test.cjs` for camera consistency across frame rates and exact hop endpoints.
 
 Run `node tests/trail-model.test.cjs` to verify graph connectivity, legal moves, direction selection, reward deduplication, crown requirements, wind timing boundaries, and checkpoint recovery.
 

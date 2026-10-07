@@ -5,8 +5,8 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let state=M.create(),active=false,busy=false,hopFrame=0,calm=reduced.matches,clock=2200,lastTick=performance.now();
   const nodes=new Map(),edges=[];
-  let cameraFrame=0,cameraLast=0,eyeView=false,layout={x:innerWidth/2,y:innerHeight/2,scale:1};
-  const subject={x:920,y:940},look={x:0,y:-45},chase={x:920,y:895,vx:0,vy:0,scale:1,vs:0};
+  let cameraFrame=0,cameraLast=0,eyeView=false,queued=null,layout={x:innerWidth/2,y:innerHeight/2,scale:1};
+  const subject={x:920,y:940},look={x:0,y:-45},chase={x:920,y:895,vx:0,vy:0,scale:1,vs:0,sx:innerWidth/2,sy:innerHeight/2,vsx:0,vsy:0,pitch:32,vp:0};
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.id='trail-routes';svg.setAttribute('viewBox','0 0 1600 1067');svg.setAttribute('aria-hidden','true');$('world').append(svg);
   M.links.forEach(([a,b],i)=>{const n=M.byId[a],t=M.byId[b];const p=document.createElementNS(svg.namespaceURI,'path');p.setAttribute('d',`M${n.x} ${n.y} Q${(n.x+t.x)/2} ${(n.y+t.y)/2-15} ${t.x} ${t.y}`);p.classList.add('trail-edge');svg.append(p);edges.push({a,b,p,i});if(M.wind(a,b,0).windy)p.classList.add('windy');});
   const layer=document.createElement('div');layer.id='trail-stops';$('world').append(layer);
@@ -23,14 +23,18 @@
   const badge=document.createElement('button');badge.id='resume-game';badge.textContent='Play the fox trail ↗';badge.onclick=()=>start();$('experience').append(badge);
   function say(message){$('game-message').textContent=message;$('announcement').textContent=message;}
   function foxAt(n){subject.x=n.x;subject.y=n.y;fox.style.setProperty('--fox-x',n.x+'px');fox.style.setProperty('--fox-y',n.y+'px');}
+  function pose(lift=0,stretch=0,lean=0){fox.style.setProperty('--hop-lift',lift+'px');fox.style.setProperty('--hop-stretch',1+stretch);fox.style.setProperty('--hop-squash',1-stretch*.65);fox.style.setProperty('--fox-lean',lean+'deg');}
+  function resumeQueued(){const to=queued;queued=null;if(to&&!state.won)attempt(to);}
   function cameraTick(now){
     if(!active)return;
     const dt=Math.min(.05,Math.max(0,(now-(cameraLast||now))/1000));cameraLast=now;
     const tx=subject.x+look.x,ty=subject.y+look.y;
     if(reduced.matches){chase.x=tx;chase.y=ty;chase.scale=layout.scale;chase.vx=chase.vy=chase.vs=0;}
     else {let next=Motion.damp(chase.x,chase.vx,tx,dt);chase.x=next.value;chase.vx=next.velocity;next=Motion.damp(chase.y,chase.vy,ty,dt);chase.y=next.value;chase.vy=next.velocity;next=Motion.damp(chase.scale,chase.vs,layout.scale,dt,7);chase.scale=next.value;chase.vs=next.velocity;}
-    const pitch=reduced.matches?15:eyeView?48:32;
-    $('world').style.transform=`translate3d(${layout.x}px,${layout.y}px,0) perspective(1100px) rotateX(${pitch}deg) scale(${chase.scale}) translate3d(${-chase.x}px,${-chase.y}px,0)`;
+    const targetPitch=reduced.matches?15:eyeView?48:32;
+    if(reduced.matches){chase.sx=layout.x;chase.sy=layout.y;chase.pitch=targetPitch;}else{for(const [key,velocity,target] of [['sx','vsx',layout.x],['sy','vsy',layout.y],['pitch','vp',targetPitch]]){const n=Motion.damp(chase[key],chase[velocity],target,dt,8);chase[key]=n.value;chase[velocity]=n.velocity;}}
+    const pitch=chase.pitch;
+    $('world').style.transform=`translate3d(${chase.sx}px,${chase.sy}px,0) perspective(1100px) rotateX(${pitch}deg) scale(${chase.scale}) translate3d(${-chase.x}px,${-chase.y}px,0)`;
     $('world').style.setProperty('--pin-scale',1/chase.scale);$('world').style.setProperty('--camera-pitch',pitch+'deg');
     if(!document.hidden)cameraFrame=requestAnimationFrame(cameraTick);
   }
@@ -54,22 +58,34 @@
     say(message||current.hint);foxAt(current);follow();updateWind();document.body.classList.toggle('crown-lit',state.won);
   }
   function attempt(to){
-    if(!active||busy||document.querySelector('dialog[open]'))return;
+    if(!active||document.querySelector('dialog[open]'))return;if(busy){if(M.neighbors(state.at).includes(to))queued=to;return;}
     const previous=M.byId[state.at];
     if(!M.neighbors(state.at).includes(to)){say('Choose one of the connected branches below.');return;}
     if(M.neighbors(state.at).includes(to)&&!calm&&!M.wind(state.at,to,clock).safe){
       busy=true;M.fall(state);fox.classList.add('stumbled');say('A gust caught you! Your fireflies are safe. Returning to your last checkpoint.');
-      const started=performance.now();function recover(now){if(!reduced.matches&&now-started<650){hopFrame=requestAnimationFrame(recover);return;}busy=false;fox.classList.remove('stumbled');render('Back at your checkpoint. Wait until the route says CLEAR, then hop.');}hopFrame=requestAnimationFrame(recover);return;
+      const checkpoint=M.byId[state.at],started=performance.now();let last=started,elapsed=0;
+      function recover(now){elapsed+=Math.min(40,now-last);last=now;const t=reduced.matches?1:Math.min(1,elapsed/850),u=Motion.ease(t);foxAt({x:previous.x+(checkpoint.x-previous.x)*u,y:previous.y+(checkpoint.y-previous.y)*u});pose(Math.sin(Math.PI*t)*12,0,Math.sin(Math.PI*t)*12);if(t<1){hopFrame=requestAnimationFrame(recover);return;}busy=false;queued=null;pose();fox.classList.remove('stumbled');render('Back at your checkpoint. Wait until the route says CLEAR, then hop.');}hopFrame=requestAnimationFrame(recover);return;
     }
     const result=M.hop(state,to);if(!result.ok){say(result.reason);return;}
-    busy=true;const next=M.byId[to];look.x=Math.max(-65,Math.min(65,(next.x-previous.x)*.16));look.y=Math.max(-80,Math.min(35,(next.y-previous.y)*.16-35));const startTime=performance.now(),duration=reduced.matches?0:440;fox.classList.toggle('face-left',next.x<previous.x);fox.classList.add('hopping');
-    function animate(now){const t=duration?Math.min(1,(now-startTime)/duration):1;foxAt({x:previous.x+(next.x-previous.x)*t,y:previous.y+(next.y-previous.y)*t-Math.sin(t*Math.PI)*38});if(t<1)hopFrame=requestAnimationFrame(animate);else{busy=false;fox.classList.remove('hopping');api.chime(state.hops);render(result.won?'You brought the light home. Every route tells a different story.':result.found?`${next.firefly[0].toUpperCase()+next.firefly.slice(1)} firefly found. Checkpoint saved. Read the story behind this place, or keep climbing.`:next.hint);if(result.won){$('finish-stats').textContent=`${state.hops} hops · ${state.visited.length} places visited · ${state.falls} gust recoveries`;finish.showModal();}window.dispatchEvent(new CustomEvent('trail:arrive',{detail:{...result,at:to}}));}}
+    busy=true;const next=M.byId[to];look.x=Math.max(-65,Math.min(65,(next.x-previous.x)*.16));look.y=Math.max(-80,Math.min(35,(next.y-previous.y)*.16-35));
+    const distance=Math.hypot(next.x-previous.x,next.y-previous.y),duration=reduced.matches?0:Math.max(600,Math.min(900,450+distance*.8));
+    let last=performance.now(),elapsed=0;fox.classList.toggle('face-left',next.x<previous.x);fox.classList.add('hopping');
+    function animate(now){
+      elapsed+=Math.min(40,now-last);last=now;const t=duration?Math.min(1,elapsed/duration):1,sample=Motion.hop(previous,next,t);
+      foxAt(sample);pose(sample.lift,sample.stretch,Math.sin(Math.PI*t)*Math.sign(next.x-previous.x)*-6);
+      if(t<1){hopFrame=requestAnimationFrame(animate);return;}
+      busy=false;pose();fox.classList.remove('hopping');api.chime(state.hops);
+      render(result.won?'You brought the light home. Every route tells a different story.':result.found?`${next.firefly[0].toUpperCase()+next.firefly.slice(1)} firefly found. Checkpoint saved. Read the story behind this place, or keep climbing.`:next.hint);
+      if(result.won){queued=null;$('finish-stats').textContent=`${state.hops} hops · ${state.visited.length} places visited · ${state.falls} gust recoveries`;finish.showModal();}
+      window.dispatchEvent(new CustomEvent('trail:arrive',{detail:{...result,at:to}}));resumeQueued();
+    }
     hopFrame=requestAnimationFrame(animate);
   }
+
   function start(){document.querySelectorAll('dialog[open]').forEach(d=>d.close());$('end-trail').click();api.begin();active=true;document.body.classList.add('game-active','fox-perspective');document.body.classList.toggle('fox-eye',eyeView);startCamera();render(state.won?'The crown is yours. Start over to try another route.':'Hop with arrow keys, WASD, or the routes below. At windy crossings, wait for CLEAR.');$('viewport').focus({preventScroll:true});}
-  function leave(){cancelAnimationFrame(hopFrame);busy=false;fox.classList.remove('hopping','stumbled');active=false;cancelAnimationFrame(cameraFrame);cameraFrame=0;api.setGameCamera(false);document.body.classList.remove('game-active','fox-perspective','fox-eye');api.sceneView('whole');}
+  function leave(){cancelAnimationFrame(hopFrame);busy=false;queued=null;pose();fox.classList.remove('hopping','stumbled');active=false;cancelAnimationFrame(cameraFrame);cameraFrame=0;api.setGameCamera(false);document.body.classList.remove('game-active','fox-perspective','fox-eye');api.sceneView('whole');}
   $('begin').onclick=start;$('leave-game').onclick=leave;$('follow-fox').onclick=()=>{look.x=0;look.y=-45;follow();};$('fox-view').onclick=()=>{eyeView=!eyeView;document.body.classList.toggle('fox-eye',eyeView);$('fox-view').setAttribute('aria-pressed',eyeView);$('fox-view').textContent=eyeView?'Follow behind':'Fox-eye view';follow();};
-  $('restart-game').onclick=()=>{cancelAnimationFrame(hopFrame);busy=false;state=M.create();fox.classList.remove('hopping','stumbled');render('A fresh trail. Your first choice is waiting.');};
+  $('restart-game').onclick=()=>{cancelAnimationFrame(hopFrame);busy=false;queued=null;pose();state=M.create();fox.classList.remove('hopping','stumbled');render('A fresh trail. Your first choice is waiting.');};
   $('route-choices').onclick=e=>{const b=e.target.closest('[data-hop]');if(b)attempt(b.dataset.hop);};
   $('read-camp').onclick=()=>{if(busy)return;const i=api.places.findIndex(p=>p.id===state.at);if(i>=0)api.openStory(i);};
   function updateWind(){
