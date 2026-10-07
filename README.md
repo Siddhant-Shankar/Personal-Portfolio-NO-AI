@@ -1,10 +1,14 @@
 # Siddhant Shankar — A Living Body of Work
 
-An explorable illustrated tree connecting eight professional chapters, five public projects, and ongoing research. HTML, CSS, and browser JavaScript; no build step or framework.
+A playable fox adventure through an illustrated tree: eighteen connected stops, eight professional chapters, five public projects, and ongoing research. HTML, CSS, and browser JavaScript; no build step or framework.
 
 ## Explore
 
-Drag or swipe to pan; scroll, pinch, or use the zoom controls. Select a light to open its story. The index gives direct access to all eleven places. An eight-stop guided trail connects the background, work, and open questions.
+Choose **Play the fox trail**. Use arrow keys, WASD, or the visible route buttons to hop between connected branches. Collect the research firefly at Parasol Lab, the systems firefly at The Boring Company, and the product firefly at Hyphenate, then bring them to the crown.
+
+Five wind crossings alternate between GUST and CLEAR. A gust returns the fox to its last checkpoint without losing collected fireflies. **Calm mode** removes the timing challenge and is enabled automatically for reduced-motion visitors. The game pauses its wind clock when a dialog is open or the tab is hidden.
+
+At a career stop, press E or select **Read this chapter**. Reading is optional during play. The index, original guided story tour, free exploration, and complete text portfolio remain available. There are no game accounts or remote progress tracking; a page reload starts a new run.
 
 Three fictional demonstrations let visitors trace a telemetry signal, reconcile duplicate transactions, and explore parallel speedup. The full text-based portfolio remains in `field-notes.html`.
 
@@ -28,6 +32,9 @@ The public repository intentionally excludes `dist/resume.pdf`; the PDF remains 
 | `dist/world.css` | Styling and responsive layouts |
 | `dist/world.js` | Camera, inputs, stories, and index |
 | `dist/discoveries.js` | Guided trail, demonstrations, and ambient motes |
+| `dist/trail-model.js` | Graph, movement rules, fireflies, wind timing, and checkpoints |
+| `dist/trail-game.js`, `dist/trail-game.css` | Fox animation, camera following, game controls, and finale |
+| `tests/trail-model.test.cjs` | Deterministic game-rule tests |
 | `dist/career-data.js` | Experience, projects, and research |
 | `dist/field-notes.html` | Complete text-based portfolio |
 | `dist/app.js`, `dist/style.css` | Field-guide behavior and presentation |
@@ -45,6 +52,9 @@ Sites publishes this workspace using its existing identity and access settings. 
 
 ## Validation
 
+Run `node tests/trail-model.test.cjs` to verify graph connectivity, legal moves, direction selection, reward deduplication, crown requirements, wind timing boundaries, and checkpoint recovery.
+
+
 JavaScript syntax, DOM references, local assets, field-guide links, script loading order, and demo calculations were checked. Native dialogs, keyboard controls, visible focus, reduced-motion handling, and a text-based alternative are included. Browser visual and interaction QA was unavailable in the managed static-site preview environment. Responsive layouts and touch interactions still need a real-browser review.
 
 ## Design references
@@ -58,4 +68,3 @@ JavaScript syntax, DOM references, local assets, field-guide links, script loadi
 - https://constancesouville.com/
 
 The user-supplied AI Tool Pick checklist could not be retrieved; no claim is made that its content was reviewed.
-

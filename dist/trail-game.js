@@ -43,6 +43,7 @@
   function attempt(to){
     if(!active||busy||document.querySelector('dialog[open]'))return;
     const previous=M.byId[state.at];
+    if(!M.neighbors(state.at).includes(to)){say('Choose one of the connected branches below.');return;}
     if(M.neighbors(state.at).includes(to)&&!calm&&!M.wind(state.at,to,clock).safe){
       busy=true;M.fall(state);fox.classList.add('stumbled');say('A gust caught you! Your fireflies are safe. Returning to your last checkpoint.');
       const started=performance.now();function recover(now){if(!reduced.matches&&now-started<650){hopFrame=requestAnimationFrame(recover);return;}busy=false;fox.classList.remove('stumbled');render('Back at your checkpoint. Wait until the route says CLEAR, then hop.');}hopFrame=requestAnimationFrame(recover);return;
@@ -67,6 +68,9 @@
   setInterval(()=>{const now=performance.now(),paused=!active||document.hidden||!!document.querySelector('dialog[open]');if(!paused)clock+=Math.min(150,now-lastTick);lastTick=now;document.body.classList.toggle('game-paused',paused);if(!paused)updateWind();},100);
   document.addEventListener('keydown',e=>{if(!active||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;const vector={ArrowUp:[0,-1],w:[0,-1],ArrowDown:[0,1],s:[0,1],ArrowLeft:[-1,0],a:[-1,0],ArrowRight:[1,0],d:[1,0]}[e.key.length===1?e.key.toLowerCase():e.key];if(vector){e.preventDefault();e.stopImmediatePropagation();const to=M.direction(state.at,...vector);if(to)attempt(to);else say('No branch in that direction. Choose one of the connected routes below.');}else if(e.key.toLowerCase()==='e'){e.preventDefault();$('read-camp').click();}},true);
   $('story').addEventListener('close',()=>{if(active){follow();$('viewport').focus({preventScroll:true});}});
+  const guidedTour=$('help-tour').onclick;$('help-tour').onclick=()=>{if(active)leave();guidedTour();};
+  $('recenter').onclick=()=>active?follow():api.sceneView('whole');
+  reduced.addEventListener('change',()=>{if(reduced.matches){calm=true;syncCalm();}});
   addEventListener('resize',()=>{if(active)requestAnimationFrame(follow);});
   window.TrailGame={get state(){return state;},get active(){return active;},attempt,start,leave,render,say,follow,nodes,edges};
 })();
