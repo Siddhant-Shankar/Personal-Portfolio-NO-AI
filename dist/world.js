@@ -22,9 +22,10 @@
   const camera = {x:0,y:0,scale:1};
   const viewport = $('viewport'), world = $('world'), story = $('story');
   let selected = -1, explored = false, animation = 0, sound = null, soundOn = false;
-  let view = 'whole';
+  let view = 'whole', gameCameraLocked=false;
   const fit = () => Math.min(innerWidth / 1600, (innerHeight - 160) / 1067);
   function draw() {
+    if(gameCameraLocked)return;
     world.style.transform = `translate(${camera.x}px,${camera.y}px) scale(${camera.scale})`;
     world.style.setProperty('--pin-scale', 1 / camera.scale);
   }
@@ -35,6 +36,7 @@
     return c;
   }
   function move(target,animate=true) {
+    if(gameCameraLocked)return;
     cancelAnimationFrame(animation); constrain(target);
     const start = {...camera}, time = performance.now();
     function frame(now) {
@@ -122,9 +124,9 @@
   document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{begin();sceneView(b.dataset.view);});
   function zoom(factor,x=innerWidth/2,y=innerHeight/2){begin();const scale=Math.max(Math.max(.22,fit()*.8),Math.min(2.5,camera.scale*factor));move({scale,x:x-(x-camera.x)*scale/camera.scale,y:y-(y-camera.y)*scale/camera.scale},false);}
   $('zoom-in').onclick=()=>zoom(1.25);$('zoom-out').onclick=()=>zoom(.8);$('recenter').onclick=()=>sceneView('whole');
-  viewport.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-Math.max(-100,Math.min(100,e.deltaY))*.002),e.clientX,e.clientY);},{passive:false});
+  viewport.addEventListener('wheel',e=>{e.preventDefault();if(gameCameraLocked)return;zoom(Math.exp(-Math.max(-100,Math.min(100,e.deltaY))*.002),e.clientX,e.clientY);},{passive:false});
   const pointers=new Map();let suppressClick=false,origin=null;
-  viewport.addEventListener('pointerdown',e=>{if(e.button&&e.pointerType==='mouse')return;cancelAnimationFrame(animation);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});origin={x:e.clientX,y:e.clientY};if(!e.target.closest('button'))viewport.setPointerCapture(e.pointerId);});
+  viewport.addEventListener('pointerdown',e=>{if(gameCameraLocked)return;if(e.button&&e.pointerType==='mouse')return;cancelAnimationFrame(animation);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});origin={x:e.clientX,y:e.clientY};if(!e.target.closest('button'))viewport.setPointerCapture(e.pointerId);});
   viewport.addEventListener('pointermove',e=>{
     if(!pointers.has(e.pointerId))return;
     const old=pointers.get(e.pointerId),other=[...pointers.entries()].find(([id])=>id!==e.pointerId)?.[1];
@@ -144,5 +146,5 @@
   const art=$('tree-art');if(art.complete&&art.naturalWidth)document.body.classList.add('art-ready');else art.addEventListener('load',()=>document.body.classList.add('art-ready'));
   art.addEventListener('error',()=>{$('announcement').textContent='The illustration could not load. All stories remain available in the index.';});
   sceneView('whole',false);addEventListener('resize',()=>sceneView(view,false));
-  window.Portfolio={openStory,places,begin,sceneView,esc,move,chime};
+  window.Portfolio={openStory,places,begin,sceneView,esc,move,chime,setGameCamera(value){gameCameraLocked=value;cancelAnimationFrame(animation);}};
 })();
