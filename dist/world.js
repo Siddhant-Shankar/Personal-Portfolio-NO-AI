@@ -144,5 +144,5 @@
   const art=$('tree-art');if(art.complete&&art.naturalWidth)document.body.classList.add('art-ready');else art.addEventListener('load',()=>document.body.classList.add('art-ready'));
   art.addEventListener('error',()=>{$('announcement').textContent='The illustration could not load. All stories remain available in the index.';});
   sceneView('whole',false);addEventListener('resize',()=>sceneView(view,false));
-  window.Portfolio={openStory,places,begin,sceneView,esc};
+  window.Portfolio={openStory,places,begin,sceneView,esc,move,chime};
 })();
