@@ -1,22 +1,288 @@
 const cases = {
- flux: {title:'TRACE 01 / FLUX ANALYSIS', label:'FIELD NOTE 01 / HYPHENATE',headline:'A useful answer isn’t a usable product.',outcome:'3',outcomeCaption:'enterprise customers in three months',caption:'A financial question becomes a repeatable workflow.',problem:'When I joined, Flux Analysis was built around a single LLM call. It wasn’t dynamic enough for the accounting workflows it needed to support, and no accounting teams were using it.',change:'I grew it into a product with multiple agentic workflows, Temporal orchestration, and work across the frontend and backend. In three months, it was being used by three enterprise customers.',question:'How do you turn one successful model response into a workflow a team can depend on?',failureLabel:'Interrupt a task',normalLabel:'Restore the workflow',failureStatus:'A task is interrupted. Inspect stage 03: recovery belongs in the workflow.',normalStatus:'Explore each stage of the system.',failureNode:2,stages:[['Question','Start with the accounting question','The starting point is a financial question that needs an explanation. The product has to support the way an accounting team investigates a change.'],['Context','Give the work structure','A useful workflow needs the relevant financial context and clear boundaries for each piece of analysis. One broad request is a fragile foundation for a product.'],['Workflow','Make execution manageable','I used agentic workflows and Temporal orchestration to move beyond a single LLM call and manage the work as a process.'],['Review','Bring the result back to people','The result needs a usable frontend and a backend that supports it. The product reached three enterprise customers in three months.']],failureCopy:'In this illustration, one task has been interrupted. Orchestration creates a place to manage execution and recovery. This demonstrates the design concern, not a recorded production incident.'},
- data: {title:'TRACE 02 / FINANCIAL DATA',label:'FIELD NOTE 02 / HYPHENATE',headline:'A duplicate row can become a different financial story.',outcome:'1',outcomeCaption:'deterministic record choice for each duplicate group',caption:'Preserve the meaning of a record as it crosses systems.',problem:'Financial data moved through several systems before reaching accounting workflows. Duplicate, stale, or soft-deleted records could propagate into downstream customer data.',change:'I investigated the source data and entity state, then implemented deterministic deduplication with window-function ranking. Entity scoping and deletion state also mattered to deciding which records belonged in the result.',question:'Which record should survive—and what makes that choice consistent every time?',failureLabel:'Introduce a duplicate',normalLabel:'Resolve the duplicate',failureStatus:'Two copies describe one record. Inspect stage 03: choose deterministically.',normalStatus:'Follow a record from its source to a trusted result.',failureNode:2,stages:[['Source','Understand the original record','Start with what a record means in the source system. The important distinction is between a real additional transaction and another representation of the same one.'],['Copies','Trace it across the pipeline','Moving data between systems introduces questions about freshness, entity scope, and deletion state. A row existing downstream does not automatically make it valid.'],['Resolve','Define which record survives','I used deterministic ranking to deduplicate records. The choice needs an explicit ordering and must account for the state of the relevant entity.'],['Result','Protect the accounting workflow','The downstream result should represent the intended set of records, so duplicates and stale state do not quietly change the financial view.']],failureCopy:'This synthetic example represents one record arriving twice. Keeping both changes the result; removing one arbitrarily can keep stale data. A deterministic rule makes the choice repeatable.'},
- signal: {title:'TRACE 03 / MACHINE TELEMETRY',label:'FIELD NOTE 03 / THE BORING COMPANY',headline:'The machine had a signal. The application didn’t.',outcome:'01',outcomeCaption:'first week: traced the issue and verified the signal in the app',caption:'A signal is only useful if it reaches the people who need it.',problem:'In my first week at The Boring Company, I worked on a telemetry signal that wasn’t reaching the application. It was an unfamiliar system, and I needed to understand it by following the signal.',change:'I traced the path, identified that the signal was missing from an allowlist, and added the required entry. I then confirmed the signal appeared in the application.',question:'Where does the evidence stop between what the machine emits and what the application shows?',failureLabel:'Block the signal',normalLabel:'Allow the signal',failureStatus:'The signal stops at a boundary. Inspect stage 03 to locate the break.',normalStatus:'Trace the signal from its source to the application.',failureNode:2,stages:[['Signal','Start with what should exist','A machine signal is expected in an application. That expectation gives the investigation a concrete starting point and an observable end state.'],['Trace','Follow the evidence','I traced the signal through the system to understand where it was being lost, rather than assuming the missing value was an application-rendering problem.'],['Boundary','Inspect the allowlist','The signal was not included in an allowlist. Finding that boundary explained why the application was not receiving what it needed.'],['Verify','Close the loop in the app','After adding the required entry, I confirmed the signal appeared in the application. The useful outcome was end-to-end visibility.']],failureCopy:'In this simplified illustration, a boundary blocks the signal. Allowing it through restores the path. The real investigation likewise ended with verification in the application.'}
+  flux: {
+    title: 'TRACE 01 / FLUX ANALYSIS',
+    label: 'FIELD NOTE 01 / HYPHENATE',
+    headline: 'A useful answer isn’t a usable product.',
+    outcome: '3',
+    outcomeCaption: 'enterprise customers in three months',
+    caption: 'A financial question becomes a repeatable workflow.',
+    problem:
+      'When I joined, Flux Analysis was built around a single LLM call. It wasn’t dynamic enough for the accounting workflows it needed to support, and no accounting teams were using it.',
+    change:
+      'I grew it into a product with multiple agentic workflows, Temporal orchestration, and work across the frontend and backend. In three months, it was being used by three enterprise customers.',
+    question: 'How do you turn one successful model response into a workflow a team can depend on?',
+    failureLabel: 'Interrupt a task',
+    normalLabel: 'Restore the workflow',
+    failureStatus: 'A task is interrupted. Inspect stage 03: recovery belongs in the workflow.',
+    normalStatus: 'Explore each stage of the system.',
+    failureNode: 2,
+    stages: [
+      [
+        'Question',
+        'Start with the accounting question',
+        'The starting point is a financial question that needs an explanation. The product has to support the way an accounting team investigates a change.',
+      ],
+      [
+        'Context',
+        'Give the work structure',
+        'A useful workflow needs the relevant financial context and clear boundaries for each piece of analysis. One broad request is a fragile foundation for a product.',
+      ],
+      [
+        'Workflow',
+        'Make execution manageable',
+        'I used agentic workflows and Temporal orchestration to move beyond a single LLM call and manage the work as a process.',
+      ],
+      [
+        'Review',
+        'Bring the result back to people',
+        'The result needs a usable frontend and a backend that supports it. The product reached three enterprise customers in three months.',
+      ],
+    ],
+    failureCopy:
+      'In this illustration, one task has been interrupted. Orchestration creates a place to manage execution and recovery. This demonstrates the design concern, not a recorded production incident.',
+  },
+  data: {
+    title: 'TRACE 02 / FINANCIAL DATA',
+    label: 'FIELD NOTE 02 / HYPHENATE',
+    headline: 'A duplicate row can become a different financial story.',
+    outcome: '1',
+    outcomeCaption: 'deterministic record choice for each duplicate group',
+    caption: 'Preserve the meaning of a record as it crosses systems.',
+    problem:
+      'Financial data moved through several systems before reaching accounting workflows. Duplicate, stale, or soft-deleted records could propagate into downstream customer data.',
+    change:
+      'I investigated the source data and entity state, then implemented deterministic deduplication with window-function ranking. Entity scoping and deletion state also mattered to deciding which records belonged in the result.',
+    question: 'Which record should survive—and what makes that choice consistent every time?',
+    failureLabel: 'Introduce a duplicate',
+    normalLabel: 'Resolve the duplicate',
+    failureStatus: 'Two copies describe one record. Inspect stage 03: choose deterministically.',
+    normalStatus: 'Follow a record from its source to a trusted result.',
+    failureNode: 2,
+    stages: [
+      [
+        'Source',
+        'Understand the original record',
+        'Start with what a record means in the source system. The important distinction is between a real additional transaction and another representation of the same one.',
+      ],
+      [
+        'Copies',
+        'Trace it across the pipeline',
+        'Moving data between systems introduces questions about freshness, entity scope, and deletion state. A row existing downstream does not automatically make it valid.',
+      ],
+      [
+        'Resolve',
+        'Define which record survives',
+        'I used deterministic ranking to deduplicate records. The choice needs an explicit ordering and must account for the state of the relevant entity.',
+      ],
+      [
+        'Result',
+        'Protect the accounting workflow',
+        'The downstream result should represent the intended set of records, so duplicates and stale state do not quietly change the financial view.',
+      ],
+    ],
+    failureCopy:
+      'This synthetic example represents one record arriving twice. Keeping both changes the result; removing one arbitrarily can keep stale data. A deterministic rule makes the choice repeatable.',
+  },
+  signal: {
+    title: 'TRACE 03 / MACHINE TELEMETRY',
+    label: 'FIELD NOTE 03 / THE BORING COMPANY',
+    headline: 'The machine had a signal. The application didn’t.',
+    outcome: '01',
+    outcomeCaption: 'first week: traced the issue and verified the signal in the app',
+    caption: 'A signal is only useful if it reaches the people who need it.',
+    problem:
+      'In my first week at The Boring Company, I worked on a telemetry signal that wasn’t reaching the application. It was an unfamiliar system, and I needed to understand it by following the signal.',
+    change:
+      'I traced the path, identified that the signal was missing from an allowlist, and added the required entry. I then confirmed the signal appeared in the application.',
+    question:
+      'Where does the evidence stop between what the machine emits and what the application shows?',
+    failureLabel: 'Block the signal',
+    normalLabel: 'Allow the signal',
+    failureStatus: 'The signal stops at a boundary. Inspect stage 03 to locate the break.',
+    normalStatus: 'Trace the signal from its source to the application.',
+    failureNode: 2,
+    stages: [
+      [
+        'Signal',
+        'Start with what should exist',
+        'A machine signal is expected in an application. That expectation gives the investigation a concrete starting point and an observable end state.',
+      ],
+      [
+        'Trace',
+        'Follow the evidence',
+        'I traced the signal through the system to understand where it was being lost, rather than assuming the missing value was an application-rendering problem.',
+      ],
+      [
+        'Boundary',
+        'Inspect the allowlist',
+        'The signal was not included in an allowlist. Finding that boundary explained why the application was not receiving what it needed.',
+      ],
+      [
+        'Verify',
+        'Close the loop in the app',
+        'After adding the required entry, I confirmed the signal appeared in the application. The useful outcome was end-to-end visibility.',
+      ],
+    ],
+    failureCopy:
+      'In this simplified illustration, a boundary blocks the signal. Allowing it through restores the path. The real investigation likewise ended with verification in the application.',
+  },
 };
-let current='flux',stage=0,failed=false;
-const $=id=>document.getElementById(id);
-function renderStage(){const item=cases[current],s=item.stages[stage];$('step-count').textContent=`STAGE 0${stage+1} / 04`;$('step-title').textContent=s[1];$('step-copy').textContent=failed&&stage===item.failureNode?item.failureCopy:s[2];document.querySelectorAll('.node').forEach((n,i)=>{n.setAttribute('aria-pressed',String(i===stage));n.classList.toggle('failure',failed&&i===item.failureNode);});$('next-step').setAttribute('aria-label',stage===3?'Return to first stage':'Explore next stage');$('next-step').innerHTML=stage===3?'Back to start <span aria-hidden="true">+</span>':'Next stage <span aria-hidden="true">+</span>';}
-function renderCase(){const c=cases[current];document.querySelectorAll('[data-case]').forEach(b=>{const selected=b.dataset.case===current;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;});$('case-panel').setAttribute('aria-labelledby',`tab-${current}`);$('diagram-title').textContent=c.title;$('trace-caption').textContent=c.caption;$('story-label').textContent=c.label;$('story-title').textContent=c.headline;$('outcome-number').textContent=c.outcome;$('outcome-caption').textContent=c.outcomeCaption;$('story-problem').textContent=c.problem;$('story-change').textContent=c.change;$('story-question').textContent=c.question;$('nodes').replaceChildren(...c.stages.map((s,i)=>{const b=document.createElement('button');b.className='node';b.type='button';b.setAttribute('aria-label',`Stage ${i+1}: ${s[0]}`);const num=document.createElement('span');num.className='node-index';num.textContent=`0${i+1}`;const label=document.createElement('span');label.className='node-label';label.textContent=s[0];b.append(num,label);b.addEventListener('click',()=>{stage=i;renderStage()});return b;}));renderDemo();}
-function renderDemo(){const c=cases[current];document.querySelector('.diagram').classList.toggle('failed',failed);$('demo-toggle').textContent=failed?c.normalLabel:c.failureLabel;$('demo-toggle').setAttribute('aria-pressed',String(failed));$('demo-status').textContent=failed?c.failureStatus:c.normalStatus;renderStage();}
-document.querySelectorAll('[data-case]').forEach((b)=>{b.addEventListener('click',()=>{current=b.dataset.case;stage=0;failed=false;renderCase()});b.addEventListener('keydown',e=>{const tabs=[...document.querySelectorAll('[data-case]')],i=tabs.indexOf(b);let n;if(e.key==='ArrowRight'||e.key==='ArrowDown')n=(i+1)%tabs.length;if(e.key==='ArrowLeft'||e.key==='ArrowUp')n=(i+tabs.length-1)%tabs.length;if(e.key==='Home')n=0;if(e.key==='End')n=tabs.length-1;if(n!==undefined){e.preventDefault();tabs[n].click();tabs[n].focus();}})});
-$('next-step').addEventListener('click',()=>{stage=(stage+1)%4;renderStage()});$('demo-toggle').addEventListener('click',()=>{failed=!failed;stage=failed?cases[current].failureNode:3;renderDemo()});
-for(const [trigger,id] of [['open-brief','brief'],['open-colophon','colophon']]){$(trigger).addEventListener('click',()=>$(id).showModal());$(id).querySelector('[data-close]').addEventListener('click',()=>$(id).close());$(id).addEventListener('click',e=>{if(e.target===$(id)){const r=$(id).getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$(id).close()}})}
+let current = 'flux',
+  stage = 0,
+  failed = false;
+const $ = id => document.getElementById(id);
+function renderStage() {
+  const item = cases[current],
+    s = item.stages[stage];
+  $('step-count').textContent = `STAGE 0${stage + 1} / 04`;
+  $('step-title').textContent = s[1];
+  $('step-copy').textContent = failed && stage === item.failureNode ? item.failureCopy : s[2];
+  document.querySelectorAll('.node').forEach((n, i) => {
+    n.setAttribute('aria-pressed', String(i === stage));
+    n.classList.toggle('failure', failed && i === item.failureNode);
+  });
+  $('next-step').setAttribute(
+    'aria-label',
+    stage === 3 ? 'Return to first stage' : 'Explore next stage',
+  );
+  $('next-step').innerHTML =
+    stage === 3
+      ? 'Back to start <span aria-hidden="true">+</span>'
+      : 'Next stage <span aria-hidden="true">+</span>';
+}
+function renderCase() {
+  const c = cases[current];
+  document.querySelectorAll('[data-case]').forEach(b => {
+    const selected = b.dataset.case === current;
+    b.setAttribute('aria-selected', String(selected));
+    b.tabIndex = selected ? 0 : -1;
+  });
+  $('case-panel').setAttribute('aria-labelledby', `tab-${current}`);
+  $('diagram-title').textContent = c.title;
+  $('trace-caption').textContent = c.caption;
+  $('story-label').textContent = c.label;
+  $('story-title').textContent = c.headline;
+  $('outcome-number').textContent = c.outcome;
+  $('outcome-caption').textContent = c.outcomeCaption;
+  $('story-problem').textContent = c.problem;
+  $('story-change').textContent = c.change;
+  $('story-question').textContent = c.question;
+  $('nodes').replaceChildren(
+    ...c.stages.map((s, i) => {
+      const b = document.createElement('button');
+      b.className = 'node';
+      b.type = 'button';
+      b.setAttribute('aria-label', `Stage ${i + 1}: ${s[0]}`);
+      const num = document.createElement('span');
+      num.className = 'node-index';
+      num.textContent = `0${i + 1}`;
+      const label = document.createElement('span');
+      label.className = 'node-label';
+      label.textContent = s[0];
+      b.append(num, label);
+      b.addEventListener('click', () => {
+        stage = i;
+        renderStage();
+      });
+      return b;
+    }),
+  );
+  renderDemo();
+}
+function renderDemo() {
+  const c = cases[current];
+  document.querySelector('.diagram').classList.toggle('failed', failed);
+  $('demo-toggle').textContent = failed ? c.normalLabel : c.failureLabel;
+  $('demo-toggle').setAttribute('aria-pressed', String(failed));
+  $('demo-status').textContent = failed ? c.failureStatus : c.normalStatus;
+  renderStage();
+}
+document.querySelectorAll('[data-case]').forEach(b => {
+  b.addEventListener('click', () => {
+    current = b.dataset.case;
+    stage = 0;
+    failed = false;
+    renderCase();
+  });
+  b.addEventListener('keydown', e => {
+    const tabs = [...document.querySelectorAll('[data-case]')],
+      i = tabs.indexOf(b);
+    let n;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % tabs.length;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i + tabs.length - 1) % tabs.length;
+    if (e.key === 'Home') n = 0;
+    if (e.key === 'End') n = tabs.length - 1;
+    if (n !== undefined) {
+      e.preventDefault();
+      tabs[n].click();
+      tabs[n].focus();
+    }
+  });
+});
+$('next-step').addEventListener('click', () => {
+  stage = (stage + 1) % 4;
+  renderStage();
+});
+$('demo-toggle').addEventListener('click', () => {
+  failed = !failed;
+  stage = failed ? cases[current].failureNode : 3;
+  renderDemo();
+});
+for (const [trigger, id] of [
+  ['open-brief', 'brief'],
+  ['open-colophon', 'colophon'],
+]) {
+  $(trigger).addEventListener('click', () => $(id).showModal());
+  $(id)
+    .querySelector('[data-close]')
+    .addEventListener('click', () => $(id).close());
+  $(id).addEventListener('click', e => {
+    if (e.target === $(id)) {
+      const r = $(id).getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)
+        $(id).close();
+    }
+  });
+}
 renderCase();
 
-document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{const filter=button.dataset.filter;let count=0;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));document.querySelectorAll('.career-entry').forEach(entry=>{const show=filter==='all'||entry.dataset.groups.split(' ').includes(filter);entry.hidden=!show;if(show)count++;});$('experience-count').textContent=`${count} ${count===1?'role':'roles'}`;}));
-document.querySelectorAll('[data-case-target]').forEach(link=>link.addEventListener('click',()=>{current=link.dataset.caseTarget;stage=0;failed=false;renderCase();}));
+document.querySelectorAll('[data-filter]').forEach(button =>
+  button.addEventListener('click', () => {
+    const filter = button.dataset.filter;
+    let count = 0;
+    document
+      .querySelectorAll('[data-filter]')
+      .forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+    document.querySelectorAll('.career-entry').forEach(entry => {
+      const show = filter === 'all' || entry.dataset.groups.split(' ').includes(filter);
+      entry.hidden = !show;
+      if (show) count++;
+    });
+    $('experience-count').textContent = `${count} ${count === 1 ? 'role' : 'roles'}`;
+  }),
+);
+document.querySelectorAll('[data-case-target]').forEach(link =>
+  link.addEventListener('click', () => {
+    current = link.dataset.caseTarget;
+    stage = 0;
+    failed = false;
+    renderCase();
+  }),
+);
 // Deep links: field-notes.html#case-flux (or -data, -signal) opens that case study directly.
-function openFromHash(){const m=location.hash.match(/^#case-(\w+)$/);if(!m||!cases[m[1]])return;current=m[1];stage=0;failed=false;renderCase();requestAnimationFrame(()=>document.getElementById('work').scrollIntoView({block:'start'}));}
-addEventListener('hashchange',openFromHash);openFromHash();
+function openFromHash() {
+  const m = location.hash.match(/^#case-(\w+)$/);
+  if (!m || !cases[m[1]]) return;
+  current = m[1];
+  stage = 0;
+  failed = false;
+  renderCase();
+  requestAnimationFrame(() => document.getElementById('work').scrollIntoView({ block: 'start' }));
+}
+addEventListener('hashchange', openFromHash);
+openFromHash();
 // Fonts and images shift the layout after first paint; land on the case study once everything has loaded.
-addEventListener('load',()=>{if(/^#case-/.test(location.hash))document.getElementById('work').scrollIntoView({block:'start'});});
+addEventListener('load', () => {
+  if (/^#case-/.test(location.hash))
+    document.getElementById('work').scrollIntoView({ block: 'start' });
+});

@@ -1,0 +1,14 @@
+{
+  "name": "living-city-portfolio",
+  "private": true,
+  "description": "Siddhant Shankar's portfolio: a living, explorable city where every building is a chapter of my work.",
+  "scripts": {
+    "start": "python -m http.server 8000 --directory dist",
+    "test": "node --test \"tests/**/*.test.cjs\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "3.3.3"
+  }
+}

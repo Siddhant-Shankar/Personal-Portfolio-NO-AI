@@ -1,8 +1,95 @@
-const test=require('node:test'),assert=require('node:assert/strict'),F=require('../dist/field-core.js'),City=require('../dist/field-city.js'),L=require('../dist/field-life.js');
-test('trees, lamps, signs, and benches are solid and walking slides along them',()=>{assert.ok(City.props.length>60);for(const p of City.props){assert.equal(F.canWalk(p.x,p.z),false,`${p.kind} at ${p.x},${p.z}`);let moved={x:p.x-p.hx-1,z:p.z};for(let i=0;i<30;i++)moved=F.slide(moved,.1,0);assert.ok(moved.x<p.x-p.hx,`${p.kind} let the visitor through`);}});
-test('the canal can only be crossed on a bridge, whose deck is raised and reached smoothly',()=>{assert.equal(F.canWalk(57,0),false);assert.equal(F.canWalk(57,24),true);assert.equal(F.canWalk(57,-24),true);assert.equal(F.canWalk(57,26),false);assert.equal(City.groundAt(57,24),2.1);assert.equal(City.groundAt(40,24),0);let previous=City.groundAt(45,24);for(let x=45;x<=57;x+=.05){const h=City.groundAt(x,24);assert.ok(Math.abs(h-previous)<.06);previous=h;}});
-test('guided routes walk around street furniture, not through it',()=>{const tree=City.props.find(p=>p.kind==='tree'&&p.x===-19&&p.z===5),a={x:tree.x-2,z:tree.z},b={x:tree.x+2,z:tree.z};assert.equal(F.clearLine(a,b),false);const legs=F.route(a,b);assert.ok(legs.length>1);let last=a;for(const leg of legs){assert.ok(F.clearLine(last,leg));last=leg;}assert.ok(F.distance(last,b)<.01);});
-test('a car brakes for a visitor standing in front of it, then drives on',()=>{const s=L.create(),p=L.vehiclePose(s,0),visitor={x:p.x+Math.sin(p.yaw)*4,z:p.z+Math.cos(p.yaw)*4,y:1.45};for(let i=0;i<240;i++)L.update(s,1/60,visitor);assert.equal(s.vehicles[0].v,0);const stopped=L.vehiclePose(s,0);assert.ok(F.distance(stopped,visitor)>City.vehicleHalf(0).l);assert.equal(L.solid(s,[],visitor.x,visitor.z,.35),false);for(let i=0;i<240;i++)L.update(s,1/60,{x:99,z:99,y:1.45});assert.ok(s.vehicles[0].v>1);});
-test('a visitor flying overhead does not stop traffic',()=>{const s=L.create(),p=L.vehiclePose(s,0);for(let i=0;i<120;i++)L.update(s,1/60,{x:p.x+Math.sin(p.yaw)*4,z:p.z+Math.cos(p.yaw)*4,y:60});assert.ok(s.vehicles[0].v>1);});
-test('stopped traffic queues without vehicles overlapping, over five minutes of interruptions',()=>{const s=L.create();for(let i=0;i<9000;i++){const blocker=Math.floor(i/600)%2?{x:99,z:99,y:1.45}:(()=>{const p=L.vehiclePose(s,(i/600|0)%City.TRAFFIC);return {x:p.x+Math.sin(p.yaw)*3.5,z:p.z+Math.cos(p.yaw)*3.5,y:1.45};})();L.update(s,1/30,blocker);if(i%30)continue;for(let a=0;a<City.TRAFFIC;a++)for(let b=a+1;b<City.TRAFFIC;b++){if(a%City.circuits.length!==b%City.circuits.length)continue;assert.ok(F.distance(L.vehiclePose(s,a),L.vehiclePose(s,b))>City.vehicleHalf(a).l+City.vehicleHalf(b).l,`${a} and ${b} overlap at ${i}`);}}});
-test('a pedestrian waits for a visitor on the pavement, then carries on',()=>{const s=L.create(),p=L.livePerson(s,0),visitor={x:p.x+Math.sin(p.yaw)*.9,z:p.z+Math.cos(p.yaw)*.9,y:1.45};for(let i=0;i<120;i++)L.update(s,1/60,visitor);assert.equal(s.people[0].rate,0);assert.ok(L.solid(s,[],L.livePerson(s,0).x,L.livePerson(s,0).z,.35));const t=s.people[0].t;for(let i=0;i<120;i++)L.update(s,1/60,{x:99,z:99,y:1.45});assert.ok(s.people[0].t>t+.5);});
+const test = require('node:test'),
+  assert = require('node:assert/strict'),
+  F = require('../dist/field-core.js'),
+  City = require('../dist/field-city.js'),
+  L = require('../dist/field-life.js');
+test('trees, lamps, signs, and benches are solid and walking slides along them', () => {
+  assert.ok(City.props.length > 60);
+  for (const p of City.props) {
+    assert.equal(F.canWalk(p.x, p.z), false, `${p.kind} at ${p.x},${p.z}`);
+    let moved = { x: p.x - p.hx - 1, z: p.z };
+    for (let i = 0; i < 30; i++) moved = F.slide(moved, 0.1, 0);
+    assert.ok(moved.x < p.x - p.hx, `${p.kind} let the visitor through`);
+  }
+});
+test('the canal can only be crossed on a bridge, whose deck is raised and reached smoothly', () => {
+  assert.equal(F.canWalk(57, 0), false);
+  assert.equal(F.canWalk(57, 24), true);
+  assert.equal(F.canWalk(57, -24), true);
+  assert.equal(F.canWalk(57, 26), false);
+  assert.equal(City.groundAt(57, 24), 2.1);
+  assert.equal(City.groundAt(40, 24), 0);
+  let previous = City.groundAt(45, 24);
+  for (let x = 45; x <= 57; x += 0.05) {
+    const h = City.groundAt(x, 24);
+    assert.ok(Math.abs(h - previous) < 0.06);
+    previous = h;
+  }
+});
+test('guided routes walk around street furniture, not through it', () => {
+  const tree = City.props.find(p => p.kind === 'tree' && p.x === -19 && p.z === 5),
+    a = { x: tree.x - 2, z: tree.z },
+    b = { x: tree.x + 2, z: tree.z };
+  assert.equal(F.clearLine(a, b), false);
+  const legs = F.route(a, b);
+  assert.ok(legs.length > 1);
+  let last = a;
+  for (const leg of legs) {
+    assert.ok(F.clearLine(last, leg));
+    last = leg;
+  }
+  assert.ok(F.distance(last, b) < 0.01);
+});
+test('a car brakes for a visitor standing in front of it, then drives on', () => {
+  const s = L.create(),
+    p = L.vehiclePose(s, 0),
+    visitor = { x: p.x + Math.sin(p.yaw) * 4, z: p.z + Math.cos(p.yaw) * 4, y: 1.45 };
+  for (let i = 0; i < 240; i++) L.update(s, 1 / 60, visitor);
+  assert.equal(s.vehicles[0].v, 0);
+  const stopped = L.vehiclePose(s, 0);
+  assert.ok(F.distance(stopped, visitor) > City.vehicleHalf(0).l);
+  assert.equal(L.solid(s, [], visitor.x, visitor.z, 0.35), false);
+  for (let i = 0; i < 240; i++) L.update(s, 1 / 60, { x: 99, z: 99, y: 1.45 });
+  assert.ok(s.vehicles[0].v > 1);
+});
+test('a visitor flying overhead does not stop traffic', () => {
+  const s = L.create(),
+    p = L.vehiclePose(s, 0);
+  for (let i = 0; i < 120; i++)
+    L.update(s, 1 / 60, { x: p.x + Math.sin(p.yaw) * 4, z: p.z + Math.cos(p.yaw) * 4, y: 60 });
+  assert.ok(s.vehicles[0].v > 1);
+});
+test('stopped traffic queues without vehicles overlapping, over five minutes of interruptions', () => {
+  const s = L.create();
+  for (let i = 0; i < 9000; i++) {
+    const blocker =
+      Math.floor(i / 600) % 2
+        ? { x: 99, z: 99, y: 1.45 }
+        : (() => {
+            const p = L.vehiclePose(s, ((i / 600) | 0) % City.TRAFFIC);
+            return { x: p.x + Math.sin(p.yaw) * 3.5, z: p.z + Math.cos(p.yaw) * 3.5, y: 1.45 };
+          })();
+    L.update(s, 1 / 30, blocker);
+    if (i % 30) continue;
+    for (let a = 0; a < City.TRAFFIC; a++)
+      for (let b = a + 1; b < City.TRAFFIC; b++) {
+        if (a % City.circuits.length !== b % City.circuits.length) continue;
+        assert.ok(
+          F.distance(L.vehiclePose(s, a), L.vehiclePose(s, b)) >
+            City.vehicleHalf(a).l + City.vehicleHalf(b).l,
+          `${a} and ${b} overlap at ${i}`,
+        );
+      }
+  }
+});
+test('a pedestrian waits for a visitor on the pavement, then carries on', () => {
+  const s = L.create(),
+    p = L.livePerson(s, 0),
+    visitor = { x: p.x + Math.sin(p.yaw) * 0.9, z: p.z + Math.cos(p.yaw) * 0.9, y: 1.45 };
+  for (let i = 0; i < 120; i++) L.update(s, 1 / 60, visitor);
+  assert.equal(s.people[0].rate, 0);
+  assert.ok(L.solid(s, [], L.livePerson(s, 0).x, L.livePerson(s, 0).z, 0.35));
+  const t = s.people[0].t;
+  for (let i = 0; i < 120; i++) L.update(s, 1 / 60, { x: 99, z: 99, y: 1.45 });
+  assert.ok(s.people[0].t > t + 0.5);
+});
