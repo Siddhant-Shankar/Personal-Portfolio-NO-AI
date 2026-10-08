@@ -8,6 +8,8 @@
   --mono: 'Atkinson Hyperlegible Mono', monospace;
   --sans: 'Atkinson Hyperlegible Next', Arial, sans-serif;
   --serif: 'Young Serif', Georgia, serif;
+  /* Young Serif has one roman weight; never fake an italic or bold of it. */
+  font-synthesis: none;
 }
 * {
   box-sizing: border-box;

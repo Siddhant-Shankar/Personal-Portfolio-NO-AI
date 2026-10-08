@@ -8,6 +8,8 @@
   --sans: 'Atkinson Hyperlegible Next', Arial, sans-serif;
   --mono: 'Atkinson Hyperlegible Mono', monospace;
   color-scheme: dark;
+  /* Young Serif has one roman weight; never fake an italic or bold of it. */
+  font-synthesis: none;
 }
 * {
   box-sizing: border-box;
@@ -373,7 +375,7 @@ h1 em {
   margin: 0 0 18px;
 }
 .intro-secondary {
-  font: italic 23px/1.3 var(--serif);
+  font: 21px/1.3 var(--serif);
   color: #a8c0b2;
   margin: 0 0 29px;
 }
@@ -669,7 +671,7 @@ dialog::backdrop {
   flex: 1;
 }
 .story-number {
-  font: italic 65px/1 var(--serif);
+  font: 400 58px/1 var(--serif);
   color: #cbbb8769;
   float: right;
   margin-left: 12px;
