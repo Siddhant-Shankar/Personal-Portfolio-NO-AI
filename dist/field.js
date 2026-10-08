@@ -38,7 +38,7 @@
   for(const [id,key] of [['field-rise',' '],['field-descend','c']]){const b=$(id);b.onpointerdown=e=>{e.preventDefault();keys.add(key);b.setPointerCapture(e.pointerId);};for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(key));}
   $('enter-field').onclick=()=>setMode('walk');$('nearby-place').onclick=()=>{if(nearest)openPlace(nearest.place);};
   $('field-home').onclick=()=>{stop();player.x=0;player.y=1.45;player.z=23;player.yaw=-.25;player.pitch=0;setMode('walk');};
-  $('field-help').onclick=()=>{unlock();$('help-toggle').click();};$('fallback-index').onclick=()=>$('open-index').click();
+  $('field-help').onclick=()=>{unlock();api.modal('help');};$('fallback-index').onclick=()=>$('open-index').click();
   $('field-look').onclick=async()=>{enter();try{await canvas.requestPointerLock();}catch{$('field-look').textContent='Drag the scene to look';}};
   document.addEventListener('pointerlockchange',()=>{$('field-look').textContent=document.pointerLockElement===canvas?'Mouse captured · Esc to release':'Mouse look';});
   let drag=null;

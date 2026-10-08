@@ -34,12 +34,4 @@
     const el=lab('PARALLEL THINKING','Does twice the hardware mean twice the speed?','<label class="worker-label">Workers <output>4</output><input type="range" min="1" max="16" value="4" aria-label="Number of workers"></label><div class="speed-track"><span></span></div><p class="lab-result" role="status"></p><p class="lab-label">MODEL: 20% SERIAL WORK / NO ADDED OVERHEAD</p>');
     const input=el.querySelector('input');function update(){const n=Number(input.value),speed=1/(.2+.8/n);el.querySelector('output').textContent=n;el.querySelector('.speed-track span').style.width=(speed/5*100)+'%';el.querySelector('.lab-result').textContent=`${n} worker${n===1?'':'s'} → ${speed.toFixed(2)}× theoretical speedup. The serial portion caps this model at 5×, even with unlimited workers.`;}input.oninput=update;update();
   }
-  // Ambient motes are decorative; never run them for reduced-motion visitors.
-  const canvas=$('motes'),ctx=canvas.getContext('2d'),motion=matchMedia('(prefers-reduced-motion: reduce)');
-  let frame=0,last=0,w=0,h=0;
-  const motes=Array.from({length:30},()=>({x:Math.random(),y:Math.random(),phase:Math.random()*6.28,size:Math.random()*1.3+.5}));
-  function resize(){w=innerWidth;h=innerHeight;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
-  function tick(time){if(motion.matches||document.hidden||document.body.classList.contains('field-mode'))return;const dt=Math.min(40,time-last||16);last=time;ctx.clearRect(0,0,w,h);for(const m of motes){m.y-=dt*.000006;if(m.y<0)m.y=1;const a=.15+.3*(.5+.5*Math.sin(time*.0007+m.phase));ctx.fillStyle=`rgba(223,218,157,${a})`;ctx.beginPath();ctx.arc(m.x*w+Math.sin(time*.0002+m.phase)*15,m.y*h,m.size,0,Math.PI*2);ctx.fill();}frame=requestAnimationFrame(tick);}
-  function restart(){cancelAnimationFrame(frame);last=0;ctx.clearRect(0,0,w,h);if(!motion.matches&&!document.hidden&&!document.body.classList.contains('field-mode'))frame=requestAnimationFrame(tick);}
-  if(ctx){resize();addEventListener('resize',resize);motion.addEventListener('change',restart);document.addEventListener('visibilitychange',restart);restart();}
 })();

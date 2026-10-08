@@ -1,6 +1,6 @@
 # Living world design references
 
-This alternative lives on `feature/living-world`. It preserves the original tree portfolio at the root and adds the experimental first-person world at `field.html`.
+The city began on `feature/living-world` and is now the home page. The original illustrated tree and fox trail were retired in favour of it.
 
 ## Factory Yard
 
