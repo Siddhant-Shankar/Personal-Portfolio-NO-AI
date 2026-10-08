@@ -2,6 +2,7 @@
 (function(root){
   'use strict';
   const F=typeof module==='object'&&module.exports?require('./field-core.js'):root.FieldCore;
+  const Life=typeof module==='object'&&module.exports?require('./field-life.js'):root.FieldLife;
   function create(seed=731){const rand=F.random(seed),animals=[];const types=['rabbit','chicken','fox','deer'];
     for(let i=0;i<16;i++){let x,z;do{x=rand()*90-45;z=rand()*90-40;}while(!F.canWalk(x,z));animals.push({id:i,kind:types[i%4],x,z,yaw:rand()*Math.PI*2,phase:rand()*6,wait:i%4===0?1+rand()*2:0,goal:null,pace:0,path:[]});}
     // Two quiet neighbours greet you near the starting clearing.
@@ -45,6 +46,6 @@
     for(const side of [-1,1])for(const end of [-1,1]){if(bird&&end<0)continue;const lift=Math.max(0,Math.sin(a.phase+(side*end>0?0:Math.PI)))*Math.min(.2,a.pace*.12);const stride=Math.sin(a.phase+(side*end>0?0:Math.PI))*Math.min(.19,a.pace*.15);box(side*.2,.25+lift,end*.3+stride,.12,.45,.13,bird?'#bb904e':deer?'#5b5541':coat);}
     if(deer){for(const side of [-1,1]){box(side*.14,1.5-graze,.48,.07,.65,.08,'#706045');box(side*.23,1.65-graze,.48,.25,.07,.07,'#706045');}}
 
-  }F.city.addTraffic(b,world.elapsed);return b.finish();}
+  }F.city.addTraffic(b,world.elapsed);Life.add(b,world.elapsed);return b.finish();}
   const api={create,update,mesh};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldWildlife=api;
 })(typeof window!=='undefined'?window:globalThis);

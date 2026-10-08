@@ -86,8 +86,8 @@
     for(const x of [-16,-8]){box(x,.6,12,2.5,.45,.6,'#8b785b');box(x,1.05,11.7,2.5,.65,.12,'#8b785b');}
     // A canal and promenade establish a readable eastern city edge.
     box(57,.03,0,8,.1,113,'#7aa5a6');for(const x of [52,62])box(x,.18,0,1,.3,113,stone);
-    for(const z of [-24,24]){box(57,.4,z,12,.45,4,stone);for(const side of [-1,1]){box(57,1,z+side*2,12,.13,.13,ink);for(let x=51;x<=63;x+=2)box(x,.7,z+side*2,.09,.7,.09,ink);}}
-    for(let z=-48;z<=48;z+=12){tree(-57,z,.8);lamp(51,z);}
+    for(const z of [-24,24]){box(57,1.9,z,10.5,.4,4,stone);for(const x of [51.8,62.2])box(x,1.05,z,1.6,2.1,4,stone);for(const side of [-1,1])for(let k=0;k<4;k++){const top=1.95-k*.45;box(57+side*(5.55+k*.6),top/2,z,.6,top,3.4,stone);}for(const side of [-1,1]){box(57,2.65,z+side*1.95,10.5,.11,.11,ink);for(let x=52;x<=62;x+=2)box(x,2.35,z+side*1.95,.09,.6,.09,ink);}}
+    for(let z=-48;z<=48;z+=12){tree(-57,z,.8);if(Math.abs(z)!==24)lamp(51,z);}
     // A denser, muted skyline frames the playable district, without adding fake chapters.
     for(let n=-78;n<=78;n+=12)for(const side of [-1,1]){
       const h=10+rand()*19;tower(n,side*72,7+rand()*2,8,h,side<0?'#a7af9e':'#a0aea5');
@@ -95,26 +95,30 @@
     }
     return finish();
   }
-  function trafficPose(index,time){
-    // Vehicles travel on rounded loops inset within the street lanes.
-    const centers=[[-12,-12],[12,12],[-36,12],[12,-36],[36,36]];
-    const [cx,cz]=centers[index%centers.length],extent=10.7,r=2.1,straight=2*(extent-r),arc=Math.PI*r/2,total=4*(straight+arc);
-    let distance=((time*(index%3===0?3.2:4.6)+index*17)%total+total)%total;
-    const starts=[[cx-extent+r,cz-extent],[cx+extent,cz-extent+r],[cx+extent-r,cz+extent],[cx-extent,cz+extent-r]];
-    const directions=[[1,0],[0,1],[-1,0],[0,-1]],corners=[[cx+extent-r,cz-extent+r],[cx+extent-r,cz+extent-r],[cx-extent+r,cz+extent-r],[cx-extent+r,cz-extent+r]];
+  // Rounded-rectangle circuits shared by cars, pedestrians, and boats. Travel is clockwise seen from above.
+  function loopPose(cx,cz,ex,ez,r,distance){
+    const sx=2*(ex-r),sz=2*(ez-r),arc=Math.PI*r/2,total=2*(sx+sz)+4*arc;distance=(distance%total+total)%total;
+    const lengths=[sx,sz,sx,sz],starts=[[cx-ex+r,cz-ez],[cx+ex,cz-ez+r],[cx+ex-r,cz+ez],[cx-ex,cz+ez-r]];
+    const directions=[[1,0],[0,1],[-1,0],[0,-1]],corners=[[cx+ex-r,cz-ez+r],[cx+ex-r,cz+ez-r],[cx-ex+r,cz+ez-r],[cx-ex+r,cz-ez+r]];
     for(let side=0;side<4;side++){
-      if(distance<=straight){const [dx,dz]=directions[side];return {x:starts[side][0]+dx*distance,z:starts[side][1]+dz*distance,yaw:Math.atan2(dx,dz)};}distance-=straight;
+      if(distance<=lengths[side]){const [dx,dz]=directions[side];return {x:starts[side][0]+dx*distance,z:starts[side][1]+dz*distance,yaw:Math.atan2(dx,dz)};}distance-=lengths[side];
       if(distance<=arc){const angle=-Math.PI/2+side*Math.PI/2+distance/r;return {x:corners[side][0]+r*Math.cos(angle),z:corners[side][1]+r*Math.sin(angle),yaw:Math.atan2(-Math.sin(angle),Math.cos(angle))};}distance-=arc;
     }
     return {x:starts[0][0],z:starts[0][1],yaw:Math.PI/2};
   }
+  const loopLength=(ex,ez,r)=>2*(2*(ex-r)+2*(ez-r))+2*Math.PI*r;
+  // Vehicles share a speed per circuit, so cars on the same block never overtake each other.
+  const TRAFFIC=16,circuits=[[-12,-12,3.2],[12,12,4.6],[-36,12,3.8],[12,-36,4.2],[36,36,4],[36,-12,4.4],[-12,36,3.6],[-36,-36,3.9]];
+  const vehicleKind=i=>i%8===5?'bus':i%4===0?'van':'car';
+  function trafficPose(index,time){const [cx,cz,speed]=circuits[index%circuits.length];return loopPose(cx,cz,10.7,10.7,2.1,time*speed+index*17);}
   function addTraffic(builder,time){
-    for(let i=0;i<10;i++){const p=trafficPose(i,time),s=Math.sin(p.yaw),c=Math.cos(p.yaw),van=i%4===0,coat=['#d3ad68','#a06c50','#759d9c','#e0d3b2','#8895aa'][i%5];
+    for(let i=0;i<TRAFFIC;i++){const p=trafficPose(i,time),s=Math.sin(p.yaw),c=Math.cos(p.yaw),kind=vehicleKind(i),van=kind==='van',coat=['#d3ad68','#a06c50','#759d9c','#e0d3b2','#8895aa'][i%5];
       function part(x,y,z,w,h,d,color,glow=0){builder.box(p.x+x*c+z*s,y,p.z-x*s+z*c,w,h,d,color,p.yaw,glow);}
+      if(kind==='bus'){part(0,1.05,0,1.4,1.55,4.4,'#c9a24f');part(0,1.25,0,1.43,.5,3.9,'#4a6a6e',.7);part(0,1.86,0,1.3,.08,4.2,'#e7dcc0');for(const side of [-1,1])for(const end of [-1.4,1.4])part(side*.66,.32,end,.2,.44,.44,'#3d4c48');for(const side of [-1,1]){part(side*.45,.6,2.21,.26,.16,.04,'#ead6a1',1);part(side*.5,.6,-2.21,.22,.14,.04,'#b5463a',.8);}part(0,1.62,2.21,1,.22,.03,'#ead6a1',.9);continue;}
       part(0,.49,0,1.25,.55,van?2.6:2.2,coat);part(0,.94,van?-.15:0,1.1,van?1:.6,van?1.8:1.25,coat);part(0,1,van?.79:.65,.93,.38,.045,'#47676b');part(0,1,van?-1.06:-.65,.93,.38,.045,'#47676b');
       for(const side of [-1,1])for(const end of [-1,1])part(side*.63,.3,end*.76,.18,.4,.4,'#3d4c48');
       for(const side of [-1,1]){part(side*.4,.56,van?1.32:1.12,.25,.18,.04,'#ead6a1',1);part(side*.45,.56,van?-1.32:-1.12,.2,.14,.04,'#b5463a',.8);}
     }
   }
-  const api={landmarks,streets,infill,blockers,mesh,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
+  const api={landmarks,streets,infill,blockers,mesh,loopPose,loopLength,TRAFFIC,vehicleKind,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
 })(typeof window!=='undefined'?window:globalThis);
