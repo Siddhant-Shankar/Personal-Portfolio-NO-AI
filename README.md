@@ -10,6 +10,14 @@ The 3D renderer uses WebGL with no runtime framework or asset download. Static g
 
 Validation: `node --test tests/field-core.test.cjs tests/field-wildlife.test.cjs tests/field-camera.test.cjs tests/field-city.test.cjs`. This covers all 121 landmark journeys, camera projection, deterministic geometry, collisions, a five-minute wildlife simulation, overview framing across screen shapes, camera transitions, flight bounds, exact return-to-walking behaviour, traffic path continuity, and building avoidance. JavaScript and local asset checks also pass. Browser visual and interaction QA remains unavailable for this managed static-site project; this is a candidate design for review, not a claim of visual parity with the reference games.
 
+### A living city
+
+- **Day and night.** A full day lasts six minutes and starts at the visitor's local hour. The sun crosses the sky, then a cool moonlight takes over. After dusk, about half the windows, plus shopfronts, plaques, street lamps, and vehicle lights, glow under stars. The clock can be paused, and **T** or **+1h** skips ahead. `field.html?hour=19.5` opens at a chosen time.
+- **Street life.** Thirty-two pedestrians walk the pavements. Sixteen vehicles, including a city bus and delivery vans, drive two-way street circuits. A ferry, a barge, and a rowing boat travel the canal under raised bridges. A flock circles the park, and the makers' warehouse chimney smokes.
+- **Inspect anything that moves.** Click a car, bus, person, boat, or animal to open a live card with its route, heading, nearby landmark, and errand. In City view, **Follow** glides to a chase camera. All city-life details are fictional.
+
+Run `node --test tests/*.cjs` to run every suite. The new tests cover sky continuity across midnight, pavement and canal bounds, forward-only pedestrian movement, bird clearance over rooftops, and all sixteen vehicle circuits. The day cycle, street life, and inspection cards were also checked in headless Chrome at desktop and phone sizes, with no console errors. This was automated QA, not hands-on testing on a phone.
+
 See [DESIGN_REFERENCES.md](DESIGN_REFERENCES.md) for observed references and the choices taken from each.
 
 ---

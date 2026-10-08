@@ -32,3 +32,9 @@ Eight professional chapters and the existing public-project, research, and about
 ## City revision
 
 The user's later direction replaces the scattered meadow settlement with a compact city. The initial scene now opens from above. Eleven career buildings form a connected four-by-four block layout with four infill buildings, an urban park, street crossings, a canal, and a distant skyline. Ten procedural vehicles travel on rounded street circuits. The illustrated map reflects these same streets. First-person walking and free flight remain available, with original career content preserved.
+
+## Living-city revision
+
+Factory Yard (https://github.com/Khalidabdi1/factory) was revisited for its simulation ideas. Three were adopted, with original code. First, a six-minute day in which the city's materials shift into a night palette and windows and lamps light up. Second, independent residents and vehicles going about their day. Third, clicking a moving object to open a contextual card, with the option to follow it. Its economy, scenario system, isometric line-drawing renderer, and section views were not adopted. No Factory code or assets were copied.
+
+The newer Dilum Sanjaya post (https://x.com/dilumsanjaya/status/2106426962738880879) could not be retrieved. X returned HTTP 402 to automated access, so no claim is made about its contents. The revision continues the earlier cozy-village direction: warm lit windows against a cool dusk, small figures and boats for scale, and ambient motion that never blocks access to career stories.
