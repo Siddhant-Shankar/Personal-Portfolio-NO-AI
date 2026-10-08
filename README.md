@@ -1,3 +1,19 @@
+# Living world experiment — feature/living-world
+
+Open `field.html` for the new first-person landscape. `index.html` preserves the existing illustrated fox trail. The two routes share the same verified career data, stories, résumé access, and text alternative.
+
+The field has eleven distinct career landmarks, an illustrated atlas drawn from the actual world coordinates, collision-aware guided walking, keyboard and touch controls, and twelve procedural animals. Rabbits, chickens, foxes, and deer alternate between resting and wandering and move aside when approached. Reduced-motion preferences freeze ambient wildlife and remove head bob. Opening a dialog pauses movement; hidden tabs stop the render loop.
+
+Use WASD to walk, drag to look, E to open a nearby chapter, and M for the field map. Choose **Walk here** for a guided journey; WASD, Escape, or the stop button cancels it. **The index** and **Read the chapter** provide direct access without playing.
+
+The 3D renderer uses WebGL with no runtime framework or asset download. Static geometry is batched; animated wildlife has a separate buffer. Buildings, roofs, trees, river, paths, and animals are original procedural geometry. The atlas is an SVG/HTML interface, not a geographic mapping service or a dependency on an unidentified “inked maps” product.
+
+Validation: `node --test tests/field-core.test.cjs tests/field-wildlife.test.cjs`. This covers all 121 landmark journeys, camera projection, deterministic geometry, collisions, and a five-minute wildlife simulation. JavaScript and local asset checks also pass. Browser visual and interaction QA remains unavailable for this managed static-site project; this is a candidate design for review, not a claim of visual parity with the reference games.
+
+See [DESIGN_REFERENCES.md](DESIGN_REFERENCES.md) for observed references and the choices taken from each.
+
+---
+
 # Siddhant Shankar — A Living Body of Work
 
 A playable fox adventure through an illustrated tree: eighteen connected stops, eight professional chapters, five public projects, and ongoing research. HTML, CSS, and browser JavaScript; no build step or framework.
