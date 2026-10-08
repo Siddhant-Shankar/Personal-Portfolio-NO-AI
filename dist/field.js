@@ -7,7 +7,7 @@
   $('experience').append(shell);const canvas=$('field-canvas');
   const player={x:0,y:1.45,z:23,yaw:-.25,pitch:0},keys=new Set(),visited=new Set();
   let renderer,entered=false,last=0,frame=0,dirty=true,targetYaw=player.yaw,targetPitch=0,vx=0,vz=0,nearest=null,walkTime=0,journey=null;
-  const labels=new Map();
+  const labels=new Map(),wildlife=FieldWildlife.create();let wildlifeMesh=FieldWildlife.mesh(wildlife),wildlifeClock=0;
   for(const place of F.landmarks){const button=document.createElement('button');button.className='field-label';button.innerHTML=`<i style="--marker:${place.color}"></i><span>${api.esc(place.company)}</span>`;button.setAttribute('aria-label',`Read about ${place.company}`);button.onclick=()=>window.FieldNavigation?.select(place);$('landmark-labels').append(button);labels.set(place.id,button);}
   function pause(){return !!document.querySelector('dialog[open]');}
   function enter(){entered=true;document.body.classList.add('field-entered');$('field-intro').inert=true;canvas.focus({preventScroll:true});dirty=true;}
@@ -44,7 +44,8 @@
       const a=1-Math.exp(-12*dt);vx+=(tx-vx)*a;vz+=(tz-vz)*a;const next=F.slide(player,vx*dt,vz*dt);moving=moving||Math.hypot(next.x-player.x,next.z-player.z)>.00001;player.x=next.x;player.z=next.z;
       if(moving)walkTime+=dt;player.y=1.45+(moving&&!reduced.matches?Math.sin(walkTime*9)*.012:0);dirty=dirty||moving||Math.abs(yawDelta)>.0001||Math.abs(pitchDelta)>.0001;
     }
-    if(dirty&&renderer){overlay(renderer.draw(player));window.FieldNavigation?.update();dirty=false;}
+    if(!pause()&&!reduced.matches){FieldWildlife.update(wildlife,dt,player);wildlifeClock+=dt;if(wildlifeClock>1/24){wildlifeMesh=FieldWildlife.mesh(wildlife);wildlifeClock=0;dirty=true;}}
+    if(dirty&&renderer){overlay(renderer.draw(player,wildlifeMesh));window.FieldNavigation?.update();dirty=false;}
     if(!document.hidden)frame=requestAnimationFrame(tick);
   }
   try{renderer=new window.FieldRenderer(canvas);frame=requestAnimationFrame(tick);}catch(error){$('field-fallback').hidden=false;$('field-intro').hidden=true;console.warn('Field renderer unavailable:',error.message);}
