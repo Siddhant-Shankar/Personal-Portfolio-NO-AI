@@ -4,7 +4,7 @@ const vm = require('node:vm'),
   path = require('node:path'),
   sandbox = { window: {} };
 vm.runInNewContext(
-  fs.readFileSync(path.join(__dirname, '..', 'dist', 'career-data.js'), 'utf8'),
+  fs.readFileSync(path.join(__dirname, '..', 'dist', 'js', 'content', 'career-data.js'), 'utf8'),
   sandbox,
 );
 module.exports = sandbox.window.CAREER;

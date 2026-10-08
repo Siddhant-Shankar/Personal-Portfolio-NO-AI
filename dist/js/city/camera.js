@@ -1,8 +1,7 @@
 /* Creative-style flight, kept independent from the grounded visitor and the renderer. */
 (function (root) {
   'use strict';
-  const F =
-    typeof module === 'object' && module.exports ? require('./field-core.js') : root.FieldCore;
+  const Core = typeof module === 'object' && module.exports ? require('./core.js') : root.CityCore;
   const copy = p => ({ x: p.x, y: p.y, z: p.z, yaw: p.yaw, pitch: p.pitch });
   function overview(aspect = 16 / 9) {
     const half = Math.atan(Math.tan(Math.PI / 6) * Math.min(1, Math.max(0.35, aspect)));
@@ -47,7 +46,7 @@
     if (state.transition) {
       const t = state.transition;
       t.elapsed += Math.max(0, dt);
-      const v = F.clamp(t.elapsed / 1.15, 0, 1),
+      const v = Core.clamp(t.elapsed / 1.15, 0, 1),
         s = v * v * (3 - 2 * v),
         eye = {};
       for (const key of ['x', 'y', 'z', 'pitch'])
@@ -61,9 +60,9 @@
   }
   function fly(state, input, dt) {
     if (state.mode !== 'world' || state.transition) return false;
-    dt = F.clamp(dt, 0, 0.05);
+    dt = Core.clamp(dt, 0, 0.05);
     const p = state.flight,
-      f = F.forward(p.yaw),
+      f = Core.forward(p.yaw),
       norm = Math.max(1, Math.hypot(input.forward, input.side, input.up)),
       speed = input.fast ? 38 : 19;
     const target = {
@@ -77,13 +76,13 @@
       state.velocity[axis] += (target[axis] - state.velocity[axis]) * damping;
       const next = {
         ...p,
-        [axis]: F.clamp(
+        [axis]: Core.clamp(
           p[axis] + state.velocity[axis] * dt,
           axis === 'y' ? 7 : -260,
           axis === 'y' ? 330 : 260,
         ),
       };
-      if (F.canFly(next.x, next.y, next.z)) p[axis] = next[axis];
+      if (Core.canFly(next.x, next.y, next.z)) p[axis] = next[axis];
       else state.velocity[axis] = 0;
     }
     return Math.hypot(p.x - old.x, p.y - old.y, p.z - old.z) > 0.00001;
@@ -91,13 +90,13 @@
   function zoom(state, delta) {
     if (state.mode !== 'world' || state.transition) return;
     const p = state.flight,
-      step = F.clamp(delta, -100, 100) * Math.max(0.035, p.y * 0.0016),
+      step = Core.clamp(delta, -100, 100) * Math.max(0.035, p.y * 0.0016),
       cp = Math.cos(p.pitch),
       start = copy(p);
     const next = {
-      x: F.clamp(p.x - Math.sin(p.yaw) * cp * step, -260, 260),
-      z: F.clamp(p.z + Math.cos(p.yaw) * cp * step, -260, 260),
-      y: F.clamp(p.y - Math.sin(p.pitch) * step, 7, 330),
+      x: Core.clamp(p.x - Math.sin(p.yaw) * cp * step, -260, 260),
+      z: Core.clamp(p.z + Math.cos(p.yaw) * cp * step, -260, 260),
+      y: Core.clamp(p.y - Math.sin(p.pitch) * step, 7, 330),
     };
     const steps = Math.max(
       1,
@@ -110,12 +109,12 @@
           y: start.y + (next.y - start.y) * t,
           z: start.z + (next.z - start.z) * t,
         };
-      if (!F.canFly(q.x, q.y, q.z)) break;
+      if (!Core.canFly(q.x, q.y, q.z)) break;
       Object.assign(p, q);
     }
     resetVelocity(state);
   }
   const api = { overview, create, setMode, frameWorld, sample, fly, zoom, resetVelocity };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldCamera = api;
+  else root.CityCamera = api;
 })(typeof window !== 'undefined' ? window : globalThis);

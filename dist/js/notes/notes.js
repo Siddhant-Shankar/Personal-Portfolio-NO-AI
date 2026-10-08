@@ -269,7 +269,7 @@ document.querySelectorAll('[data-case-target]').forEach(link =>
     renderCase();
   }),
 );
-// Deep links: field-notes.html#case-flux (or -data, -signal) opens that case study directly.
+// Deep links: notes.html#case-flux (or -data, -signal) opens that case study directly.
 function openFromHash() {
   const m = location.hash.match(/^#case-(\w+)$/);
   if (!m || !cases[m[1]]) return;

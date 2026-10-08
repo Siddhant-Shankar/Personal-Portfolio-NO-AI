@@ -2,20 +2,20 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id),
-    F = window.FieldCore,
-    C = window.FieldCamera,
-    api = window.Portfolio,
+    Core = window.CityCore,
+    Camera = window.CityCamera,
+    Portfolio = window.Portfolio,
     reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  document.body.classList.add('field-mode');
+  document.body.classList.add('city-mode');
   const shell = document.createElement('div');
-  shell.id = 'field-shell';
-  shell.innerHTML = `<canvas id="field-canvas" tabindex="0" aria-label="First-person landscape. Use WASD to move, drag to look, and E to read a nearby landmark."></canvas><div id="field-shade" aria-hidden="true"></div><div id="landmark-labels"></div><div class="field-compass"><span id="field-heading">N</span><i></i><span>CITY ATLAS / SIDDHANT SHANKAR</span></div><div id="field-clock" role="group" aria-label="Time of day in the city"><span id="clock-dial" aria-hidden="true"><i></i></span><span class="clock-read"><strong id="clock-time">--:--</strong><small id="clock-phase"></small></span><button id="clock-run" aria-pressed="true" aria-label="Pause the passage of time">❚❚</button><button id="clock-skip" aria-label="Skip ahead one hour">+1h <kbd>T</kbd></button></div><div id="field-status"><span class="field-kicker" id="field-mode-status">ON FOOT / STREET LEVEL</span><span id="field-visited">0 / 11 PLACES VISITED</span></div><button id="nearby-place" hidden><span class="nearby-key">E</span><span><small id="nearby-company"></small><strong id="nearby-title"></strong></span><span>↗</span></button><div id="field-perspectives" role="group" aria-label="Camera perspective"><button id="field-walk-view" aria-pressed="true">On foot</button><button id="field-world-view" aria-pressed="false">City view <kbd>V</kbd></button></div><div id="field-flight-controls" hidden><span>FREE FLIGHT</span><p>WASD move · drag to look<br>Space rise · C descend · Shift faster</p><div><button id="field-rise" aria-label="Fly higher">↑ Rise</button><button id="field-descend" aria-label="Fly lower">↓ Descend</button></div><button id="field-frame">Frame the city <kbd>R</kbd></button><small>Scroll to move closer or farther</small></div><div id="field-controls"><button id="field-look">Mouse look</button><button id="field-home">Return to start</button><button id="field-help">How to explore</button></div><div class="field-reticle" aria-hidden="true">·</div><div id="field-fallback" hidden><h2>The city needs WebGL.</h2><p>You can still explore every career story through the index, or read the complete field guide.</p><button id="fallback-index">Open experience index</button><a href="field-notes.html">Read the field guide ↗</a></div>`;
+  shell.id = 'city-shell';
+  shell.innerHTML = `<canvas id="city-canvas" tabindex="0" aria-label="First-person landscape. Use WASD to move, drag to look, and E to read a nearby landmark."></canvas><div id="city-shade" aria-hidden="true"></div><div id="landmark-labels"></div><div class="city-compass"><span id="city-heading">N</span><i></i><span>CITY ATLAS / SIDDHANT SHANKAR</span></div><div id="city-clock" role="group" aria-label="Time of day in the city"><span id="clock-dial" aria-hidden="true"><i></i></span><span class="clock-read"><strong id="clock-time">--:--</strong><small id="clock-phase"></small></span><button id="clock-run" aria-pressed="true" aria-label="Pause the passage of time">❚❚</button><button id="clock-skip" aria-label="Skip ahead one hour">+1h <kbd>T</kbd></button></div><div id="city-status"><span class="city-kicker" id="city-mode-status">ON FOOT / STREET LEVEL</span><span id="city-visited">0 / 11 PLACES VISITED</span></div><button id="nearby-place" hidden><span class="nearby-key">E</span><span><small id="nearby-company"></small><strong id="nearby-title"></strong></span><span>↗</span></button><div id="city-perspectives" role="group" aria-label="Camera perspective"><button id="city-walk-view" aria-pressed="true">On foot</button><button id="city-world-view" aria-pressed="false">City view <kbd>V</kbd></button></div><div id="city-flight-controls" hidden><span>FREE FLIGHT</span><p>WASD move · drag to look<br>Space rise · C descend · Shift faster</p><div><button id="city-rise" aria-label="Fly higher">↑ Rise</button><button id="city-descend" aria-label="Fly lower">↓ Descend</button></div><button id="city-frame">Frame the city <kbd>R</kbd></button><small>Scroll to move closer or farther</small></div><div id="city-controls"><button id="city-look">Mouse look</button><button id="city-home">Return to start</button><button id="city-help">How to explore</button></div><div class="city-reticle" aria-hidden="true">·</div><div id="city-fallback" hidden><h2>The city needs WebGL.</h2><p>You can still explore every career story through the index, or read the complete field guide.</p><button id="fallback-index">Open experience index</button><a href="notes.html">Read the field guide ↗</a></div>`;
   $('experience').append(shell);
-  const canvas = $('field-canvas');
+  const canvas = $('city-canvas');
   const player = { x: 0, y: 1.45, z: 23, yaw: -0.25, pitch: 0 },
     keys = new Set(),
     visited = new Set();
-  const camera = C.create(player);
+  const camera = Camera.create(player);
   let renderer,
     entered = false,
     last = 0,
@@ -28,20 +28,20 @@
     nearest = null,
     walkTime = 0,
     journey = null;
-  const S = window.FieldSky,
+  const Sky = window.CitySky,
     now = new Date(),
     clock = { hours: now.getHours() + now.getMinutes() / 60, running: !reduced.matches, shown: '' };
   const requested = parseFloat(new URLSearchParams(location.search).get('hour'));
-  if (Number.isFinite(requested)) clock.hours = S.wrap(requested);
-  let sky = S.sample(clock.hours),
+  if (Number.isFinite(requested)) clock.hours = Sky.wrap(requested);
+  let sky = Sky.sample(clock.hours),
     skyClock = 0;
   const labels = new Map(),
-    wildlife = FieldWildlife.create();
-  let wildlifeMesh = FieldWildlife.mesh(wildlife),
+    wildlife = CityWildlife.create();
+  let wildlifeMesh = CityWildlife.mesh(wildlife),
     wildlifeClock = 0,
     wildlifePaused = reduced.matches;
   const wildlifeButton = document.createElement('button');
-  wildlifeButton.id = 'field-wildlife-toggle';
+  wildlifeButton.id = 'city-wildlife-toggle';
   function wildlifeControl() {
     wildlifeButton.textContent = wildlifePaused ? 'Resume city life' : 'City alive';
     wildlifeButton.setAttribute(
@@ -55,7 +55,7 @@
     wildlifeControl();
     dirty = true;
   };
-  $('field-controls').append(wildlifeButton);
+  $('city-controls').append(wildlifeButton);
   wildlifeControl();
   reduced.addEventListener('change', () => {
     wildlifePaused = reduced.matches;
@@ -65,14 +65,14 @@
     dirty = true;
   });
   function applySky() {
-    sky = S.sample(clock.hours);
-    const style = $('field-shell').style;
+    sky = Sky.sample(clock.hours);
+    const style = $('city-shell').style;
     style.setProperty('--sky-top', sky.css.top);
     style.setProperty('--sky-low', sky.css.low);
     style.setProperty('--sky-haze', sky.css.haze);
     style.setProperty('--night', sky.night.toFixed(3));
-    document.body.classList.toggle('field-night', sky.night > 0.5);
-    const label = S.label(clock.hours);
+    document.body.classList.toggle('city-night', sky.night > 0.5);
+    const label = Sky.label(clock.hours);
     if (label !== clock.shown) {
       clock.shown = label;
       $('clock-time').textContent = label;
@@ -87,7 +87,7 @@
     );
   }
   function skipHour() {
-    clock.hours = S.wrap(clock.hours + 1);
+    clock.hours = Sky.wrap(clock.hours + 1);
     applySky();
     dirty = true;
   }
@@ -97,12 +97,12 @@
   };
   $('clock-skip').onclick = skipHour;
   applySky();
-  for (const place of F.landmarks) {
+  for (const place of Core.landmarks) {
     const button = document.createElement('button');
-    button.className = 'field-label';
-    button.innerHTML = `<i style="--marker:${place.color}"></i><span>${api.esc(place.company)}</span>`;
+    button.className = 'city-label';
+    button.innerHTML = `<i style="--marker:${place.color}"></i><span>${Portfolio.esc(place.company)}</span>`;
     button.setAttribute('aria-label', `Explore ${place.company}`);
-    button.onclick = () => window.FieldNavigation?.select(place);
+    button.onclick = () => window.CityMap?.select(place);
     $('landmark-labels').append(button);
     labels.set(place.id, button);
   }
@@ -110,7 +110,7 @@
   let groundY = 0;
   function movers(ignore) {
     if (ignore) return null;
-    const solid = (x, z) => FieldLife.solid(wildlife.life, wildlife.animals, x, z, 0.35);
+    const solid = (x, z) => CityLife.solid(wildlife.life, wildlife.animals, x, z, 0.35);
     return solid(player.x, player.z) ? null : solid;
   }
   function pause() {
@@ -118,8 +118,8 @@
   }
   function enter() {
     entered = true;
-    document.body.classList.add('field-entered');
-    $('field-intro').inert = true;
+    document.body.classList.add('city-entered');
+    $('city-intro').inert = true;
     canvas.focus({ preventScroll: true });
     dirty = true;
   }
@@ -131,24 +131,24 @@
     unlock();
     stop();
     visited.add(place.id);
-    $('field-visited').textContent = `${visited.size} / 11 PLACES VISITED`;
-    const i = api.places.findIndex(p => p.id === place.id);
-    if (i >= 0) api.openStory(i);
+    $('city-visited').textContent = `${visited.size} / 11 PLACES VISITED`;
+    const i = Portfolio.places.findIndex(p => p.id === place.id);
+    if (i >= 0) Portfolio.openStory(i);
     dirty = true;
   }
   function stop() {
     journey = null;
     keys.clear();
     vx = vz = 0;
-    C.resetVelocity(camera);
+    Camera.resetVelocity(camera);
   }
   function modeUI() {
     const flying = camera.mode === 'world';
-    document.body.classList.toggle('field-flying', flying);
-    $('field-walk-view').setAttribute('aria-pressed', String(!flying));
-    $('field-world-view').setAttribute('aria-pressed', String(flying));
-    $('field-flight-controls').hidden = !flying;
-    $('field-mode-status').textContent = flying
+    document.body.classList.toggle('city-flying', flying);
+    $('city-walk-view').setAttribute('aria-pressed', String(!flying));
+    $('city-world-view').setAttribute('aria-pressed', String(flying));
+    $('city-flight-controls').hidden = !flying;
+    $('city-mode-status').textContent = flying
       ? 'CITY VIEW / FREE FLIGHT'
       : 'ON FOOT / STREET LEVEL';
     canvas.setAttribute(
@@ -162,7 +162,7 @@
     enter();
     unlock();
     stop();
-    C.setMode(camera, mode, player, innerWidth / innerHeight, reduced.matches);
+    Camera.setMode(camera, mode, player, innerWidth / innerHeight, reduced.matches);
     const pose = mode === 'world' ? camera.flight : player;
     targetYaw = pose.yaw;
     targetPitch = pose.pitch;
@@ -171,17 +171,17 @@
   }
   function frameWorld() {
     stop();
-    C.frameWorld(camera, reduced.matches, innerWidth / innerHeight);
+    Camera.frameWorld(camera, reduced.matches, innerWidth / innerHeight);
     targetYaw = camera.flight.yaw;
     targetPitch = camera.flight.pitch;
     dirty = true;
   }
-  $('field-walk-view').onclick = () => setMode('walk');
-  $('field-world-view').onclick = () => setMode('world');
-  $('field-frame').onclick = frameWorld;
+  $('city-walk-view').onclick = () => setMode('walk');
+  $('city-world-view').onclick = () => setMode('world');
+  $('city-frame').onclick = frameWorld;
   for (const [id, key] of [
-    ['field-rise', ' '],
-    ['field-descend', 'c'],
+    ['city-rise', ' '],
+    ['city-descend', 'c'],
   ]) {
     const b = $(id);
     b.onpointerdown = e => {
@@ -196,7 +196,7 @@
   $('nearby-place').onclick = () => {
     if (nearest) openPlace(nearest.place);
   };
-  $('field-home').onclick = () => {
+  $('city-home').onclick = () => {
     stop();
     player.x = 0;
     player.y = 1.45;
@@ -205,21 +205,21 @@
     player.pitch = 0;
     setMode('walk');
   };
-  $('field-help').onclick = () => {
+  $('city-help').onclick = () => {
     unlock();
-    api.modal('help');
+    Portfolio.modal('help');
   };
   $('fallback-index').onclick = () => $('open-index').click();
-  $('field-look').onclick = async () => {
+  $('city-look').onclick = async () => {
     enter();
     try {
       await canvas.requestPointerLock();
     } catch {
-      $('field-look').textContent = 'Drag the scene to look';
+      $('city-look').textContent = 'Drag the scene to look';
     }
   };
   document.addEventListener('pointerlockchange', () => {
-    $('field-look').textContent =
+    $('city-look').textContent =
       document.pointerLockElement === canvas ? 'Mouse captured · Esc to release' : 'Mouse look';
   });
   let drag = null;
@@ -232,7 +232,7 @@
   canvas.addEventListener('pointermove', e => {
     if (!drag || pause() || document.pointerLockElement === canvas) return;
     targetYaw += (e.clientX - drag.x) * 0.004;
-    targetPitch = F.clamp(
+    targetPitch = Core.clamp(
       targetPitch - (e.clientY - drag.y) * 0.003,
       camera.mode === 'world' ? -1.48 : -0.7,
       camera.mode === 'world' ? 1.2 : 0.7,
@@ -246,7 +246,7 @@
   document.addEventListener('mousemove', e => {
     if (document.pointerLockElement !== canvas || pause()) return;
     targetYaw += e.movementX * 0.002;
-    targetPitch = F.clamp(
+    targetPitch = Core.clamp(
       targetPitch - e.movementY * 0.002,
       camera.mode === 'world' ? -1.48 : -0.7,
       camera.mode === 'world' ? 1.2 : 0.7,
@@ -258,7 +258,7 @@
     e => {
       if (camera.mode !== 'world' || pause()) return;
       e.preventDefault();
-      C.zoom(camera, e.deltaY);
+      Camera.zoom(camera, e.deltaY);
       dirty = true;
     },
     { passive: false },
@@ -297,7 +297,7 @@
     }
     if (k === 'm') {
       e.preventDefault();
-      window.FieldNavigation?.open();
+      window.CityMap?.open();
     }
     if (k === 't' && !e.repeat) {
       e.preventDefault();
@@ -344,12 +344,14 @@
     const eye = camera.eye,
       flying = camera.mode === 'world',
       occupied = [];
-    const intro = flying && !entered ? $('field-intro').getBoundingClientRect() : null;
+    const intro = flying && !entered ? $('city-intro').getBoundingClientRect() : null;
     let stems = '';
-    for (const p of [...F.landmarks].sort((a, b) => F.distance(eye, a) - F.distance(eye, b))) {
+    for (const p of [...Core.landmarks].sort(
+      (a, b) => Core.distance(eye, a) - Core.distance(eye, b),
+    )) {
       const b = labels.get(p.id),
-        distance = F.distance(eye, p),
-        point = F.project(matrix, p.x, (p.height || 5) + 1.5, p.z),
+        distance = Core.distance(eye, p),
+        point = Core.project(matrix, p.x, (p.height || 5) + 1.5, p.z),
         x = (point.x * 0.5 + 0.5) * innerWidth,
         y = (-point.y * 0.5 + 0.5) * innerHeight,
         width = p.company.length * 6.1 + 32;
@@ -369,8 +371,8 @@
           top = 165 + h,
           bottom = innerHeight - 100;
         const place = (dx, dy) => {
-          let x = F.clamp(anchorX + dx * (w * 0.6 + 8), 16 + w / 2, innerWidth - 16 - w / 2);
-          const y = F.clamp(anchorY - 6 + dy * (h + 6), top, bottom);
+          let x = Core.clamp(anchorX + dx * (w * 0.6 + 8), 16 + w / 2, innerWidth - 16 - w / 2);
+          const y = Core.clamp(anchorY - 6 + dy * (h + 6), top, bottom);
           if (intro && x - w / 2 < intro.right + 8 && y > intro.top && y - h < intro.bottom)
             x = Math.min(innerWidth - 16 - w / 2, intro.right + 8 + w / 2);
           return { x, y };
@@ -418,21 +420,21 @@
       if (shown) {
         occupied.push({ x, y, w: width });
         b.style.transform = `translate(${x}px,${y}px) translate(-50%,-100%)`;
-        b.style.opacity = flying ? '1' : String(F.clamp(1 - distance / 100, 0.45, 1));
+        b.style.opacity = flying ? '1' : String(Core.clamp(1 - distance / 100, 0.45, 1));
       }
     }
     if (stems !== lastStems) {
       lastStems = stems;
       labelStems.innerHTML = stems;
     }
-    nearest = F.nearest(player);
+    nearest = Core.nearest(player);
     $('nearby-place').hidden = !entered || flying || !!camera.transition || nearest.distance > 6;
     if (nearest.distance <= 6) {
       $('nearby-company').textContent = nearest.place.company;
       $('nearby-title').textContent = nearest.place.name;
     }
     const degrees = ((((eye.yaw * 180) / Math.PI) % 360) + 360) % 360;
-    $('field-heading').textContent = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][
+    $('city-heading').textContent = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][
       Math.round(degrees / 45) % 8
     ];
   }
@@ -447,7 +449,7 @@
         side = (keys.has('d') ? 1 : 0) - (keys.has('a') ? 1 : 0);
       if (camera.mode === 'walk' && journey) {
         const next = journey.points[0],
-          distance = F.distance(player, next);
+          distance = Core.distance(player, next);
         if (distance < 0.18) {
           journey.points.shift();
           if (!journey.points.length) {
@@ -461,13 +463,13 @@
             player.yaw + Math.atan2(Math.sin(angle - player.yaw), Math.cos(angle - player.yaw));
           const step = Math.min(distance, dt * 5),
             blocked = movers(journey.stuck > 1.4);
-          const moved = F.slide(
+          const moved = Core.slide(
             player,
             ((next.x - player.x) / distance) * step,
             ((next.z - player.z) / distance) * step,
             blocked,
           );
-          journey.stuck = F.distance(moved, player) < step * 0.3 ? journey.stuck + dt : 0;
+          journey.stuck = Core.distance(moved, player) < step * 0.3 ? journey.stuck + dt : 0;
           player.x = moved.x;
           player.z = moved.z;
           dirty = true;
@@ -486,9 +488,9 @@
         const up =
           (keys.has(' ') || keys.has('pageup') ? 1 : 0) -
           (keys.has('c') || keys.has('pagedown') ? 1 : 0);
-        moving = C.fly(camera, { forward, side, up, fast: keys.has('shift') }, dt);
+        moving = Camera.fly(camera, { forward, side, up, fast: keys.has('shift') }, dt);
       } else {
-        const f = F.forward(player.yaw),
+        const f = Core.forward(player.yaw),
           length = Math.hypot(forward, side) || 1,
           speed = keys.has('shift') ? 8 : 4.5,
           tx = ((f.x * forward + Math.cos(player.yaw) * side) / length) * speed,
@@ -496,32 +498,32 @@
         const a = 1 - Math.exp(-12 * dt);
         vx += (tx - vx) * a;
         vz += (tz - vz) * a;
-        const next = F.slide(player, vx * dt, vz * dt, movers());
+        const next = Core.slide(player, vx * dt, vz * dt, movers());
         if (next.x === player.x && Math.abs(vx) > 0.5) vx *= 0.5;
         if (next.z === player.z && Math.abs(vz) > 0.5) vz *= 0.5;
         moving = moving || Math.hypot(next.x - player.x, next.z - player.z) > 0.00001;
         player.x = next.x;
         player.z = next.z;
         if (moving) walkTime += dt;
-        groundY += (F.groundAt(player.x, player.z) - groundY) * (1 - Math.exp(-10 * dt));
+        groundY += (Core.groundAt(player.x, player.z) - groundY) * (1 - Math.exp(-10 * dt));
         player.y =
           1.45 + groundY + (moving && !reduced.matches ? Math.sin(walkTime * 9) * 0.012 : 0);
       }
       dirty = dirty || moving || Math.abs(yawDelta) > 0.0001 || Math.abs(pitchDelta) > 0.0001;
     }
     if (camera.transition && !pause()) dirty = true;
-    C.sample(camera, player, pause() ? 0 : dt);
+    Camera.sample(camera, player, pause() ? 0 : dt);
     if (!pause() && !wildlifePaused) {
-      FieldWildlife.update(wildlife, dt, camera.eye);
+      CityWildlife.update(wildlife, dt, camera.eye);
       wildlifeClock += dt;
       if (wildlifeClock > 1 / 30) {
-        wildlifeMesh = FieldWildlife.mesh(wildlife);
+        wildlifeMesh = CityWildlife.mesh(wildlife);
         wildlifeClock = 0;
         dirty = true;
       }
     }
     if (!pause() && clock.running) {
-      clock.hours = S.wrap(clock.hours + (dt * 24) / S.DAY_SECONDS);
+      clock.hours = Sky.wrap(clock.hours + (dt * 24) / Sky.DAY_SECONDS);
       skyClock += dt;
       if (skyClock > 1 / 24) {
         skyClock = 0;
@@ -532,24 +534,24 @@
     if (dirty && renderer) {
       const matrix = renderer.draw(camera.eye, wildlifeMesh, camera.mode === 'world', sky);
       overlay(matrix);
-      window.FieldNavigation?.update();
-      window.FieldInspect?.update(matrix);
+      window.CityMap?.update();
+      window.CityInspector?.update(matrix);
       dirty = false;
     }
     if (!document.hidden) frame = requestAnimationFrame(tick);
   }
-  C.setMode(camera, 'world', player, innerWidth / innerHeight, true);
+  Camera.setMode(camera, 'world', player, innerWidth / innerHeight, true);
   targetYaw = camera.flight.yaw;
   targetPitch = camera.flight.pitch;
   modeUI();
   try {
-    renderer = new window.FieldRenderer(canvas);
+    renderer = new window.CityRenderer(canvas);
     frame = requestAnimationFrame(tick);
   } catch (error) {
-    $('field-fallback').hidden = true;
+    $('city-fallback').hidden = true;
     $('enter-field').innerHTML = 'Open every chapter <span aria-hidden="true">↗</span>';
-    $('enter-field').onclick = () => api.modal('atlas');
-    console.warn('Field renderer unavailable:', error.message);
+    $('enter-field').onclick = () => Portfolio.modal('atlas');
+    console.warn('City renderer unavailable:', error.message);
   }
   addEventListener('resize', () => {
     renderer?.resize();
@@ -566,20 +568,20 @@
   canvas.addEventListener('webglcontextlost', e => {
     e.preventDefault();
     cancelAnimationFrame(frame);
-    $('field-fallback').hidden = false;
+    $('city-fallback').hidden = false;
   });
   canvas.addEventListener('webglcontextrestored', () => {
     try {
-      renderer = new window.FieldRenderer(canvas);
-      $('field-fallback').hidden = true;
+      renderer = new window.CityRenderer(canvas);
+      $('city-fallback').hidden = true;
       dirty = true;
       last = 0;
       frame = requestAnimationFrame(tick);
     } catch {
-      $('field-fallback').hidden = false;
+      $('city-fallback').hidden = false;
     }
   });
-  window.Field = {
+  window.CityApp = {
     player,
     keys,
     visited,
@@ -610,7 +612,7 @@
       if (camera.mode === 'world') setMode('walk');
       enter();
       unlock();
-      const points = F.route(player, place);
+      const points = Core.route(player, place);
       journey = points.length ? { place, points, stuck: 0 } : null;
       vx = vz = 0;
       dirty = true;

@@ -1,36 +1,36 @@
 /* An illustrated atlas, built from the same coordinates and paths as the 3D field. */
 (() => {
   'use strict';
-  const F = FieldCore,
-    game = Field,
+  const Core = CityCore,
+    game = CityApp,
     $ = id => document.getElementById(id),
     esc = Portfolio.esc;
-  let selected = F.landmarks[1];
+  let selected = Core.landmarks[1];
   const dialog = document.createElement('dialog');
-  dialog.id = 'field-map';
+  dialog.id = 'city-map';
   dialog.setAttribute('aria-labelledby', 'map-title');
-  dialog.innerHTML = `<header class="map-header"><div><span class="map-eyebrow">CITY GUIDE / NO. 01</span><h2 id="map-title">Every block, a story.</h2></div><button id="map-close" aria-label="Close city map">×</button></header><div class="map-layout"><div class="map-sheet"><span class="map-north">N<br>↑</span><svg id="map-drawing" viewBox="-65 -65 130 130" aria-hidden="true"><defs><pattern id="map-hatch" width="3" height="3" patternUnits="userSpaceOnUse"><path d="M0 3L3 0" stroke="#7f846c" stroke-width=".12" opacity=".4"/></pattern></defs><path d="M-58-56Q-15-66 46-58L61-33Q67 0 56 57L-34 61Q-62 59-61 24Z" fill="url(#map-hatch)" stroke="#78826c" stroke-width=".3"/><g id="map-paths"></g><path id="map-route" fill="none" stroke="#bd602f" stroke-width=".8" stroke-dasharray="1.4 1.2"/><path id="map-player" d="M0-1.8L1.3 1.5 0 .7-1.3 1.5Z" fill="#b24b2d" stroke="#f3ead2" stroke-width=".4"/></svg><div id="map-markers"></div><span class="map-caption">THE CITY · A PERSONAL ATLAS<br>11 chapters. A city to explore.</span></div><aside class="map-notes"><span class="map-eyebrow" id="map-number"></span><h3 id="map-company"></h3><p id="map-place"></p><p class="map-description">Choose a place to walk there, or open its chapter right away.</p><button id="map-walk">Walk here <span>↗</span></button><button id="map-read">Read the chapter <span>→</span></button><label for="map-destination">All destinations</label><select id="map-destination">${F.landmarks.map(p => `<option value="${p.id}">${esc(p.company)}</option>`).join('')}</select><p class="map-legend"><i></i> Your position & direction<br><b>○</b> A chapter waiting to be read<br><b>●</b> A chapter you’ve opened</p><a href="field-notes.html">The complete field guide ↗</a></aside></div>`;
+  dialog.innerHTML = `<header class="map-header"><div><span class="map-eyebrow">CITY GUIDE / NO. 01</span><h2 id="map-title">Every block, a story.</h2></div><button id="map-close" aria-label="Close city map">×</button></header><div class="map-layout"><div class="map-sheet"><span class="map-north">N<br>↑</span><svg id="map-drawing" viewBox="-65 -65 130 130" aria-hidden="true"><defs><pattern id="map-hatch" width="3" height="3" patternUnits="userSpaceOnUse"><path d="M0 3L3 0" stroke="#7f846c" stroke-width=".12" opacity=".4"/></pattern></defs><path d="M-58-56Q-15-66 46-58L61-33Q67 0 56 57L-34 61Q-62 59-61 24Z" fill="url(#map-hatch)" stroke="#78826c" stroke-width=".3"/><g id="map-paths"></g><path id="map-route" fill="none" stroke="#bd602f" stroke-width=".8" stroke-dasharray="1.4 1.2"/><path id="map-player" d="M0-1.8L1.3 1.5 0 .7-1.3 1.5Z" fill="#b24b2d" stroke="#f3ead2" stroke-width=".4"/></svg><div id="map-markers"></div><span class="map-caption">THE CITY · A PERSONAL ATLAS<br>11 chapters. A city to explore.</span></div><aside class="map-notes"><span class="map-eyebrow" id="map-number"></span><h3 id="map-company"></h3><p id="map-place"></p><p class="map-description">Choose a place to walk there, or open its chapter right away.</p><button id="map-walk">Walk here <span>↗</span></button><button id="map-read">Read the chapter <span>→</span></button><label for="map-destination">All destinations</label><select id="map-destination">${Core.landmarks.map(p => `<option value="${p.id}">${esc(p.company)}</option>`).join('')}</select><p class="map-legend"><i></i> Your position & direction<br><b>○</b> A chapter waiting to be read<br><b>●</b> A chapter you’ve opened</p><a href="notes.html">The complete field guide ↗</a></aside></div>`;
   document.body.append(dialog);
-  const controls = $('field-controls'),
+  const controls = $('city-controls'),
     mapButton = document.createElement('button');
-  mapButton.id = 'field-map-toggle';
+  mapButton.id = 'city-map-toggle';
   mapButton.innerHTML = '<span aria-hidden="true">⌁</span> City map <kbd>M</kbd>';
   mapButton.onclick = open;
   controls.prepend(mapButton);
   const travel = document.createElement('button');
-  travel.id = 'field-travel';
+  travel.id = 'city-travel';
   travel.hidden = true;
   travel.onclick = () => {
     game.stop();
     update();
   };
-  $('field-shell').append(travel);
+  $('city-shell').append(travel);
   let roads =
     '<rect x="53" y="-60" width="8" height="120" fill="#aec1b8" opacity=".7"/><rect x="-21" y="3" width="18" height="18" rx="1" fill="#b7c09b"/>';
-  for (const n of FieldCity.streets) {
+  for (const n of CityLayout.streets) {
     roads += `<path d="M${n} -54V54M-54 ${n}H54" stroke="#a79f88" stroke-width="5.8" fill="none"/><path d="M${n} -54V54M-54 ${n}H54" stroke="#f5edda" stroke-width="4.8" fill="none"/>`;
   }
-  for (const p of FieldCity.infill)
+  for (const p of CityLayout.infill)
     roads += `<rect x="${p.x - 4.5}" y="${p.z - 4.5}" width="9" height="9" fill="#c4bfaa" stroke="#949881" stroke-width=".25"/>`;
   $('map-paths').innerHTML = roads;
   const icons = {
@@ -41,7 +41,7 @@
     classroom: 'M-3 3V-2H3V3ZM-4-2L0-5 4-2M-1 3V0H1V3',
     garden: 'M-3 3V-2H3V3ZM-3-2L-2-4 0-2 2-4 3-2',
   };
-  for (const p of F.landmarks) {
+  for (const p of Core.landmarks) {
     const b = document.createElement('button');
     b.className = 'map-marker';
     b.style.left = `${(p.x + 65) / 1.3}%`;
@@ -63,7 +63,7 @@
     dialog
       .querySelectorAll('.map-marker')
       .forEach(b => b.setAttribute('aria-pressed', String(b.dataset.place === place.id)));
-    const path = [game.player, ...F.route(game.player, place)];
+    const path = [game.player, ...Core.route(game.player, place)];
     $('map-route').setAttribute('d', path.map((p, i) => `${i ? 'L' : 'M'}${p.x} ${p.z}`).join(' '));
     if (show) open();
   }
@@ -87,12 +87,12 @@
   }
   $('map-close').onclick = () => dialog.close();
   dialog.addEventListener('close', () => {
-    $('field-canvas').focus();
+    $('city-canvas').focus();
     game.invalidate();
   });
   $('map-destination').onchange = e =>
     select(
-      F.landmarks.find(p => p.id === e.target.value),
+      Core.landmarks.find(p => p.id === e.target.value),
       false,
     );
   $('map-walk').onclick = () => {
@@ -106,11 +106,11 @@
   };
   // Large press-and-hold targets plus drag-to-look, without pointer lock on mobile.
   const pad = document.createElement('div');
-  pad.id = 'field-touch';
+  pad.id = 'city-touch';
   pad.setAttribute('aria-label', 'Touch walking controls');
   pad.innerHTML =
     '<button data-key="w" aria-label="Walk forward">↑</button><button data-key="a" aria-label="Step left">←</button><button data-key="s" aria-label="Walk backward">↓</button><button data-key="d" aria-label="Step right">→</button>';
-  $('field-shell').append(pad);
+  $('city-shell').append(pad);
   pad.querySelectorAll('button').forEach(b => {
     b.onpointerdown = e => {
       e.preventDefault();
@@ -122,6 +122,6 @@
     for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
       b.addEventListener(event, () => game.keys.delete(b.dataset.key));
   });
-  window.FieldNavigation = { open, select, update };
+  window.CityMap = { open, select, update };
   select(selected, false);
 })();

@@ -101,5 +101,5 @@
   };
   const api = { DAY_SECONDS, sample, label, phase, wrap };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldSky = api;
+  else root.CitySky = api;
 })(typeof window !== 'undefined' ? window : globalThis);

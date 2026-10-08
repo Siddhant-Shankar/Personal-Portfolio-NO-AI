@@ -149,11 +149,11 @@
     const d = Math.abs(x - 57);
     return d <= 5.2 ? 2.1 : d >= 7.6 ? 0 : (2.1 * (7.6 - d)) / 2.4;
   }
-  function mesh(F, extra) {
-    const b = F.builder({ edges: true }),
+  function mesh(Core, extra) {
+    const b = Core.builder({ edges: true }),
       { box, cone, roof, finish } = b,
-      rand = F.random(29417),
-      lights = F.random(5113),
+      rand = Core.random(29417),
+      lights = Core.random(5113),
       ink = '#354f50',
       stone = '#c9bea7',
       paving = '#b5b2a0',
@@ -498,5 +498,5 @@
     addTraffic,
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldCity = api;
+  else root.CityLayout = api;
 })(typeof window !== 'undefined' ? window : globalThis);

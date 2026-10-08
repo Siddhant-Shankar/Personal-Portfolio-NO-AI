@@ -1,12 +1,10 @@
 /* Small, independent lives: forage, pause, wander, and yield to a nearby visitor. */
 (function (root) {
   'use strict';
-  const F =
-    typeof module === 'object' && module.exports ? require('./field-core.js') : root.FieldCore;
-  const Life =
-    typeof module === 'object' && module.exports ? require('./field-life.js') : root.FieldLife;
+  const Core = typeof module === 'object' && module.exports ? require('./core.js') : root.CityCore;
+  const Life = typeof module === 'object' && module.exports ? require('./life.js') : root.CityLife;
   function create(seed = 731) {
-    const rand = F.random(seed),
+    const rand = Core.random(seed),
       animals = [];
     const types = ['rabbit', 'chicken', 'fox', 'deer'];
     for (let i = 0; i < 16; i++) {
@@ -14,7 +12,7 @@
       do {
         x = rand() * 90 - 45;
         z = rand() * 90 - 40;
-      } while (!F.canWalk(x, z));
+      } while (!Core.canWalk(x, z));
       animals.push({
         id: i,
         kind: types[i % 4],
@@ -39,11 +37,11 @@
         do {
           a.x = -20 + rand() * 16;
           a.z = 4 + rand() * 16;
-        } while (!F.canWalk(a.x, a.z));
+        } while (!Core.canWalk(a.x, a.z));
       }
     // Nobody starts inside a tree, bench, or lamp post.
     for (const a of animals)
-      while (!F.canWalk(a.x, a.z)) {
+      while (!Core.canWalk(a.x, a.z)) {
         a.x += rand() * 2 - 1;
         a.z += rand() * 2 - 1;
       }
@@ -57,11 +55,11 @@
         r = 3 + world.rand() * range;
       const h = a.habitat,
         goal = {
-          x: F.clamp(a.x + Math.sin(angle) * r, h ? h.minX : -48, h ? h.maxX : 48),
-          z: F.clamp(a.z + Math.cos(angle) * r, h ? h.minZ : -52, h ? h.maxZ : 54),
+          x: Core.clamp(a.x + Math.sin(angle) * r, h ? h.minX : -48, h ? h.maxX : 48),
+          z: Core.clamp(a.z + Math.cos(angle) * r, h ? h.minZ : -52, h ? h.maxZ : 54),
         };
-      if (!F.canWalk(goal.x, goal.z) || F.distance(a, goal) < 2) continue;
-      const path = F.route(a, goal);
+      if (!Core.canWalk(goal.x, goal.z) || Core.distance(a, goal) < 2) continue;
+      const path = Core.route(a, goal);
       if (path.length) {
         a.path = path;
         a.goal = a.path.shift();
@@ -71,7 +69,7 @@
     a.wait = 0.5;
   }
   function update(world, dt, player) {
-    dt = F.clamp(dt, 0, 0.05);
+    dt = Core.clamp(dt, 0, 0.05);
     world.elapsed += dt;
     Life.update(world.life, dt, player);
     for (const a of world.animals) {
@@ -82,7 +80,7 @@
           dz = a.z - player.z,
           l = Math.hypot(dx, dz) || 1,
           goal = { x: a.x + (dx / l) * 5, z: a.z + (dz / l) * 5 };
-        if (F.clearLine(a, goal)) {
+        if (Core.clearLine(a, goal)) {
           a.goal = goal;
           a.path = [];
           a.wait = 1.5;
@@ -93,7 +91,7 @@
       const desired = a.goal ? (d < 3.8 ? 3.1 : cruising) : 0;
       a.pace += (desired - a.pace) * (1 - Math.exp(-6 * dt));
       if (a.goal) {
-        const dist = F.distance(a, a.goal);
+        const dist = Core.distance(a, a.goal);
         if (dist < 0.09) {
           a.goal = a.path.shift() || null;
           if (!a.goal) a.wait = 0.8 + world.rand() * 2.7;
@@ -102,8 +100,12 @@
             delta = Math.atan2(Math.sin(angle - a.yaw), Math.cos(angle - a.yaw));
           a.yaw += delta * (1 - Math.exp(-7 * dt));
           const step = Math.min(dist, a.pace * dt),
-            next = F.slide(a, ((a.goal.x - a.x) / dist) * step, ((a.goal.z - a.z) / dist) * step);
-          if (F.distance(a, next) < 0.00001) {
+            next = Core.slide(
+              a,
+              ((a.goal.x - a.x) / dist) * step,
+              ((a.goal.z - a.z) / dist) * step,
+            );
+          if (Core.distance(a, next) < 0.00001) {
             a.goal = null;
             a.path = [];
             a.wait = 0.5;
@@ -116,7 +118,7 @@
     }
   }
   function mesh(world) {
-    const b = F.builder();
+    const b = Core.builder();
     for (const a of world.animals) {
       const deer = a.kind === 'deer',
         rabbit = a.kind === 'rabbit',
@@ -191,7 +193,7 @@
         }
       }
     }
-    F.city.addTraffic(
+    Core.city.addTraffic(
       b,
       world.elapsed,
       world.life.vehicles.map((_, i) => Life.vehiclePose(world.life, i)),
@@ -201,5 +203,5 @@
   }
   const api = { create, update, mesh };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldWildlife = api;
+  else root.CityWildlife = api;
 })(typeof window !== 'undefined' ? window : globalThis);

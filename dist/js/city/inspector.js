@@ -1,13 +1,13 @@
 /* Click anything that moves to see what it is up to. Every detail here is fictional city life. */
 (() => {
   'use strict';
-  const F = window.FieldCore,
-    City = window.FieldCity,
-    Life = window.FieldLife,
-    Marks = window.FieldLandmarks,
-    game = window.Field,
+  const Core = window.CityCore,
+    City = window.CityLayout,
+    Life = window.CityLife,
+    Landmarks = window.CityLandmarks,
+    game = window.CityApp,
     $ = id => document.getElementById(id),
-    canvas = $('field-canvas');
+    canvas = $('city-canvas');
   const names = [
     'Ines',
     'Kofi',
@@ -46,7 +46,8 @@
       'Taking the long way home',
     ],
   };
-  const nearestPlace = p => [...F.landmarks].sort((a, b) => F.distance(p, a) - F.distance(p, b))[0];
+  const nearestPlace = p =>
+    [...Core.landmarks].sort((a, b) => Core.distance(p, a) - Core.distance(p, b))[0];
   const heading = yaw => {
     const dx = Math.sin(yaw),
       dz = Math.cos(yaw);
@@ -69,7 +70,7 @@
       const p = Life.boatPose(target.i, t);
       return { ...p, y: 0.7 };
     }
-    if (target.type === 'feature') return { yaw: 0, ...Marks.features[target.i].where(t) };
+    if (target.type === 'feature') return { yaw: 0, ...Landmarks.features[target.i].where(t) };
     const a = game.wildlife.animals[target.i];
     return { x: a.x, z: a.z, yaw: a.yaw, y: 0.6 };
   }
@@ -79,17 +80,17 @@
     for (let i = 0; i < Life.PEOPLE; i++) list.push({ type: 'person', i });
     for (let i = 0; i < Life.boats.length; i++) list.push({ type: 'boat', i });
     game.wildlife.animals.forEach((a, i) => list.push({ type: 'animal', i }));
-    Marks.features.forEach((f, i) => list.push({ type: 'feature', i }));
+    Landmarks.features.forEach((f, i) => list.push({ type: 'feature', i }));
     return list;
   }
   function describe(target, p) {
     const place = nearestPlace(p),
       night = game.sky.night > 0.5;
     if (target.type === 'feature') {
-      const f = Marks.features[target.i],
+      const f = Landmarks.features[target.i],
         actions = [];
       if (f.chapter) actions.push({ label: 'Read the chapter', chapter: f.chapter });
-      if (f.case) actions.push({ label: 'Case study ↗', href: `field-notes.html#case-${f.case}` });
+      if (f.case) actions.push({ label: 'Case study ↗', href: `notes.html#case-${f.case}` });
       if (f.github) {
         const repo = window.CAREER.projects.find(q => q.title === f.github);
         if (repo) actions.push({ label: 'View on GitHub ↗', href: repo.url, external: true });
@@ -164,18 +165,18 @@
   }
 
   const card = document.createElement('div');
-  card.id = 'field-inspect';
+  card.id = 'city-inspect';
   card.hidden = true;
   card.setAttribute('role', 'dialog');
   card.setAttribute('aria-live', 'polite');
   card.innerHTML =
     '<div class="inspect-head"><span id="inspect-icon" aria-hidden="true"></span><strong id="inspect-title"></strong><button id="inspect-close" aria-label="Close details">×</button></div><ul id="inspect-lines"></ul><div id="inspect-actions"></div><div class="inspect-foot"><button id="inspect-follow">Follow <span aria-hidden="true">◎</span></button><small id="inspect-note">Fictional city life</small></div>';
-  $('field-shell').append(card);
+  $('city-shell').append(card);
   let selected = null,
     follow = null,
     shown = '';
   const screen = (matrix, p) => {
-    const q = F.project(matrix, p.x, p.y, p.z);
+    const q = Core.project(matrix, p.x, p.y, p.z);
     return {
       x: (q.x * 0.5 + 0.5) * innerWidth,
       y: (-q.y * 0.5 + 0.5) * innerHeight,
@@ -223,7 +224,7 @@
     if (i >= 0) {
       close();
       game.openPlace
-        ? game.openPlace(F.landmarks.find(l => l.id === b.dataset.chapter))
+        ? game.openPlace(Core.landmarks.find(l => l.id === b.dataset.chapter))
         : window.Portfolio.openStory(i);
     }
   });
@@ -282,7 +283,7 @@
       const f = game.camera.flight,
         k = 0.12;
       let ty = p.y + follow.dy;
-      while (!F.canFly(p.x + follow.dx, ty, p.z + follow.dz) && ty < 80) ty += 2;
+      while (!Core.canFly(p.x + follow.dx, ty, p.z + follow.dz) && ty < 80) ty += 2;
       f.x += (p.x + follow.dx - f.x) * k;
       f.y += (ty - f.y) * k;
       f.z += (p.z + follow.dz - f.z) * k;
@@ -292,7 +293,7 @@
       game.look(Math.atan2(-ox, oz), Math.atan2(-oy, Math.hypot(ox, oz)));
       game.invalidate();
     } else if (follow && game.mode !== 'world') follow = null;
-    const lift = selected.type === 'feature' ? Marks.features[selected.i].lift || 0 : 0,
+    const lift = selected.type === 'feature' ? Landmarks.features[selected.i].lift || 0 : 0,
       s = screen(matrix, { ...p, y: p.y + lift });
     card.hidden = !s.visible;
     if (!s.visible) return;
@@ -317,7 +318,7 @@
       $('inspect-note').textContent = info.fact ? 'From my work' : 'Fictional city life';
     }
   }
-  window.FieldInspect = {
+  window.CityInspector = {
     update,
     open,
     close,

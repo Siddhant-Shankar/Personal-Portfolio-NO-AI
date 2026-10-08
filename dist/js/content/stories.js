@@ -40,7 +40,7 @@
       kind: 'future',
     },
   ];
-  // The three written case studies in field-notes.html, with their verified outcomes.
+  // The three written case studies in notes.html, with their verified outcomes.
   const CASES = [
     {
       id: 'flux',
@@ -92,7 +92,7 @@
         paragraph(r.body) +
         `<h3>WHAT I WORKED ON</h3><ul class="contributions">${r.items.map(item => `<li>${esc(item)}</li>`).join('')}</ul><p class="tools-used">${esc(r.tech)}</p>`;
       if (r.case)
-        html += `<a class="chapter-link" href="field-notes.html#case-${esc(r.case)}">Read the case study: ${esc(r.link.toLowerCase())} ↗</a>`;
+        html += `<a class="chapter-link" href="notes.html#case-${esc(r.case)}">Read the case study: ${esc(r.link.toLowerCase())} ↗</a>`;
     } else if (p.id === 'projects') {
       html =
         paragraph('Small experiments. Real questions.', 'story-content-lead') +
@@ -120,7 +120,7 @@
         paragraph(
           'This city is a map of those questions. Each building holds a chapter, and the streets between them are the things that connect it all.',
         ) +
-        '<a class="chapter-link" href="field-notes.html#about">Read the complete field guide ↗</a>';
+        '<a class="chapter-link" href="notes.html#about">Read the complete field guide ↗</a>';
     } else {
       html =
         paragraph('Some branches are still taking shape.', 'story-content-lead') +
@@ -149,7 +149,7 @@
     '<h3 class="index-group-title">SELECTED WORK</h3><div class="case-links">' +
     CASES.map(
       c =>
-        `<a class="case-link" href="field-notes.html#case-${c.id}"><small>${esc(c.where)}</small><strong>${esc(c.title)}</strong><span>${esc(c.result)}</span></a>`,
+        `<a class="case-link" href="notes.html#case-${c.id}"><small>${esc(c.where)}</small><strong>${esc(c.title)}</strong><span>${esc(c.result)}</span></a>`,
     ).join('') +
     '</div><h3 class="index-group-title">EVERY CHAPTER</h3><div class="index-grid">' +
     places

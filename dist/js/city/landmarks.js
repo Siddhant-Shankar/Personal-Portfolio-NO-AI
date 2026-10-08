@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
   const City =
-    typeof module === 'object' && module.exports ? require('./field-city.js') : root.FieldCity;
+    typeof module === 'object' && module.exports ? require('./layout.js') : root.CityLayout;
   const at = id => City.landmarks.find(p => p.id === id);
   const B = at('boring'),
     H = at('hyphenate'),
@@ -496,5 +496,5 @@
   ];
   const api = { addStatic, addAnimated, features, dronePose, carPose, EASEL };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldLandmarks = api;
+  else root.CityLandmarks = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -15,7 +15,7 @@
       content="Software engineer building across AI, finance, and the physical world. Walk a living city where every building is a chapter of my work."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="og-image.png" />
+    <meta property="og:image" content="images/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
@@ -23,32 +23,32 @@
       content="A miniature city at golden hour beside a summary of Siddhant Shankar's software engineering work."
     />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="og-image.png" />
+    <meta name="twitter:image" content="images/og-image.png" />
     <link
       rel="icon"
       type="image/svg+xml"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='16' fill='%230b2529'/%3E%3Cpath d='M16 26V9m0 8-7-7m7 11 8-8m-8 13-5 4m5-4 5 4' stroke='%23ead2a2' stroke-width='1.7' fill='none'/%3E%3Ccircle cx='16' cy='6' r='3' fill='%23ead2a2'/%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="world.css" />
-    <link rel="stylesheet" href="field.css" />
-    <script src="resume-check.js" defer></script>
-    <script src="career-data.js" defer></script>
-    <script src="stories.js" defer></script>
-    <script src="discoveries.js" defer></script>
-    <script src="field-sky.js" defer></script>
-    <script src="field-city.js" defer></script>
-    <script src="field-core.js" defer></script>
-    <script type="module" src="field-renderer.js"></script>
-    <script src="field-landmarks.js" defer></script>
-    <script src="field-life.js" defer></script>
-    <script src="field-wildlife.js" defer></script>
-    <script src="field-camera.js" defer></script>
-    <script src="field.js" defer></script>
-    <script src="field-navigation.js" defer></script>
-    <script src="field-inspect.js" defer></script>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/city.css" />
+    <script src="js/content/resume-check.js" defer></script>
+    <script src="js/content/career-data.js" defer></script>
+    <script src="js/content/stories.js" defer></script>
+    <script src="js/content/tour.js" defer></script>
+    <script src="js/city/sky.js" defer></script>
+    <script src="js/city/layout.js" defer></script>
+    <script src="js/city/core.js" defer></script>
+    <script type="module" src="js/city/renderer.js"></script>
+    <script src="js/city/landmarks.js" defer></script>
+    <script src="js/city/life.js" defer></script>
+    <script src="js/city/wildlife.js" defer></script>
+    <script src="js/city/camera.js" defer></script>
+    <script src="js/city/main.js" defer></script>
+    <script src="js/city/map.js" defer></script>
+    <script src="js/city/inspector.js" defer></script>
   </head>
-  <body class="field-mode">
-    <a class="skip" href="field-notes.html">Read the text-based portfolio</a>
+  <body class="city-mode">
+    <a class="skip" href="notes.html">Read the text-based portfolio</a>
     <header class="topbar">
       <a class="identity" href="./" aria-label="Siddhant Shankar home"
         ><span class="identity-symbol" aria-hidden="true">✳</span
@@ -61,8 +61,8 @@
       </nav>
     </header>
     <main id="experience" aria-label="Explorable portfolio city">
-      <section id="field-intro" aria-labelledby="hero-title">
-        <span class="field-kicker">SOFTWARE ENGINEER · CS + ECONOMICS AT UIUC</span>
+      <section id="city-intro" aria-labelledby="hero-title">
+        <span class="city-kicker">SOFTWARE ENGINEER · CS + ECONOMICS AT UIUC</span>
         <h1 id="hero-title">I build across AI, finance,<br /><em>and the physical world.</em></h1>
         <p class="hero-now">
           Now: Software Engineering Intern at <strong>The Boring Company</strong>. Previously at
@@ -77,7 +77,7 @@
         </ul>
         <div class="hero-actions">
           <button id="enter-field">Explore the city <span aria-hidden="true">↗</span></button
-          ><a class="hero-link" href="field-notes.html#case-flux">Read the case studies →</a>
+          ><a class="hero-link" href="notes.html#case-flux">Read the case studies →</a>
         </div>
         <p class="hero-contact">
           <a href="resume.pdf" target="_blank" rel="noopener">Résumé</a
@@ -122,7 +122,7 @@
       <p>Eight professional chapters. A few experiments. Plenty of curiosity.</p>
       <div id="index-entries"></div>
       <div class="atlas-footer">
-        <a href="field-notes.html">Read the complete field guide</a
+        <a href="notes.html">Read the complete field guide</a
         ><a href="resume.pdf" target="_blank" rel="noopener">Open résumé</a>
       </div>
     </dialog>
@@ -199,7 +199,7 @@
         </div>
       </dl>
       <button class="text-button" id="help-tour">Take the guided story tour</button
-      ><a class="text-button" href="field-notes.html">Read the text-based portfolio</a>
+      ><a class="text-button" href="notes.html">Read the text-based portfolio</a>
       <p class="art-note">
         A procedural WebGL city with no frameworks or downloaded assets. Career stories come from my
         experience; demonstrations use fictional data.
@@ -212,7 +212,7 @@
           This interactive world requires JavaScript. The complete portfolio and résumé are
           available without it.
         </p>
-        <a href="field-notes.html">Read the portfolio</a>
+        <a href="notes.html">Read the portfolio</a>
       </div></noscript
     >
   </body>

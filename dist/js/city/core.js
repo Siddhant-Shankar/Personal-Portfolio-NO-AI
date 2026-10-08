@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   const City =
-    typeof module === 'object' && module.exports ? require('./field-city.js') : root.FieldCity;
+    typeof module === 'object' && module.exports ? require('./layout.js') : root.CityLayout;
   const landmarks = City.landmarks,
     blockers = City.blockers,
     hub = { x: 0, z: 24 };
@@ -520,9 +520,7 @@
     };
   }
   const landmarks3d = () =>
-    typeof module === 'object' && module.exports
-      ? require('./field-landmarks.js')
-      : root.FieldLandmarks;
+    typeof module === 'object' && module.exports ? require('./landmarks.js') : root.CityLandmarks;
   function mesh() {
     const L = landmarks3d();
     return City.mesh(api, L ? b => L.addStatic(b) : null);
@@ -554,5 +552,5 @@
     random,
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldCore = api;
+  else root.CityCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

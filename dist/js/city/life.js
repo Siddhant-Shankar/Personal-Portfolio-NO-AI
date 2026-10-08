@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   const City =
-    typeof module === 'object' && module.exports ? require('./field-city.js') : root.FieldCity;
+    typeof module === 'object' && module.exports ? require('./layout.js') : root.CityLayout;
   const hash = n => {
     const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
     return x - Math.floor(x);
@@ -263,9 +263,7 @@
     return false;
   }
   const Landmarks = () =>
-    typeof module === 'object' && module.exports
-      ? require('./field-landmarks.js')
-      : root.FieldLandmarks;
+    typeof module === 'object' && module.exports ? require('./landmarks.js') : root.CityLandmarks;
   function add(builder, time, state) {
     for (let i = 0; i < PEOPLE; i++) addPerson(builder, i, state ? state.people[i].t : time);
     for (let i = 0; i < boats.length; i++) addBoat(builder, i, time);
@@ -290,5 +288,5 @@
     livePerson,
   };
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.FieldLife = api;
+  else root.CityLife = api;
 })(typeof window !== 'undefined' ? window : globalThis);

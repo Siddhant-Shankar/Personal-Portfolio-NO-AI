@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
-body.field-mode {
+body.city-mode {
   --night: #202b29;
   --ivory: #f6f0dd;
   --gold: #e3c896;
@@ -8,57 +8,57 @@ body.field-mode {
   --mono: 'DM Mono', monospace;
   background: #a0b4a5;
 }
-.field-mode #viewport,
-.field-mode #motes,
-.field-mode .vignette,
-.field-mode .invitation,
-.field-mode .world-caption,
-.field-mode .view-control,
-.field-mode .discovery,
-.field-mode .scene-tools,
-.field-mode .gesture-hint,
-.field-mode #trail-progress {
+.city-mode #viewport,
+.city-mode #motes,
+.city-mode .vignette,
+.city-mode .invitation,
+.city-mode .world-caption,
+.city-mode .view-control,
+.city-mode .discovery,
+.city-mode .scene-tools,
+.city-mode .gesture-hint,
+.city-mode #trail-progress {
   display: none !important;
 }
-.field-mode .topbar {
+.city-mode .topbar {
   top: 25px;
   left: 30px;
   right: 30px;
   text-shadow: 0 1px 15px #223a2d44;
 }
-.field-mode .identity-symbol {
+.city-mode .identity-symbol {
   color: #f2e5bd;
 }
-.field-mode .identity {
+.city-mode .identity {
   font-weight: 600;
 }
-.field-mode .identity small {
+.city-mode .identity small {
   color: #e0e5d2;
   font-size: 10px;
   letter-spacing: 0.12em;
 }
-.field-mode .topbar nav {
+.city-mode .topbar nav {
   font-size: 12px;
   gap: 24px;
 }
-.field-mode .topbar nav button {
+.city-mode .topbar nav button {
   font-size: 12px;
 }
-.field-mode .topbar nav button:last-child {
+.city-mode .topbar nav button:last-child {
   background: #30463d33;
   border-color: #f2e8c447;
   border-radius: 3px;
 }
-.field-mode .topbar a:hover,
-.field-mode .topbar button:hover {
+.city-mode .topbar a:hover,
+.city-mode .topbar button:hover {
   color: #fff;
 }
-#field-shell {
+#city-shell {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, #7da8ad 0%, #b5c4ae 44%, #d9cda7 70%, #cebd8f 100%);
 }
-#field-canvas {
+#city-canvas {
   width: 100%;
   height: 100%;
   position: absolute;
@@ -68,10 +68,10 @@ body.field-mode {
   cursor: grab;
   outline-offset: -5px;
 }
-#field-canvas:active {
+#city-canvas:active {
   cursor: grabbing;
 }
-#field-shade {
+#city-shade {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -85,7 +85,7 @@ body.field-mode {
   z-index: 2;
   overflow: hidden;
 }
-.field-label {
+.city-label {
   position: absolute;
   left: 0;
   top: 0;
@@ -102,18 +102,18 @@ body.field-mode {
   pointer-events: auto;
   box-shadow: 0 4px 16px #1d302222;
 }
-.field-label:hover {
+.city-label:hover {
   background: #283e32;
   opacity: 1 !important;
 }
-.field-label i {
+.city-label i {
   width: 5px;
   height: 5px;
   background: var(--marker);
   display: block;
   box-shadow: 0 0 6px var(--marker);
 }
-.field-compass {
+.city-compass {
   position: absolute;
   top: 105px;
   left: 50%;
@@ -127,20 +127,20 @@ body.field-mode {
   color: #f8edcf;
   pointer-events: none;
 }
-.field-compass > span:first-child {
+.city-compass > span:first-child {
   font-size: 14px;
 }
-.field-compass i {
+.city-compass i {
   height: 13px;
   width: 1px;
   background: #f4e5bb66;
 }
-.field-kicker {
+.city-kicker {
   font: 10px/1.7 var(--mono);
   letter-spacing: 0.12em;
   color: #e5d6af;
 }
-#field-intro {
+#city-intro {
   position: absolute;
   left: 5%;
   bottom: 18%;
@@ -153,19 +153,19 @@ body.field-mode {
   padding: 20px 25px 20px 0;
   pointer-events: none;
 }
-#field-intro > * {
+#city-intro > * {
   pointer-events: auto;
 }
-#field-intro h1 {
+#city-intro h1 {
   font: 400 clamp(60px, 6vw, 86px) / 0.96 var(--serif);
   letter-spacing: -0.05em;
   margin: 17px 0 20px;
   text-shadow: 0 2px 22px #18302133;
 }
-#field-intro h1 em {
+#city-intro h1 em {
   color: #f0e4c1;
 }
-#field-intro p {
+#city-intro p {
   font: 14px/1.9 var(--sans);
   color: #f2f0dc;
   margin: 0 0 22px;
@@ -190,21 +190,21 @@ body.field-mode {
   font-size: 23px;
   line-height: 1;
 }
-#field-intro .field-intro-hint {
+#city-intro .city-intro-hint {
   font: 10px/1.8 var(--mono);
   letter-spacing: 0.02em;
   color: #e1dec3;
   margin-top: 16px;
 }
-.field-entered #field-intro {
+.city-entered #city-intro {
   opacity: 0;
   transform: translateY(15px);
   pointer-events: none;
 }
-.field-entered #field-intro * {
+.city-entered #city-intro * {
   pointer-events: none;
 }
-#field-status {
+#city-status {
   position: absolute;
   left: 30px;
   bottom: 27px;
@@ -214,12 +214,12 @@ body.field-mode {
   gap: 7px;
   pointer-events: none;
 }
-#field-visited {
+#city-visited {
   font: 10px var(--mono);
   color: #c9d4bd;
   letter-spacing: 0.04em;
 }
-#field-controls {
+#city-controls {
   position: absolute;
   right: 30px;
   bottom: 28px;
@@ -227,13 +227,13 @@ body.field-mode {
   display: flex;
   gap: 20px;
 }
-#field-controls button {
+#city-controls button {
   font: 11px var(--mono);
   color: #ebdfbe;
   border-bottom: 1px solid #d4cbac66;
   padding: 5px 0;
 }
-.field-reticle {
+.city-reticle {
   display: none;
   position: absolute;
   left: 50%;
@@ -245,7 +245,7 @@ body.field-mode {
   text-shadow: 0 0 3px #173d28;
   pointer-events: none;
 }
-.field-entered .field-reticle {
+.city-entered .city-reticle {
   display: block;
 }
 #nearby-place {
@@ -293,7 +293,7 @@ body.field-mode {
   margin-left: auto;
   color: #e5c896;
 }
-#field-fallback {
+#city-fallback {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -306,100 +306,100 @@ body.field-mode {
   max-width: 500px;
   width: calc(100% - 40px);
 }
-#field-fallback h2 {
+#city-fallback h2 {
   font: 40px var(--serif);
   margin-top: 0;
 }
-#field-fallback p {
+#city-fallback p {
   font-size: 16px;
   line-height: 1.7;
 }
-#field-fallback a,
-#field-fallback button {
+#city-fallback a,
+#city-fallback button {
   display: block;
   font-size: 14px;
   color: var(--gold);
   margin-top: 20px;
 }
-.field-mode dialog {
+.city-mode dialog {
   background: #293e35;
   border-color: #c6ccaa40;
 }
-.field-mode .story-panel {
+.city-mode .story-panel {
   background: #263d34f7;
 }
-.field-mode .story-bottom {
+.city-mode .story-bottom {
   background: #23372f;
 }
-.field-mode .story-content-lead {
+.city-mode .story-content-lead {
   color: #f0dfbc;
 }
-.field-mode .story-panel p.body-copy {
+.city-mode .story-panel p.body-copy {
   color: #d2dbc7;
 }
-.field-mode .mini-lab {
+.city-mode .mini-lab {
   background: #344c3c;
 }
-.field-mode .lab-node {
+.city-mode .lab-node {
   background: #243a30;
 }
-.field-mode .index-entry {
+.city-mode .index-entry {
   border-color: #a5b39a44;
 }
-.field-mode .story-scroll {
+.city-mode .story-scroll {
   scrollbar-color: #829271 #263d34;
 }
-.field-mode .no-js {
+.city-mode .no-js {
   inset: 25%;
   z-index: 10;
 }
 @media (max-width: 760px) {
-  .field-mode .topbar {
+  .city-mode .topbar {
     left: 20px;
     right: 20px;
     top: 20px;
   }
-  .field-mode .topbar nav {
+  .city-mode .topbar nav {
     gap: 10px;
   }
-  .field-mode .identity small {
+  .city-mode .identity small {
     font-size: 9px;
   }
-  .field-compass {
+  .city-compass {
     top: 87px;
     white-space: nowrap;
     font-size: 8px;
   }
-  .field-compass > span:last-child {
+  .city-compass > span:last-child {
     font-size: 8px;
   }
-  #field-intro {
+  #city-intro {
     left: 25px;
     bottom: 22%;
     max-width: 300px;
   }
-  #field-intro h1 {
+  #city-intro h1 {
     font-size: 62px;
   }
-  #field-intro p {
+  #city-intro p {
     font-size: 13px;
   }
-  #field-status {
+  #city-status {
     left: 20px;
     bottom: 25px;
   }
-  #field-controls {
+  #city-controls {
     right: 20px;
     bottom: 26px;
     gap: 12px;
   }
-  #field-controls button {
+  #city-controls button {
     font-size: 10px;
   }
-  #field-look {
+  #city-look {
     display: none;
   }
-  #field-home {
+  #city-home {
     display: none;
   }
   #nearby-place {
@@ -409,43 +409,43 @@ body.field-mode {
     padding: 12px 15px;
     gap: 12px;
   }
-  .field-label {
+  .city-label {
     font-size: 9px;
     padding: 5px 7px;
   }
-  .field-mode #field-visited {
+  .city-mode #city-visited {
     font-size: 9px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  #field-intro {
+  #city-intro {
     transition: none;
   }
 }
 /* The atlas is a paper object inside the landscape, not a second dashboard. */
-.field-mode [hidden] {
+.city-mode [hidden] {
   display: none !important;
 }
-#field-map-toggle {
+#city-map-toggle {
   border: 1px solid #ead7ad77 !important;
   background: #f1e5cbea;
   color: #364536 !important;
   padding: 10px 14px !important;
   border-radius: 4px;
 }
-#field-map-toggle > span {
+#city-map-toggle > span {
   font-size: 19px;
   margin-right: 8px;
 }
-#field-map-toggle kbd {
+#city-map-toggle kbd {
   font-size: 9px;
   margin-left: 10px;
   opacity: 0.5;
 }
-#field-controls {
+#city-controls {
   align-items: center;
 }
-#field-map {
+#city-map {
   max-width: 1040px;
   width: calc(100% - 48px);
   max-height: 90dvh;
@@ -457,7 +457,7 @@ body.field-mode {
   box-shadow: 0 30px 100px #152e2c77;
   overflow: auto;
 }
-#field-map::backdrop {
+#city-map::backdrop {
   background: #1b342d77;
   backdrop-filter: blur(6px);
 }
@@ -622,11 +622,11 @@ body.field-mode {
   font: 10px var(--mono);
   color: #41583f;
 }
-.field-mode :focus-visible {
+.city-mode :focus-visible {
   outline: 2px solid #ce873d;
   outline-offset: 4px;
 }
-#field-travel {
+#city-travel {
   position: absolute;
   top: 145px;
   left: 50%;
@@ -640,7 +640,7 @@ body.field-mode {
   padding: 10px 18px;
   white-space: nowrap;
 }
-#field-touch {
+#city-touch {
   display: none;
   position: absolute;
   left: 22px;
@@ -650,7 +650,7 @@ body.field-mode {
   gap: 5px;
   touch-action: none;
 }
-#field-touch button {
+#city-touch button {
   height: 42px;
   color: #f5e9ca;
   border: 1px solid #f0e2b688;
@@ -660,30 +660,30 @@ body.field-mode {
   touch-action: none;
   user-select: none;
 }
-#field-touch button:first-child {
+#city-touch button:first-child {
   grid-column: 2;
   grid-row: 1;
 }
-#field-touch button:nth-child(2) {
+#city-touch button:nth-child(2) {
   grid-column: 1;
   grid-row: 2;
 }
-#field-touch button:nth-child(3) {
+#city-touch button:nth-child(3) {
   grid-column: 2;
   grid-row: 2;
 }
-#field-touch button:nth-child(4) {
+#city-touch button:nth-child(4) {
   grid-column: 3;
   grid-row: 2;
 }
-#field-touch button:active {
+#city-touch button:active {
   background: #b09362;
 }
 @media (pointer: coarse) {
-  .field-entered #field-touch {
+  .city-entered #city-touch {
     display: grid;
   }
-  #field-look {
+  #city-look {
     display: none;
   }
   #nearby-place {
@@ -691,7 +691,7 @@ body.field-mode {
   }
 }
 @media (max-width: 760px) {
-  #field-map {
+  #city-map {
     width: calc(100% - 20px);
     max-height: 94dvh;
   }
@@ -743,16 +743,16 @@ body.field-mode {
   .map-notes > .map-eyebrow {
     grid-column: 1/-1;
   }
-  #field-map-toggle {
+  #city-map-toggle {
     padding: 8px !important;
   }
-  #field-map-toggle kbd {
+  #city-map-toggle kbd {
     display: none;
   }
-  #field-status {
+  #city-status {
     bottom: 27px;
   }
-  #field-travel {
+  #city-travel {
     font-size: 10px;
     top: 120px;
     max-width: 90%;
@@ -784,21 +784,21 @@ body.field-mode {
 }
 
 @media (max-width: 760px) {
-  #field-status {
+  #city-status {
     bottom: 78px;
   }
-  #field-controls {
+  #city-controls {
     left: 20px;
     right: 20px;
     bottom: 22px;
     justify-content: space-between;
   }
-  #field-touch {
+  #city-touch {
     bottom: 122px;
   }
 }
 /* Two camera modes, always reachable without opening a menu. */
-#field-perspectives {
+#city-perspectives {
   position: absolute;
   left: 30px;
   top: 102px;
@@ -812,25 +812,25 @@ body.field-mode {
   box-shadow: 0 8px 22px #1c33272b;
   backdrop-filter: blur(8px);
 }
-#field-perspectives button {
+#city-perspectives button {
   font: 11px var(--sans);
   color: #e8dfc1;
   padding: 10px 14px;
   border-radius: 3px;
   white-space: nowrap;
 }
-#field-perspectives button[aria-pressed='true'] {
+#city-perspectives button[aria-pressed='true'] {
   background: #efe3c6;
   color: #344937;
   box-shadow: 0 2px 5px #122f2522;
 }
-#field-perspectives kbd,
-#field-frame kbd {
+#city-perspectives kbd,
+#city-frame kbd {
   font: 9px var(--mono);
   margin-left: 9px;
   opacity: 0.55;
 }
-#field-flight-controls {
+#city-flight-controls {
   position: absolute;
   right: 30px;
   top: 157px;
@@ -843,20 +843,20 @@ body.field-mode {
   box-shadow: 0 10px 25px #25382622;
   color: #3a503d;
 }
-#field-flight-controls > span {
+#city-flight-controls > span {
   font: 9px var(--mono);
   letter-spacing: 0.12em;
 }
-#field-flight-controls p {
+#city-flight-controls p {
   font: 11px/1.8 var(--sans);
   margin: 9px 0 12px;
   color: #67705b;
 }
-#field-flight-controls > div {
+#city-flight-controls > div {
   display: flex;
   gap: 7px;
 }
-#field-flight-controls button {
+#city-flight-controls button {
   font: 11px var(--sans);
   padding: 9px 11px;
   border: 1px solid #84907066;
@@ -865,181 +865,181 @@ body.field-mode {
   touch-action: none;
   user-select: none;
 }
-#field-flight-controls button:active {
+#city-flight-controls button:active {
   background: #d8d5b7;
 }
-#field-flight-controls #field-frame {
+#city-flight-controls #city-frame {
   display: block;
   width: 100%;
   text-align: left;
   margin-top: 10px;
   background: #dde0c5;
 }
-#field-flight-controls small {
+#city-flight-controls small {
   display: block;
   margin-top: 10px;
   font: 8px var(--mono);
   line-height: 1.6;
   color: #7a816a;
 }
-.field-flying .field-reticle {
+.city-flying .city-reticle {
   opacity: 0.35;
 }
-.field-flying .field-label {
+.city-flying .city-label {
   background: #f2e7cded;
   color: #3b5140;
   border-color: #879473a6;
   box-shadow: 0 3px 12px #203b2933;
 }
-.field-flying .field-label:hover {
+.city-flying .city-label:hover {
   background: #fff4d8;
 }
-.field-flying #field-shade {
+.city-flying #city-shade {
   background: linear-gradient(180deg, #24443b49, transparent 19%, transparent 78%, #22372d66);
 }
-#field-wildlife-toggle[aria-pressed='true']::before {
+#city-wildlife-toggle[aria-pressed='true']::before {
   content: '•';
   color: #c1d594;
   margin-right: 6px;
 }
-#field-controls {
+#city-controls {
   gap: 16px;
 }
 @media (min-width: 761px) and (max-width: 1040px) {
-  #field-status {
+  #city-status {
     bottom: 88px;
   }
-  #field-controls {
+  #city-controls {
     left: 30px;
     justify-content: flex-end;
   }
-  .field-compass {
+  .city-compass {
     left: auto;
     right: 30px;
     transform: none;
   }
 }
 @media (max-width: 760px) {
-  #field-perspectives {
+  #city-perspectives {
     left: 20px;
     top: 92px;
   }
-  #field-perspectives button {
+  #city-perspectives button {
     font-size: 10px;
     padding: 9px 11px;
   }
-  .field-compass {
+  .city-compass {
     top: 110px;
     right: 23px;
     left: auto;
     transform: none;
   }
-  .field-compass i,
-  .field-compass > span:last-child {
+  .city-compass i,
+  .city-compass > span:last-child {
     display: none;
   }
-  #field-flight-controls {
+  #city-flight-controls {
     top: auto;
     bottom: 128px;
     right: 20px;
     width: 140px;
     padding: 11px;
   }
-  #field-flight-controls p,
-  #field-flight-controls small {
+  #city-flight-controls p,
+  #city-flight-controls small {
     display: none;
   }
-  #field-flight-controls > div {
+  #city-flight-controls > div {
     margin-top: 10px;
     gap: 4px;
   }
-  #field-flight-controls button {
+  #city-flight-controls button {
     font-size: 9px;
     padding: 9px 5px;
     min-height: 36px;
   }
-  #field-flight-controls #field-frame {
+  #city-flight-controls #city-frame {
     font-size: 9px;
     margin-top: 7px;
   }
-  #field-frame kbd {
+  #city-frame kbd {
     display: none;
   }
-  #field-controls {
+  #city-controls {
     gap: 8px;
   }
-  #field-controls button {
+  #city-controls button {
     font-size: 9px;
   }
-  #field-map-toggle > span {
+  #city-map-toggle > span {
     margin-right: 3px;
   }
-  .field-flying #field-touch {
+  .city-flying #city-touch {
     bottom: 133px;
   }
-  .field-flying #field-mode-status {
+  .city-flying #city-mode-status {
     font-size: 9px;
   }
 }
 @media (max-width: 360px) {
-  #field-flight-controls {
+  #city-flight-controls {
     width: 126px;
     right: 12px;
   }
-  #field-touch {
+  #city-touch {
     left: 12px;
     grid-template-columns: repeat(3, 38px);
   }
-  #field-controls {
+  #city-controls {
     left: 12px;
     right: 12px;
   }
 }
 /* The city opens as a miniature; the same streets remain walkable at ground level. */
-#field-intro {
+#city-intro {
   max-width: 480px;
   background: linear-gradient(90deg, #233e3677, transparent);
   padding-right: 25px;
 }
-#field-intro h1 {
+#city-intro h1 {
   font-size: clamp(54px, 5.2vw, 76px);
   letter-spacing: -0.04em;
 }
-#field-intro p {
+#city-intro p {
   font-size: 13px;
 }
-.field-mode #field-shell {
+.city-mode #city-shell {
   background: linear-gradient(180deg, #96b6b6, #cbd0b3 62%, #dccfaf);
 }
-.field-flying:not(.field-entered) #field-flight-controls {
+.city-flying:not(.city-entered) #city-flight-controls {
   display: none;
 }
-.field-flying:not(.field-entered) .field-label {
+.city-flying:not(.city-entered) .city-label {
   font-size: 10px;
 }
-.field-mode #field-status {
+.city-mode #city-status {
   max-width: 260px;
 }
-.field-mode .map-sheet {
+.city-mode .map-sheet {
   background: radial-gradient(ellipse at 30% 40%, #f7efde, #e9dfc4);
 }
-.field-mode .map-marker svg {
+.city-mode .map-marker svg {
   fill: #d5cfb6;
   stroke: #4b6052;
 }
 @media (max-width: 760px) {
-  #field-intro {
+  #city-intro {
     left: 24px;
     bottom: 20%;
     max-width: 310px;
   }
-  #field-intro h1 {
+  #city-intro h1 {
     font-size: 52px;
   }
-  #field-intro p {
+  #city-intro p {
     font-size: 12px;
   }
-  .field-flying:not(.field-entered) .field-label {
+  .city-flying:not(.city-entered) .city-label {
     font-size: 8px;
     padding: 5px;
   }
@@ -1048,14 +1048,14 @@ body.field-mode {
   }
 }
 /* Day and night: the sky behind the transparent canvas follows the city clock. */
-.field-mode #field-shell {
+.city-mode #city-shell {
   --sky-top: #7da8ad;
   --sky-low: #d9cda7;
   --sky-haze: #c7c8ac;
   --night: 0;
   background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-low) 62%, var(--sky-haze) 100%);
 }
-#field-shell::before {
+#city-shell::before {
   content: '';
   position: absolute;
   inset: 0 0 35% 0;
@@ -1077,10 +1077,10 @@ body.field-mode {
     radial-gradient(28px 28px at 71% 21%, #f6efd6 45%, #f6efd633 52%, transparent 70%);
   transition: opacity 0.4s;
 }
-.field-night #field-shade {
+.city-night #city-shade {
   background: linear-gradient(180deg, #0a141f66, transparent 22%, transparent 60%, #0b141c88);
 }
-#field-clock {
+#city-clock {
   position: absolute;
   right: 30px;
   top: 102px;
@@ -1132,7 +1132,7 @@ body.field-mode {
   text-transform: uppercase;
   color: #c8d2bc;
 }
-#field-clock button {
+#city-clock button {
   font: 11px var(--mono);
   color: #efe3c3;
   padding: 8px 10px;
@@ -1140,19 +1140,19 @@ body.field-mode {
   border: 1px solid #e2d1a433;
   white-space: nowrap;
 }
-#field-clock button:hover {
+#city-clock button:hover {
   background: #efe3c61f;
 }
-#field-clock kbd {
+#city-clock kbd {
   font-size: 9px;
   margin-left: 6px;
   opacity: 0.55;
 }
-#field-flight-controls {
+#city-flight-controls {
   top: 165px;
 }
 @media (max-width: 760px) {
-  #field-clock {
+  #city-clock {
     right: 20px;
     top: 92px;
     gap: 7px;
@@ -1162,7 +1162,7 @@ body.field-mode {
     min-width: 0;
   }
   .clock-read small,
-  #field-clock kbd {
+  #city-clock kbd {
     display: none;
   }
   #clock-dial {
@@ -1172,15 +1172,15 @@ body.field-mode {
   #clock-dial i {
     height: 8px;
   }
-  #field-clock button {
+  #city-clock button {
     padding: 7px 8px;
   }
-  #field-flight-controls {
+  #city-flight-controls {
     top: auto;
   }
 }
 /* Inspection card for anything that moves. */
-#field-inspect {
+#city-inspect {
   position: absolute;
   left: 0;
   top: 0;
@@ -1196,7 +1196,7 @@ body.field-mode {
   backdrop-filter: blur(8px);
   pointer-events: auto;
 }
-#field-inspect::after {
+#city-inspect::after {
   content: '';
   position: absolute;
   left: 50%;
@@ -1285,12 +1285,12 @@ body.field-mode {
 #label-stems circle {
   fill: #efe2bc;
 }
-.field-label.edge {
+.city-label.edge {
   border-style: dashed;
   opacity: 0.9 !important;
 }
 /* First screen: who, what, and proof, painted before the city loads. */
-#field-intro {
+#city-intro {
   left: clamp(16px, 5vw, 72px);
   bottom: auto;
   top: 50%;
@@ -1303,16 +1303,16 @@ body.field-mode {
   backdrop-filter: blur(10px);
   box-shadow: 0 20px 50px #0c1a1340;
 }
-#field-intro h1 {
+#city-intro h1 {
   font: 400 clamp(36px, 3.6vw, 52px) / 1.04 var(--serif);
   letter-spacing: -0.03em;
   margin: 14px 0 14px;
   color: #fbf3dc;
 }
-#field-intro h1 em {
+#city-intro h1 em {
   color: #ecd9a8;
 }
-#field-intro .hero-now {
+#city-intro .hero-now {
   font: 13.5px/1.7 var(--sans);
   color: #dfe3d0;
   margin: 0 0 18px;
@@ -1349,7 +1349,7 @@ body.field-mode {
   gap: 18px;
   flex-wrap: wrap;
 }
-#field-intro #enter-field {
+#city-intro #enter-field {
   gap: 28px;
   padding: 13px 16px;
 }
@@ -1375,11 +1375,11 @@ body.field-mode {
 .hero-contact a:hover {
   color: #fff;
 }
-.field-entered #field-intro {
+.city-entered #city-intro {
   transform: translateY(-40%);
 }
 @media (max-width: 760px) {
-  #field-intro {
+  #city-intro {
     left: 12px;
     right: 12px;
     top: auto;
@@ -1388,11 +1388,11 @@ body.field-mode {
     max-width: none;
     padding: 18px 18px 16px;
   }
-  #field-intro h1 {
+  #city-intro h1 {
     font-size: 30px;
     margin: 8px 0 10px;
   }
-  #field-intro .hero-now {
+  #city-intro .hero-now {
     font-size: 12px;
     margin-bottom: 12px;
   }
@@ -1411,33 +1411,33 @@ body.field-mode {
     gap: 12px;
     margin-top: 12px !important;
   }
-  .field-entered #field-intro {
+  .city-entered #city-intro {
     transform: translateY(15px);
   }
 }
 @media (max-height: 700px) and (min-width: 761px) {
-  #field-intro .hero-now {
+  #city-intro .hero-now {
     display: none;
   }
-  #field-intro {
+  #city-intro {
     transform: translateY(-50%);
   }
 }
 @media (max-width: 760px) {
-  body:not(.field-entered) #field-status,
-  body:not(.field-entered) #field-controls {
+  body:not(.city-entered) #city-status,
+  body:not(.city-entered) #city-controls {
     display: none;
   }
-  body:not(.field-entered) #field-intro {
+  body:not(.city-entered) #city-intro {
     bottom: 14px;
   }
 }
 @media (max-height: 760px) and (min-width: 761px) {
-  #field-intro {
+  #city-intro {
     transform: translateY(-36%);
     padding: 20px 24px 18px;
   }
-  #field-intro h1 {
+  #city-intro h1 {
     font-size: clamp(30px, 3vw, 40px);
     margin: 10px 0 12px;
   }

@@ -1,10 +1,10 @@
 /* three.js renderer: sun and moon with real shadows, hairline outlines, lit windows after dark, and haze.
    The city geometry, camera maths, and simulation are unchanged; this module only draws them. */
-import * as THREE from './vendor/three.module.min.js';
+import * as THREE from '../vendor/three.module.min.js';
 
 // The city's colours are authored as plain sRGB values and lit in that space, as before.
 THREE.ColorManagement.enabled = false;
-const NOON = window.FieldSky.sample(12),
+const NOON = window.CitySky.sample(12),
   PI = Math.PI;
 
 // Lambert shading plus the city's own touches: surface grain, and windows that glow with the night.
@@ -41,7 +41,7 @@ function cityMaterial(night) {
   return material;
 }
 function interleaved(array, usage) {
-  const buffer = new THREE.InterleavedBuffer(array, window.FieldCore.STRIDE);
+  const buffer = new THREE.InterleavedBuffer(array, window.CityCore.STRIDE);
   if (usage) buffer.setUsage(usage);
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.InterleavedBufferAttribute(buffer, 3, 0));
@@ -51,7 +51,7 @@ function interleaved(array, usage) {
   return { geometry, buffer };
 }
 
-class FieldRenderer {
+class CityRenderer {
   constructor(canvas) {
     this.canvas = canvas;
     const coarse = matchMedia('(pointer: coarse)').matches;
@@ -78,7 +78,7 @@ class FieldRenderer {
     this.night = { value: 0 };
     this.material = cityMaterial(this.night);
     // Static city: one interleaved mesh, plus its hairline outlines.
-    const city = window.FieldCore.mesh(),
+    const city = window.CityCore.mesh(),
       statics = interleaved(city);
     const mesh = new THREE.Mesh(statics.geometry, this.material);
     mesh.castShadow = mesh.receiveShadow = true;
@@ -99,7 +99,7 @@ class FieldRenderer {
       lines.matrixAutoUpdate = false;
       scene.add(lines);
     }
-    this.count = city.length / window.FieldCore.STRIDE;
+    this.count = city.length / window.CityCore.STRIDE;
     // Moving things share one dynamic buffer that grows as needed.
     this.lifeCapacity = 0;
     this.lifeMesh = null;
@@ -131,17 +131,12 @@ class FieldRenderer {
     const dpr = Math.min(devicePixelRatio || 1, this.coarse ? 1.25 : 1.6);
     this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(innerWidth, innerHeight, false);
-    this.projection = window.FieldCore.perspective(
-      Math.PI / 3,
-      innerWidth / innerHeight,
-      0.08,
-      640,
-    );
+    this.projection = window.CityCore.perspective(Math.PI / 3, innerWidth / innerHeight, 0.08, 640);
     this.camera.projectionMatrix.fromArray(this.projection);
     this.camera.projectionMatrixInverse.copy(this.camera.projectionMatrix).invert();
   }
   updateLife(array) {
-    const stride = window.FieldCore.STRIDE;
+    const stride = window.CityCore.STRIDE;
     if (array.length > this.lifeCapacity) {
       if (this.lifeMesh) {
         this.scene.remove(this.lifeMesh);
@@ -161,9 +156,9 @@ class FieldRenderer {
     this.lifeMesh.geometry.setDrawRange(0, array.length / stride);
   }
   draw(eye, life, flying = false, sky = NOON) {
-    const F = window.FieldCore,
-      view = F.view(eye.x, eye.y, eye.z, eye.yaw, eye.pitch),
-      matrix = F.multiply(this.projection, view);
+    const Core = window.CityCore,
+      view = Core.view(eye.x, eye.y, eye.z, eye.yaw, eye.pitch),
+      matrix = Core.multiply(this.projection, view);
     this.camera.matrix.fromArray(view).invert();
     this.camera.matrixWorldNeedsUpdate = true;
     // Light: the old shader added ambient + sun·N·L; three's physical lights divide by π, so scale back up.
@@ -225,4 +220,4 @@ class FieldRenderer {
     q.level--;
   }
 }
-window.FieldRenderer = FieldRenderer;
+window.CityRenderer = CityRenderer;

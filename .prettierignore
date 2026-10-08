@@ -1,4 +1,4 @@
-dist/vendor/
+dist/js/vendor/
 node_modules/
 package-lock.json
 *.md
