@@ -19,7 +19,7 @@
       this.uniforms={};for(const name of ['uMatrix','uEye','uResolution','uFog','uSun','uSunColor','uAmbient','uSkyTop','uSkyLow','uNight'])this.uniforms[name]=gl.getUniformLocation(program,name);
       gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);this.resize();
     }
-    resize(){const dpr=Math.min(devicePixelRatio||1,1.6);this.canvas.width=Math.round(innerWidth*dpr);this.canvas.height=Math.round(innerHeight*dpr);this.gl.viewport(0,0,this.canvas.width,this.canvas.height);this.projection=window.FieldCore.perspective(Math.PI/3,innerWidth/innerHeight,.08,640);}
+    resize(){const dpr=Math.min(devicePixelRatio||1,matchMedia('(pointer: coarse)').matches?1.25:1.6);this.canvas.width=Math.round(innerWidth*dpr);this.canvas.height=Math.round(innerHeight*dpr);this.gl.viewport(0,0,this.canvas.width,this.canvas.height);this.projection=window.FieldCore.perspective(Math.PI/3,innerWidth/innerHeight,.08,640);}
     bind(buffer){const gl=this.gl,bytes=this.stride*4;gl.bindBuffer(gl.ARRAY_BUFFER,buffer);for(const a of this.attributes)gl.vertexAttribPointer(a.location,a.size,gl.FLOAT,false,bytes,a.offset*4);}
     draw(player,life,flying=false,sky=NOON){
       const gl=this.gl,F=window.FieldCore,u=this.uniforms;const matrix=F.multiply(this.projection,F.view(player.x,player.y,player.z,player.yaw,player.pitch));
