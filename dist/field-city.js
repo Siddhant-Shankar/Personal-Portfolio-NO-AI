@@ -18,7 +18,7 @@
   const infill=[{x:36,z:-36,height:16,color:'#ad9c8e'},{x:36,z:-12,height:21,color:'#839c9e'},{x:-12,z:-12,height:19,color:'#b4a588'},{x:12,z:36,height:11,color:'#bca58b'}];
   const blockers=[...landmarks,...infill];
   function mesh(F){
-    const {box,cone,roof,finish}=F.builder(),rand=F.random(29417),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
+    const {box,cone,roof,finish}=F.builder(),rand=F.random(29417),lights=F.random(5113),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
     // A continuous city surface with clearly separated roads, curbs, and blocks.
     box(0,-.2,0,194,.4,194,'#8e9a89');box(0,.005,0,110,.045,110,'#a7ac9b');
     for(const x of [-36,-12,12,36])for(const z of [-36,-12,12,36]){
@@ -31,11 +31,12 @@
       for(const m of streets)for(let j=-2;j<=2;j++){box(n+j*.8,.11,m+3.4,.45,.025,1.45,'#d5d2b9');box(n+3.4,.115,m+j*.8,1.45,.025,.45,'#d5d2b9');}
     }
     function tree(x,z,scale=1,y=0){box(x,y+.4,z,1.8,.7,1.8,'#9c9981');box(x,y+1.8*scale,z,.3*scale,3*scale,.3*scale,'#786852');box(x,y+3.6*scale,z,2.2*scale,2.4*scale,2.2*scale,'#6a845b',.22);box(x-.4*scale,y+4.8*scale,z,1.6*scale,1.3*scale,1.7*scale,'#97a671',-.18);}
-    function lamp(x,z){box(x,2.1,z,.13,4.2,.13,ink);box(x+.5,4.15,z,1.2,.14,.15,ink);box(x+1,4.02,z,.55,.2,.5,warm);box(x,.2,z,.38,.4,.38,ink);}
+    function lamp(x,z){box(x,2.1,z,.13,4.2,.13,ink);box(x+.5,4.15,z,1.2,.14,.15,ink);box(x+1,4.02,z,.55,.2,.5,warm,0,1);box(x,.2,z,.38,.4,.38,ink);}
+    const lit=()=>lights()<.52?.9+lights()*.1:0;
     function windows(x,z,w,d,h,color=glass,base=0){
       for(let y=base+2;y<base+h-.4;y+=2.5){
-        for(let dx=-w/2+1;dx<w/2;dx+=1.8){box(x+dx,y,z+d/2+.02,1,.95,.065,color);box(x+dx,y,z-d/2-.02,1,.95,.065,color);}
-        for(let dz=-d/2+1;dz<d/2;dz+=1.8){box(x+w/2+.02,y,z+dz,.065,.95,1,color);box(x-w/2-.02,y,z+dz,.065,.95,1,color);}
+        for(let dx=-w/2+1;dx<w/2;dx+=1.8){box(x+dx,y,z+d/2+.02,1,.95,.065,color,0,lit());box(x+dx,y,z-d/2-.02,1,.95,.065,color,0,lit());}
+        for(let dz=-d/2+1;dz<d/2;dz+=1.8){box(x+w/2+.02,y,z+dz,.065,.95,1,color,0,lit());box(x-w/2-.02,y,z+dz,.065,.95,1,color,0,lit());}
       }
     }
     function tower(x,z,w,d,h,color){
@@ -44,7 +45,7 @@
       box(x,h+.38,z,w+.3,.3,d+.3,stone);box(x+.8,h+.95,z-1,2.1,1,1.4,'#778a82');
       box(x,1.75,z+d/2+.1,1.8,3,.2,ink);box(x,3.45,z+d/2+.5,3.5,.22,1,stone);
     }
-    function shop(x,z,h,color){tower(x,z,8.4,8.4,h,color);for(let i=-1;i<=1;i++){box(x+i*2.7,1.8,z+4.28,2.1,2.5,.1,ink);box(x+i*2.7,3.2,z+4.75,2.4,.18,1.1,i%2?warm:color);}box(x,h+.7,z,5,.4,5,'#7c9367');}
+    function shop(x,z,h,color){tower(x,z,8.4,8.4,h,color);for(let i=-1;i<=1;i++){box(x+i*2.7,1.8,z+4.28,2.1,2.5,.1,ink,0,.85);box(x+i*2.7,3.2,z+4.75,2.4,.18,1.1,i%2?warm:color);}box(x,h+.7,z,5,.4,5,'#7c9367');}
     // The eleven chapters have different silhouettes, street entrances, and roof lines.
     for(const p of landmarks){const {x,z,height:h,color:c}=p;
       box(x+1,.27,z-.3,11,.025,11,'#969f8d');
@@ -57,7 +58,7 @@
       }else if(p.kind==='observatory'){
         tower(x,z,8.3,8.3,15,'#a8b0ae');box(x,16,z,9,.8,9,stone);cone(x,16.4,z,4,4.6,c,10);box(x,19,z+2.1,.9,.9,4.4,ink);box(x,21,z,.12,4,.12,ink);
       }else if(p.kind==='welcome'){
-        tower(x,z,9.4,8.5,6.8,'#cabd9c');roof(x,7.1,z,10,1.8,9.2,'#6c8c82');box(x-2.5,10,z,2.8,6,2.8,c);box(x-2.5,13.1,z,3.2,.3,3.2,stone);box(x-2.5,11.6,z+1.44,1.5,1.5,.08,warm);box(x-2.5,11.7,z+1.5,.08,.55,.03,ink);box(x-2.25,11.7,z+1.5,.55,.08,.03,ink);
+        tower(x,z,9.4,8.5,6.8,'#cabd9c');roof(x,7.1,z,10,1.8,9.2,'#6c8c82');box(x-2.5,10,z,2.8,6,2.8,c);box(x-2.5,13.1,z,3.2,.3,3.2,stone);box(x-2.5,11.6,z+1.44,1.5,1.5,.08,warm,0,1);box(x-2.5,11.7,z+1.5,.08,.55,.03,ink);box(x-2.25,11.7,z+1.5,.55,.08,.03,ink);
       }else if(p.kind==='classroom'){
         tower(x,z,9.5,8.5,11.5,'#bca783');roof(x,11.8,z,10.2,2.2,9.2,'#7c927f');for(let i=-3;i<=3;i+=2)box(x+i,2,z+4.6,.4,4,.45,stone);box(x,4.3,z+4.4,9,.35,1,stone);
       }else if(p.kind==='studio'){
@@ -74,7 +75,7 @@
         tower(x-1,z,7.3,8.4,9.8,'#d0c4aa');box(x+1,11.8,z-1,7.1,4,7.1,c);windows(x+1,z-1,7.1,7.1,4,glass,10);box(x+1,14,z-1,7.4,.3,7.4,stone);
       }
       // An enamel street plaque and a clear approach identify every career entrance.
-      box(x-3,1.4,z+7,.12,2.5,.12,ink);box(x-3,2.4,z+7,1.5,.65,.13,c);box(x-3,2.4,z+7.08,.7,.08,.02,warm);
+      box(x-3,1.4,z+7,.12,2.5,.12,ink);box(x-3,2.4,z+7,1.5,.65,.13,c);box(x-3,2.4,z+7.08,.7,.08,.02,warm,0,1);
       box(x,.28,z+7.3,3.5,.08,3.8,stone);
       for(const dx of [-7.8,7.8])tree(x+dx,z-6,.7);lamp(x+7.7,z+7.7);
     }
@@ -109,10 +110,10 @@
   }
   function addTraffic(builder,time){
     for(let i=0;i<10;i++){const p=trafficPose(i,time),s=Math.sin(p.yaw),c=Math.cos(p.yaw),van=i%4===0,coat=['#d3ad68','#a06c50','#759d9c','#e0d3b2','#8895aa'][i%5];
-      function part(x,y,z,w,h,d,color){builder.box(p.x+x*c+z*s,y,p.z-x*s+z*c,w,h,d,color,p.yaw);}
+      function part(x,y,z,w,h,d,color,glow=0){builder.box(p.x+x*c+z*s,y,p.z-x*s+z*c,w,h,d,color,p.yaw,glow);}
       part(0,.49,0,1.25,.55,van?2.6:2.2,coat);part(0,.94,van?-.15:0,1.1,van?1:.6,van?1.8:1.25,coat);part(0,1,van?.79:.65,.93,.38,.045,'#47676b');part(0,1,van?-1.06:-.65,.93,.38,.045,'#47676b');
       for(const side of [-1,1])for(const end of [-1,1])part(side*.63,.3,end*.76,.18,.4,.4,'#3d4c48');
-      for(const side of [-1,1])part(side*.4,.56,van?1.32:1.12,.25,.18,.04,'#ead6a1');
+      for(const side of [-1,1]){part(side*.4,.56,van?1.32:1.12,.25,.18,.04,'#ead6a1',1);part(side*.45,.56,van?-1.32:-1.12,.2,.14,.04,'#b5463a',.8);}
     }
   }
   const api={landmarks,streets,infill,blockers,mesh,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;

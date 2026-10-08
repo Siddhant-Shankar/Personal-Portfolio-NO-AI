@@ -30,20 +30,22 @@
   function multiply(a,b){const r=new Float32Array(16);for(let c=0;c<4;c++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)r[c*4+row]+=a[k*4+row]*b[c*4+k];return r;}
   function project(matrix,x,y,z){const w=matrix[3]*x+matrix[7]*y+matrix[11]*z+matrix[15];return {x:(matrix[0]*x+matrix[4]*y+matrix[8]*z+matrix[12])/w,y:(matrix[1]*x+matrix[5]*y+matrix[9]*z+matrix[13])/w,w};}
   function random(seed=7391){return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};}
+  const STRIDE=10;
   function color(hex){return hex.replace('#','').match(/../g).map(v=>parseInt(v,16)/255);}
   function builder(){
     const data=[],rand=random();
-    function box(x,y,z,w,h,d,c,angle=0){
+    // Each vertex: position, normal, colour, and glow (how strongly it lights up after dark).
+    function box(x,y,z,w,h,d,c,angle=0,glow=0){
       if(typeof c==='string')c=color(c);const cs=Math.cos(angle),sn=Math.sin(angle);
       const faces=[[[1,0,0],[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]]],[[-1,0,0],[[-1,-1,1],[-1,1,1],[-1,1,-1],[-1,-1,-1]]],[[0,1,0],[[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]]],[[0,-1,0],[[-1,-1,1],[-1,-1,-1],[1,-1,-1],[1,-1,1]]],[[0,0,1],[[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,1]]],[[0,0,-1],[[-1,-1,-1],[-1,1,-1],[1,1,-1],[1,-1,-1]]]];
-      for(const [normal,points] of faces){const shade=.96+rand()*.08;for(const i of [0,1,2,0,2,3]){const p=points[i],px=p[0]*w/2,pz=p[2]*d/2;data.push(x+px*cs+pz*sn,y+p[1]*h/2,z-px*sn+pz*cs,normal[0]*cs+normal[2]*sn,normal[1],-normal[0]*sn+normal[2]*cs,c[0]*shade,c[1]*shade,c[2]*shade);}}
+      for(const [normal,points] of faces){const shade=.96+rand()*.08;for(const i of [0,1,2,0,2,3]){const p=points[i],px=p[0]*w/2,pz=p[2]*d/2;data.push(x+px*cs+pz*sn,y+p[1]*h/2,z-px*sn+pz*cs,normal[0]*cs+normal[2]*sn,normal[1],-normal[0]*sn+normal[2]*cs,c[0]*shade,c[1]*shade,c[2]*shade,glow);}}
     }
-    function triangle(a,b,c,tint){if(typeof tint==='string')tint=color(tint);const u=b.map((v,i)=>v-a[i]),v=c.map((n,i)=>n-a[i]),n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot(...n)||1;for(const p of [a,b,c])data.push(...p,...n.map(v=>v/l),...tint);}
+    function triangle(a,b,c,tint,glow=0){if(typeof tint==='string')tint=color(tint);const u=b.map((v,i)=>v-a[i]),v=c.map((n,i)=>n-a[i]),n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot(...n)||1;for(const p of [a,b,c])data.push(...p,...n.map(v=>v/l),...tint,glow);}
     function cone(x,y,z,r,h,tint,sides=5){for(let i=0;i<sides;i++){const a=i/sides*Math.PI*2,b=(i+1)/sides*Math.PI*2;triangle([x+Math.cos(a)*r,y,z+Math.sin(a)*r],[x,y+h,z],[x+Math.cos(b)*r,y,z+Math.sin(b)*r],tint);}}
     function roof(x,y,z,w,h,d,tint){const a=[x-w/2,y,z-d/2],b=[x+w/2,y,z-d/2],c=[x-w/2,y,z+d/2],e=[x+w/2,y,z+d/2],u=[x,y+h,z-d/2],v=[x,y+h,z+d/2];triangle(a,c,v,tint);triangle(a,v,u,tint);triangle(b,u,v,tint);triangle(b,v,e,tint);triangle(a,u,b,'#cbb68d');triangle(c,e,v,'#cbb68d');}
     return {box,triangle,cone,roof,finish:()=>new Float32Array(data)};
   }
   function mesh(){return City.mesh(api);}
-  const api={city:City,landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,canFly,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
+  const api={STRIDE,city:City,landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,canFly,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCore=api;
 })(typeof window!=='undefined'?window:globalThis);
