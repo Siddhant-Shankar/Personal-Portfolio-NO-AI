@@ -27,7 +27,7 @@
     {
       id: 'projects',
       label: 'The workbench',
-      sub: 'FIVE PUBLIC EXPERIMENTS',
+      sub: 'SIX PUBLIC PROJECTS',
       left: true,
       kind: 'project',
     },
@@ -66,6 +66,14 @@
   let selected = -1;
   function paragraph(text, cls = 'body-copy') {
     return `<p class="${cls}">${esc(text)}</p>`;
+  }
+  // Education and skills, straight from the résumé (career-data.js).
+  function educationAndSkills() {
+    const e = data.education;
+    return (
+      `<h3>EDUCATION</h3><p class="body-copy"><strong>${esc(e.school)}</strong><br>${esc(e.degree)}<br>${esc(e.graduation)} · GPA ${esc(e.gpa)}</p><p class="tools-used">${esc(e.coursework)}</p>` +
+      `<h3>TECHNICAL SKILLS</h3><dl class="skill-list">${data.skills.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`
+    );
   }
   function openStory(index) {
     selected = index;
@@ -112,7 +120,7 @@
       html =
         paragraph('I like finding the connection between things.', 'story-content-lead') +
         paragraph(
-          'I’m Siddhant, a Computer Science + Economics student at the University of Illinois. I build across AI, financial data, and the physical world.',
+          'I’m Siddhant, a Computer Science + Economics student at the University of Illinois, with a minor in Mathematics. I build across AI, financial data, and the physical world.',
         ) +
         paragraph(
           'My work has taken me from Mumbai to Urbana-Champaign, New York, and Texas. The settings change, but I keep coming back to the same questions: how does this system behave, where does it break, and what would make it useful to someone?',
@@ -120,6 +128,7 @@
         paragraph(
           'This city is a map of those questions. Each building holds a chapter, and the streets between them are the things that connect it all.',
         ) +
+        educationAndSkills() +
         '<a class="chapter-link" href="notes.html#about">Read the complete field guide ↗</a>';
     } else {
       html =

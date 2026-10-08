@@ -1709,3 +1709,31 @@ dialog h3 {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Coursework and technical skills in the About section. */
+.skill-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 20px;
+  margin: 28px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.skill-list dt {
+  font: 11px/2 var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.skill-list dd {
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .skill-list {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .skill-list dd {
+    margin-bottom: 10px;
+  }
+}

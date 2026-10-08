@@ -354,7 +354,7 @@
       chapter: 'boring',
       lines: [
         'The Boring Company · Software Engineering Intern',
-        'Working across six engineering and operations tools',
+        'Six internal tools: React, Django, Kubernetes, Redis, AWS',
         'Week one: traced a missing machine signal to an allowlist',
       ],
       case: 'signal',
@@ -367,8 +367,8 @@
       where: () => ({ x: H.x - 2.4, y: 6.6, z: H.z + 4.1 }),
       chapter: 'hyphenate',
       lines: [
-        'Hyphenate · from one LLM call to agentic workflows',
-        '3 enterprise customers in three months',
+        'Hyphenate · one LLM call → a Claude SDK agent system',
+        '3 enterprise customers ($10M–$100M revenue)',
         '99% line-item correctness, validated against NetSuite',
       ],
       case: 'flux',
@@ -411,7 +411,7 @@
       chapter: 'zaap',
       lines: [
         'An AI analyst in your pocket · founder',
-        '50 beta users onboarded',
+        '50 beta users · 14 spending categories',
         '35% fewer API calls after redesigning data fetching',
       ],
     },
@@ -474,9 +474,9 @@
       title: 'Under the transformer',
       where: () => ({ x: W.x - 4.45, y: 4.6, z: W.z }),
       lines: [
-        'Building transformer fundamentals from scratch',
-        'Working through each piece from the inside out',
-        'A learning repository with notes alongside the code',
+        'A GPT-style Transformer from scratch in PyTorch',
+        'Multi-head attention, causal masking, positional encoding',
+        'Evaluated with cross-entropy loss and perplexity',
       ],
       ...project('Under the transformer'),
     },

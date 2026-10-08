@@ -1528,3 +1528,32 @@ body.city-mode {
 .city-label.edge .label-meta {
   color: #f1dcaa;
 }
+
+/* Technical skills in the About chapter. */
+.skill-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 8px 0 22px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.skill-list dt {
+  font: 10px/2.2 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e3c896;
+}
+.skill-list dd {
+  margin: 0;
+  color: #d2dbc7;
+}
+@media (max-width: 760px) {
+  .skill-list {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .skill-list dd {
+    margin-bottom: 8px;
+  }
+}

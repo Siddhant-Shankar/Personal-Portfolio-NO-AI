@@ -99,7 +99,7 @@
         <div class="career-ledger">
           <details class="career-entry" data-groups="engineering" open>
             <summary>
-              <span class="career-time">SEP 2026 — PRESENT<small>BASTROP, TEXAS</small></span
+              <span class="career-time">SEP — DEC 2026<small>BASTROP, TEXAS</small></span
               ><span class="career-company"
                 >The Boring Company<small>Software Engineering Intern</small></span
               ><span class="career-summary"
@@ -117,12 +117,27 @@
               </div>
               <div>
                 <ul>
-                  <li>Contributing across six engineering and operations tools.</li>
-                  <li>Building and troubleshooting cloud-backed services and data pipelines.</li>
+                  <li>
+                    Contributing across six internal engineering and operations tools:
+                    React/TypeScript interfaces, Django services, PostgreSQL workflows, and
+                    Dockerized applications used by operational teams.
+                  </li>
+                  <li>
+                    Implementing backend and infrastructure improvements with Kubernetes,
+                    server-side Redis caching, AWS/S3 data pipelines, and Linux/Nginx deployments,
+                    and tracing failures across application, service, database, and network
+                    boundaries.
+                  </li>
+                  <li>
+                    Working directly with internal users and engineers to turn loosely scoped
+                    operational problems into production changes, balancing reliability,
+                    maintainability, and speed.
+                  </li>
                   <li>Built an internal engineering knowledge layer using a Grok-based bot.</li>
                 </ul>
                 <p class="career-tech">
-                  React · TypeScript · Django · PostgreSQL · AWS · Docker · Kubernetes
+                  React · TypeScript · Django · PostgreSQL · Kubernetes · Redis · AWS/S3 · Docker ·
+                  Linux · Nginx
                 </p>
                 <a class="underlined" href="#work" data-case-target="signal"
                   >Follow the telemetry investigation</a
@@ -137,7 +152,7 @@
                 >Hyphenate<small class="former">FORMERLY MAXIMOR AI</small
                 ><small>Software Engineering Intern</small></span
               ><span class="career-summary"
-                >Owned Flux Analysis from pre-production to three enterprise customers.</span
+                >Took Flux Analysis from a static prototype to three enterprise customers.</span
               ><span class="expand-icon" aria-hidden="true"></span>
             </summary>
             <div class="career-detail">
@@ -152,20 +167,34 @@
               <div>
                 <ul>
                   <li>
-                    Built independent validation against NetSuite queries, helping bring financial
-                    line-item correctness to 99% before delivery.
+                    Took Flux Analysis from a static pre-production prototype to deployment across
+                    three enterprise customers in the roughly $10M–$100M revenue range, owning
+                    scoping, architecture, implementation, testing, rollout, and iteration.
                   </li>
                   <li>
-                    Designed hierarchy selection, transaction drilldowns, filtered totals, and
-                    review workflows.
+                    Rebuilt Flux from a single LLM call into a managed-agent system using the Claude
+                    SDK, with customer-context RAG, backend tool integration, human review, and
+                    Temporal orchestration for multi-step analysis and retries.
                   </li>
                   <li>
-                    Migrated integrations from Flask to FastAPI and configured reproducible cloud
-                    development environments for five engineers.
+                    Translated distinct customer accounting structures and reporting workflows into
+                    reusable product behavior across FastAPI, React/TypeScript, NetSuite, Snowflake,
+                    and PostgreSQL, rather than one-off implementations.
+                  </li>
+                  <li>
+                    Built a validation harness against independent NetSuite SuiteQL queries and
+                    drove line-item correctness to 99%; debugged duplicate, stale, and soft-deleted
+                    records across production financial-data pipelines.
+                  </li>
+                  <li>
+                    Configured reproducible DevPod environments on AWS ECS/Fargate for five
+                    engineers, and migrated integration endpoints from Flask to FastAPI with typed
+                    schemas, auth, validation, tests, and explicit failure handling.
                   </li>
                 </ul>
                 <p class="career-tech">
-                  Claude SDK · Temporal · FastAPI · React · PostgreSQL · Snowflake
+                  Claude SDK · RAG · Temporal · FastAPI · React/TypeScript · NetSuite · Snowflake ·
+                  PostgreSQL · AWS ECS/Fargate
                 </p>
                 <a class="underlined" href="#work" data-case-target="flux"
                   >Explore the Flux Analysis story</a
@@ -178,7 +207,7 @@
               <span class="career-time">JAN 2026 — PRESENT<small>CHAMPAIGN, ILLINOIS</small></span
               ><span class="career-company">Zaap AI<small>Founder & Software Engineer</small></span
               ><span class="career-summary"
-                >Built a personal-finance product and onboarded 50 beta users.</span
+                >Built a zero-to-one personal-finance platform for 50 beta users.</span
               ><span class="expand-icon" aria-hidden="true"></span>
             </summary>
             <div class="career-detail">
@@ -194,13 +223,18 @@
               <div>
                 <ul>
                   <li>
-                    Integrated Plaid transaction data with a React, Django, and Supabase
-                    application.
+                    Built a zero-to-one personal-finance platform for 50 beta users with React,
+                    Django, Supabase, and Plaid: account and transaction ingestion, onboarding,
+                    budgeting, dashboards, and an AI assistant grounded in each user’s financial
+                    data.
                   </li>
-                  <li>Onboarded 50 beta users to the personal-finance product.</li>
                   <li>
-                    Reduced API calls by 35% through client-side caching and redesigned state and
-                    data fetching.
+                    Designed personalization across onboarding responses, transaction behavior, and
+                    14 spending categories.
+                  </li>
+                  <li>
+                    Reduced API calls by 35% through client-side caching and redesigned conversation
+                    state and data fetching.
                   </li>
                 </ul>
                 <p class="career-tech">React · Django · Supabase · Plaid · Product development</p>
@@ -209,7 +243,7 @@
           </details>
           <details class="career-entry" data-groups="research">
             <summary>
-              <span class="career-time">2026 — PRESENT<small>CHAMPAIGN, ILLINOIS</small></span
+              <span class="career-time">JAN 2026 — PRESENT<small>CHAMPAIGN, ILLINOIS</small></span
               ><span class="career-company"
                 >Parasol Lab, UIUC<small>Research Assistant · Parallel Computing</small></span
               ><span class="career-summary"
@@ -228,12 +262,16 @@
               <div>
                 <ul>
                   <li>
-                    Implementing parallel numerical primitives and comparing them with sequential
-                    baselines.
+                    Implementing parallel scan, reduction, and inner-product primitives in
+                    C++/STAPL.
                   </li>
-                  <li>Studying synchronization costs, memory access, and load balancing.</li>
                   <li>
-                    Benchmarking execution configurations to understand scalability and bottlenecks.
+                    Profiling synchronization, memory-access behavior, load balancing, and
+                    scalability across multithreaded workloads.
+                  </li>
+                  <li>
+                    Comparing parallel primitives with sequential baselines to understand
+                    bottlenecks.
                   </li>
                 </ul>
                 <p class="career-tech">C++ · STAPL · Parallel computing · Benchmarking</p>
@@ -496,10 +534,26 @@
         </p>
         <a
           class="project-row"
-          href="https://github.com/Siddhant-Shankar/WEB-SOCKET-CHATBOT"
+          href="https://github.com/Siddhant-Shankar/AutoDock-Webots-Parking-Simulator"
           target="_blank"
           rel="noopener noreferrer"
           ><span class="project-num">A</span>
+          <div>
+            <h3>Autonomous docking, in simulation</h3>
+            <p>
+              Project Luymn AutoDock. I joined with no prior aerospace background and later led the
+              AutoDock team, building simulation foundations for autonomous docking work aimed at
+              student competitions and independent research.
+            </p>
+          </div>
+          <span class="project-tech">AUTONOMOUS SYSTEMS<br />MODELING & SIMULATION</span
+          ><span class="project-action">View repository</span></a
+        ><a
+          class="project-row"
+          href="https://github.com/Siddhant-Shankar/WEB-SOCKET-CHATBOT"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><span class="project-num">B</span>
           <div>
             <h3>Real-time chat</h3>
             <p>
@@ -514,7 +568,7 @@
           href="https://github.com/Siddhant-Shankar/drone_rl_navigation"
           target="_blank"
           rel="noopener noreferrer"
-          ><span class="project-num">B</span>
+          ><span class="project-num">C</span>
           <div>
             <h3>Learning to navigate</h3>
             <p>
@@ -529,7 +583,7 @@
           href="https://github.com/Siddhant-Shankar/AI-Sketch-Classifier"
           target="_blank"
           rel="noopener noreferrer"
-          ><span class="project-num">C</span>
+          ><span class="project-num">D</span>
           <div>
             <h3>A sketch becomes a prediction</h3>
             <p>
@@ -544,22 +598,23 @@
           href="https://github.com/Siddhant-Shankar/Transformer-from-Scratch-Tutorial-Notes-"
           target="_blank"
           rel="noopener noreferrer"
-          ><span class="project-num">D</span>
+          ><span class="project-num">E</span>
           <div>
             <h3>Under the transformer</h3>
             <p>
-              A learning repository for working through transformer fundamentals from the inside
-              out.
+              A GPT-style Transformer built from scratch: multi-head attention, positional encoding,
+              causal masking, feed-forward layers, and autoregressive generation, trained and
+              evaluated with cross-entropy loss and perplexity.
             </p>
           </div>
-          <span class="project-tech">MODEL FUNDAMENTALS<br />LEARNING NOTES</span
+          <span class="project-tech">PYTHON / PYTORCH<br />GPT-STYLE MODEL</span
           ><span class="project-action">View repository</span></a
         ><a
           class="project-row"
           href="https://github.com/Siddhant-Shankar/F1_PREDICTIONS"
           target="_blank"
           rel="noopener noreferrer"
-          ><span class="project-num">E</span>
+          ><span class="project-num">F</span>
           <div>
             <h3>Reading a race through data</h3>
             <p>
@@ -615,9 +670,9 @@
         <div class="about-copy">
           <p>
             I study Computer Science and Economics at the University of Illinois Urbana-Champaign,
-            with a minor in Mathematics. I expect to graduate in May 2028. I’m interested in how
-            software changes the decisions people can make, whether they’re reviewing financial
-            results or working with physical machines.
+            with a minor in Mathematics (GPA 3.87/4.00). I expect to graduate in May 2028. I’m
+            interested in how software changes the decisions people can make, whether they’re
+            reviewing financial results or working with physical machines.
           </p>
           <p>
             At Hyphenate, that meant turning AI-enabled accounting workflows into something teams
@@ -628,6 +683,29 @@
             I’m also building Zaap AI, a personal-finance product for students and young
             professionals. The goal: make understanding your money more accessible.
           </p>
+          <dl class="skill-list">
+            <dt>Coursework</dt>
+            <dd>
+              Data Structures, Algorithms, Systems Programming, Database Systems, Machine Learning,
+              Probability & Statistics
+            </dd>
+            <dt>Languages</dt>
+            <dd>Python, C++, TypeScript, JavaScript, SQL</dd>
+            <dt>Frameworks & data</dt>
+            <dd>
+              React, Django, FastAPI, Flask, Node.js, PostgreSQL, Snowflake, MongoDB, Supabase
+            </dd>
+            <dt>Cloud & systems</dt>
+            <dd>
+              AWS, S3, ECS/Fargate, Kubernetes, Redis, Docker, Linux, Nginx, Temporal, Git, GitHub
+              Actions
+            </dd>
+            <dt>AI & ML</dt>
+            <dd>
+              Claude SDK, RAG, Agentic Workflows, PyTorch, TensorFlow, scikit-learn, XGBoost,
+              Evaluation Harnesses
+            </dd>
+          </dl>
           <div class="about-facts">
             <span>MUMBAI → URBANA-CHAMPAIGN → TEXAS</span
             ><a
@@ -668,8 +746,9 @@
         <li>
           <strong>AI that becomes a product.</strong>
           <p>
-            At Hyphenate, I evolved Flux Analysis from a single LLM call into agentic workflows with
-            Temporal orchestration. Three enterprise customers adopted it in three months.
+            At Hyphenate, I rebuilt Flux Analysis from a single LLM call into a managed-agent system
+            (Claude SDK, RAG, human review, Temporal orchestration). Three enterprise customers in
+            the $10M–$100M revenue range adopted it in three months.
           </p>
         </li>
         <li>
@@ -689,8 +768,8 @@
       </ol>
       <p>
         Beyond those stories: I founded Zaap AI (50 beta users), research parallel algorithms at
-        Parasol Lab, taught as a UIUC Course Assistant, and worked in product evaluation at Zeus
-        Learning and financial-data engineering at APAC.
+        Parasol Lab, led the AutoDock simulation team, taught as a UIUC Course Assistant, and worked
+        in product evaluation at Zeus Learning and financial-data engineering at APAC.
       </p>
       <a class="solid-link" href="resume.pdf" target="_blank" rel="noopener">Read my résumé</a>
     </dialog>
