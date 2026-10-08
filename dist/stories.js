@@ -18,6 +18,8 @@
     {id:'about',label:'The common thread',sub:'A LITTLE ABOUT ME',kind:'about'},
     {id:'beyond',label:'Still growing',sub:'RESEARCH & OPEN QUESTIONS',left:true,kind:'future'}
   ];
+  // The three written case studies in field-notes.html, with their verified outcomes.
+  const CASES=[{id:'flux',where:'HYPHENATE',title:'From one LLM call to an enterprise workflow',result:'3 enterprise customers in three months'},{id:'data',where:'HYPHENATE',title:'Choosing which financial record survives',result:'Deterministic deduplication across systems'},{id:'signal',where:'THE BORING COMPANY',title:'The machine had a signal. The app didn’t.',result:'Traced and fixed in my first week'}];
   const visited = new Set(), story = $('story');
   let selected = -1;
   function paragraph(text,cls='body-copy'){return `<p class="${cls}">${esc(text)}</p>`;}
@@ -31,7 +33,7 @@
     let html='';
     if(r) {
       html=paragraph(r.theme,'story-content-lead')+paragraph(r.body)+`<h3>WHAT I WORKED ON</h3><ul class="contributions">${r.items.map(item=>`<li>${esc(item)}</li>`).join('')}</ul><p class="tools-used">${esc(r.tech)}</p>`;
-      if(r.case)html+=`<a class="chapter-link" href="field-notes.html#work">${esc(r.link)} ↗</a>`;
+      if(r.case)html+=`<a class="chapter-link" href="field-notes.html#case-${esc(r.case)}">Read the case study: ${esc(r.link.toLowerCase())} ↗</a>`;
     } else if(p.id==='projects') {
       html=paragraph('Small experiments. Real questions.','story-content-lead')+paragraph('The public side of my work: systems I built to understand what happens beneath the interface.')+data.projects.map(project=>`<a class="project-card" href="${esc(project.url)}" target="_blank" rel="noopener noreferrer"><strong>${esc(project.title)}</strong><p>${esc(project.body)}</p><span>EXPLORE THE REPOSITORY ↗</span></a>`).join('');
     } else if(p.id==='about') {
@@ -47,7 +49,7 @@
     $('announcement').textContent=`Opened ${p.label}. ${visited.size} places discovered.`;
     window.dispatchEvent(new CustomEvent('portfolio:story',{detail:{id:p.id,index}}));
   }
-  $('index-entries').innerHTML='<h3 class="index-group-title">EVERY CHAPTER</h3><div class="index-grid">'+places.map((p,i)=>`<button class="index-entry" data-chapter="${i}"><span>${String(i+1).padStart(2,'0')}</span><span><strong>${esc(p.label)}</strong><small>${esc(data.roles[p.role]?.role||p.sub.toLowerCase())}</small></span></button>`).join('')+'</div><button class="text-button" id="tour-start">Take the guided story tour ⊹</button><button class="text-button" id="index-contact">Say hello ↗</button>';
+  $('index-entries').innerHTML='<h3 class="index-group-title">SELECTED WORK</h3><div class="case-links">'+CASES.map(c=>`<a class="case-link" href="field-notes.html#case-${c.id}"><small>${esc(c.where)}</small><strong>${esc(c.title)}</strong><span>${esc(c.result)}</span></a>`).join('')+'</div><h3 class="index-group-title">EVERY CHAPTER</h3><div class="index-grid">'+places.map((p,i)=>`<button class="index-entry" data-chapter="${i}"><span>${String(i+1).padStart(2,'0')}</span><span><strong>${esc(p.label)}</strong><small>${esc(data.roles[p.role]?.role||p.sub.toLowerCase())}</small></span></button>`).join('')+'</div><button class="text-button" id="tour-start">Take the guided story tour ⊹</button><button class="text-button" id="index-contact">Say hello ↗</button>';
   $('index-entries').addEventListener('click',e=>{const b=e.target.closest('[data-chapter]');if(b)openStory(Number(b.dataset.chapter));});
   function modal(id){document.querySelectorAll('dialog[open]').forEach(d=>d.close());$(id).showModal();}
   $('open-index').onclick=()=>modal('atlas');$('open-contact').onclick=()=>modal('hello');$('index-contact').onclick=()=>modal('hello');

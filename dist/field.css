@@ -50,3 +50,6 @@ body.field-mode{--night:#202b29;--ivory:#f6f0dd;--gold:#e3c896;--quiet:#b8c4b8;-
 @media(max-height:700px) and (min-width:761px){#field-intro .hero-now{display:none}#field-intro{transform:translateY(-50%)}}
 @media(max-width:760px){body:not(.field-entered) #field-status,body:not(.field-entered) #field-controls{display:none}body:not(.field-entered) #field-intro{bottom:14px}}
 @media(max-height:760px) and (min-width:761px){#field-intro{transform:translateY(-36%);padding:20px 24px 18px}#field-intro h1{font-size:clamp(30px,3vw,40px);margin:10px 0 12px}.hero-stats{padding:10px 0;margin-bottom:14px}.hero-stats strong{font-size:24px}}
+/* Selected work in the index. */
+.case-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 26px}.case-link{display:flex;flex-direction:column;gap:7px;padding:14px;border:1px solid #c6ccaa40;border-radius:5px;background:#34503f66;color:#f3ead0}.case-link:hover{background:#3d5a48;border-color:#e2c99688}.case-link small{font:9px var(--mono);letter-spacing:.1em;color:#c4cfb5}.case-link strong{font:500 14px/1.35 var(--sans)}.case-link span{font:11px/1.5 var(--mono);color:#e5cf9d}
+@media(max-width:760px){.case-links{grid-template-columns:1fr}}

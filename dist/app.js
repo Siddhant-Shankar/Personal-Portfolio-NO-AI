@@ -15,3 +15,8 @@ renderCase();
 
 document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{const filter=button.dataset.filter;let count=0;document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));document.querySelectorAll('.career-entry').forEach(entry=>{const show=filter==='all'||entry.dataset.groups.split(' ').includes(filter);entry.hidden=!show;if(show)count++;});$('experience-count').textContent=`${count} ${count===1?'role':'roles'}`;}));
 document.querySelectorAll('[data-case-target]').forEach(link=>link.addEventListener('click',()=>{current=link.dataset.caseTarget;stage=0;failed=false;renderCase();}));
+// Deep links: field-notes.html#case-flux (or -data, -signal) opens that case study directly.
+function openFromHash(){const m=location.hash.match(/^#case-(\w+)$/);if(!m||!cases[m[1]])return;current=m[1];stage=0;failed=false;renderCase();requestAnimationFrame(()=>document.getElementById('work').scrollIntoView({block:'start'}));}
+addEventListener('hashchange',openFromHash);openFromHash();
+// Fonts and images shift the layout after first paint; land on the case study once everything has loaded.
+addEventListener('load',()=>{if(/^#case-/.test(location.hash))document.getElementById('work').scrollIntoView({block:'start'});});
