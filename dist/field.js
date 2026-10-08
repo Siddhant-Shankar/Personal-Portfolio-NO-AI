@@ -55,7 +55,7 @@
   function overlay(matrix){
     const eye=camera.eye,flying=camera.mode==='world',occupied=[];
     for(const p of [...F.landmarks].sort((a,b)=>F.distance(eye,a)-F.distance(eye,b))){
-      const b=labels.get(p.id),distance=F.distance(eye,p),point=F.project(matrix,p.x,5.8,p.z),x=(point.x*.5+.5)*innerWidth,y=(-point.y*.5+.5)*innerHeight,width=p.company.length*6.1+32;
+      const b=labels.get(p.id),distance=F.distance(eye,p),point=F.project(matrix,p.x,(p.height||5)+1.5,p.z),x=(point.x*.5+.5)*innerWidth,y=(-point.y*.5+.5)*innerHeight,width=p.company.length*6.1+32;
       let shown=point.w>0&&Math.abs(point.x)<.93&&Math.abs(point.y)<.77&&(flying||distance<62);
       if(flying&&occupied.some(r=>Math.abs(x-r.x)<(width+r.w)/2&&Math.abs(y-r.y)<30))shown=false;
       b.hidden=!shown;if(shown){occupied.push({x,y,w:width});b.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%)`;b.style.opacity=flying?'1':String(F.clamp(1-distance/100,.45,1));}

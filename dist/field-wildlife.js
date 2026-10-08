@@ -5,7 +5,7 @@
   function create(seed=731){const rand=F.random(seed),animals=[];const types=['rabbit','chicken','fox','deer'];
     for(let i=0;i<16;i++){let x,z;do{x=rand()*90-45;z=rand()*90-40;}while(!F.canWalk(x,z));animals.push({id:i,kind:types[i%4],x,z,yaw:rand()*Math.PI*2,phase:rand()*6,wait:i%4===0?1+rand()*2:0,goal:null,pace:0,path:[]});}
     // Two quiet neighbours greet you near the starting clearing.
-    Object.assign(animals[0],{x:5,z:17});Object.assign(animals[1],{x:-4,z:18});Object.assign(animals[2],{x:-8,z:9});Object.assign(animals[3],{x:11,z:14});
+    Object.assign(animals[0],{x:5,z:17});Object.assign(animals[1],{x:-4,z:18});Object.assign(animals[2],{x:-8,z:9});Object.assign(animals[3],{x:-10,z:16});
     return {animals,rand,elapsed:0};
   }
   function choosePath(world,a){
