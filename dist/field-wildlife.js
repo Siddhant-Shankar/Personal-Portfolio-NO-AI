@@ -7,8 +7,10 @@
     for(let i=0;i<16;i++){let x,z;do{x=rand()*90-45;z=rand()*90-40;}while(!F.canWalk(x,z));animals.push({id:i,kind:types[i%4],x,z,yaw:rand()*Math.PI*2,phase:rand()*6,wait:i%4===0?1+rand()*2:0,goal:null,pace:0,path:[]});}
     // Two quiet neighbours greet you near the starting clearing.
     Object.assign(animals[0],{x:5,z:17});Object.assign(animals[1],{x:-4,z:18});Object.assign(animals[2],{x:-8,z:9});Object.assign(animals[3],{x:-10,z:16});
-    for(const a of animals)if(a.kind!=='fox'){a.habitat={minX:-20,maxX:-4,minZ:4,maxZ:20};a.x=-20+rand()*16;a.z=4+rand()*16;}
-    return {animals,rand,elapsed:0};
+    for(const a of animals)if(a.kind!=='fox'){a.habitat={minX:-20,maxX:-4,minZ:4,maxZ:20};do{a.x=-20+rand()*16;a.z=4+rand()*16;}while(!F.canWalk(a.x,a.z));}
+    // Nobody starts inside a tree, bench, or lamp post.
+    for(const a of animals)while(!F.canWalk(a.x,a.z)){a.x+=rand()*2-1;a.z+=rand()*2-1;}
+    return {animals,rand,elapsed:0,life:Life.create()};
   }
   function choosePath(world,a){
     // Longer journeys through connected clear space; feet never pass through buildings.
@@ -22,7 +24,7 @@
     a.wait=.5;
   }
   function update(world,dt,player){
-    dt=F.clamp(dt,0,.05);world.elapsed+=dt;
+    dt=F.clamp(dt,0,.05);world.elapsed+=dt;Life.update(world.life,dt,player);
     for(const a of world.animals){
       const d=Math.hypot(a.x-player.x,a.z-player.z,Math.max(0,(player.y||1.45)-1.45));a.wait-=dt;
       if(d<3.8){const dx=a.x-player.x,dz=a.z-player.z,l=Math.hypot(dx,dz)||1,goal={x:a.x+dx/l*5,z:a.z+dz/l*5};if(F.clearLine(a,goal)){a.goal=goal;a.path=[];a.wait=1.5;}}
@@ -46,6 +48,6 @@
     for(const side of [-1,1])for(const end of [-1,1]){if(bird&&end<0)continue;const lift=Math.max(0,Math.sin(a.phase+(side*end>0?0:Math.PI)))*Math.min(.2,a.pace*.12);const stride=Math.sin(a.phase+(side*end>0?0:Math.PI))*Math.min(.19,a.pace*.15);box(side*.2,.25+lift,end*.3+stride,.12,.45,.13,bird?'#bb904e':deer?'#5b5541':coat);}
     if(deer){for(const side of [-1,1]){box(side*.14,1.5-graze,.48,.07,.65,.08,'#706045');box(side*.23,1.65-graze,.48,.25,.07,.07,'#706045');}}
 
-  }F.city.addTraffic(b,world.elapsed);Life.add(b,world.elapsed);return b.finish();}
+  }F.city.addTraffic(b,world.elapsed,world.life.vehicles.map((_,i)=>Life.vehiclePose(world.life,i)));Life.add(b,world.elapsed,world.life);return b.finish();}
   const api={create,update,mesh};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldWildlife=api;
 })(typeof window!=='undefined'?window:globalThis);

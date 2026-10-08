@@ -48,7 +48,38 @@
   // Chimney smoke from the makers' warehouse.
   function addSmoke(b,time){const w=City.landmarks.find(p=>p.id==='projects');for(let i=0;i<6;i++){const k=(time*.22+i/6)%1,size=(.45+k*1.25)*(1-Math.max(0,(k-.72)/.28));if(size<=.02)continue;b.box(w.x+3.7+k*1.8+Math.sin(time+i)*.2,12.9+k*5.5,w.z-3-k*.6,size,size,size,'#d8d4c8',k*1.4);}}
 
-  function add(builder,time){for(let i=0;i<PEOPLE;i++)addPerson(builder,i,time);for(let i=0;i<boats.length;i++)addBoat(builder,i,time);for(let i=0;i<BIRDS;i++)addBird(builder,i,time);addSmoke(builder,time);}
-  const api={PEOPLE,BIRDS,boats,blocks,PAVEMENT,personPose,boatPose,birdPose,add};
+  // Live state: each vehicle and person keeps its own progress, so they can stop for the visitor and for each other.
+  function create(){return {vehicles:Array.from({length:City.TRAFFIC},(_,i)=>{const speed=City.circuits[i%City.circuits.length][2];return {d:i*17,v:speed,speed};}),people:Array.from({length:PEOPLE},()=>({t:0,rate:1}))};}
+  const vehiclePose=(state,i)=>City.trafficPoseAt(i,state.vehicles[i].d);
+  const livePerson=(state,i)=>personPose(i,state.people[i].t);
+  const ahead=(p,yaw,q)=>{const dx=q.x-p.x,dz=q.z-p.z,s=Math.sin(yaw),c=Math.cos(yaw);return {along:dx*s+dz*c,side:Math.abs(dx*c-dz*s)};};
+  const LOOP=City.loopLength(10.7,10.7,2.1);
+  function update(state,dt,visitor){
+    const walking=visitor&&(visitor.y===undefined||visitor.y<4),ease=k=>1-Math.exp(-k*dt);
+    const cars=state.vehicles.map((_,i)=>vehiclePose(state,i));
+    state.vehicles.forEach((v,i)=>{
+      const p=cars[i],half=City.vehicleHalf(i);let blocked=false;
+      // Brake for a visitor in front of the bumper, and keep a gap behind the vehicle ahead on the same circuit.
+      if(walking){const q=ahead(p,p.yaw,visitor);if(q.along>half.l-.3&&q.along<half.l+3.2&&q.side<half.w+.9)blocked=true;}
+      for(let j=0;j<cars.length&&!blocked;j++){if(j===i||j%City.circuits.length!==i%City.circuits.length)continue;const gap=((state.vehicles[j].d-v.d)%LOOP+LOOP)%LOOP;if(gap<half.l+City.vehicleHalf(j).l+2.2)blocked=true;}
+      v.waiting=blocked;v.v+=((blocked?0:v.speed)-v.v)*ease(blocked?7:2.2);if(v.v<.02&&blocked)v.v=0;v.d+=v.v*dt;
+    });
+    const people=state.people.map((_,i)=>livePerson(state,i));
+    state.people.forEach((person,i)=>{
+      const p=people[i];let blocked=false;
+      if(walking){const q=ahead(p,p.yaw,visitor);if(q.along>0&&q.along<1.15&&q.side<.6)blocked=true;}
+      for(let j=0;j<people.length&&!blocked;j++){if(j===i||people[j].block!==p.block)continue;const q=ahead(p,p.yaw,people[j]);if(q.along>0&&q.along<.95&&q.side<.45)blocked=true;}
+      person.waiting=blocked;person.rate+=((blocked?0:1)-person.rate)*ease(blocked?9:3);if(person.rate<.02&&blocked)person.rate=0;person.t+=person.rate*dt;
+    });
+  }
+  // Is a visitor of radius r at (x,z) overlapping a vehicle, person, or animal?
+  function solid(state,animals,x,z,r){
+    for(let i=0;i<state.vehicles.length;i++){const p=vehiclePose(state,i),h=City.vehicleHalf(i),q=ahead(p,p.yaw,{x,z});if(Math.abs(q.along)<h.l+r&&q.side<h.w+r)return true;}
+    for(let i=0;i<PEOPLE;i++){const p=livePerson(state,i);if(Math.hypot(p.x-x,p.z-z)<.28+r)return true;}
+    for(const a of animals||[]){const size={deer:.6,fox:.38,rabbit:.24,chicken:.22}[a.kind]||.3;if(Math.hypot(a.x-x,a.z-z)<size+r)return true;}
+    return false;
+  }
+  function add(builder,time,state){for(let i=0;i<PEOPLE;i++)addPerson(builder,i,state?state.people[i].t:time);for(let i=0;i<boats.length;i++)addBoat(builder,i,time);for(let i=0;i<BIRDS;i++)addBird(builder,i,time);addSmoke(builder,time);}
+  const api={PEOPLE,BIRDS,boats,blocks,PAVEMENT,personPose,boatPose,birdPose,add,create,update,solid,vehiclePose,livePerson};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldLife=api;
 })(typeof window!=='undefined'?window:globalThis);

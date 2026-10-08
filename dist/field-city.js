@@ -17,6 +17,18 @@
   const streets=[-48,-24,0,24,48];
   const infill=[{x:36,z:-36,height:16,color:'#ad9c8e'},{x:36,z:-12,height:21,color:'#839c9e'},{x:-12,z:-12,height:19,color:'#b4a588'},{x:12,z:36,height:11,color:'#bca58b'}];
   const blockers=[...landmarks,...infill];
+  // Solid street furniture, as axis-aligned footprints (half extents). These mirror the props drawn in mesh().
+  const bridges=[-24,24],props=[];
+  const prop=(x,z,hx,hz,kind)=>props.push({x,z,hx,hz,kind});
+  for(const p of landmarks){for(const dx of [-7.8,7.8])prop(p.x+dx,p.z-6,.9,.9,'tree');prop(p.x+7.7,p.z+7.7,.19,.19,'lamp');prop(p.x-3,p.z+7,.1,.1,'sign');}
+  for(const p of infill){prop(p.x-7.5,p.z-6,.9,.9,'tree');prop(p.x+7.5,p.z+7.5,.19,.19,'lamp');}
+  for(const x of [-19,-5])for(const z of [5,19])prop(x,z,.9,.9,'tree');
+  for(const x of [-16,-8])prop(x,11.85,1.25,.4,'bench');
+  for(let z=-48;z<=48;z+=12){prop(-57,z,.9,.9,'tree');if(Math.abs(z)!==24)prop(51,z,.19,.19,'lamp');}
+  // The canal can only be crossed on a bridge; the deck is reached by steps and stands 2.1 above the street.
+  const onBridge=z=>bridges.some(b=>Math.abs(z-b)<1.6);
+  const inWater=(x,z)=>x>52.7&&x<61.3&&!onBridge(z);
+  function groundAt(x,z){if(!bridges.some(b=>Math.abs(z-b)<2))return 0;const d=Math.abs(x-57);return d<=5.2?2.1:d>=7.6?0:2.1*(7.6-d)/2.4;}
   function mesh(F){
     const {box,cone,roof,finish}=F.builder(),rand=F.random(29417),lights=F.random(5113),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
     // A continuous city surface with clearly separated roads, curbs, and blocks.
@@ -110,9 +122,11 @@
   // Vehicles share a speed per circuit, so cars on the same block never overtake each other.
   const TRAFFIC=16,circuits=[[-12,-12,3.2],[12,12,4.6],[-36,12,3.8],[12,-36,4.2],[36,36,4],[36,-12,4.4],[-12,36,3.6],[-36,-36,3.9]];
   const vehicleKind=i=>i%8===5?'bus':i%4===0?'van':'car';
-  function trafficPose(index,time){const [cx,cz,speed]=circuits[index%circuits.length];return loopPose(cx,cz,10.7,10.7,2.1,time*speed+index*17);}
-  function addTraffic(builder,time){
-    for(let i=0;i<TRAFFIC;i++){const p=trafficPose(i,time),s=Math.sin(p.yaw),c=Math.cos(p.yaw),kind=vehicleKind(i),van=kind==='van',coat=['#d3ad68','#a06c50','#759d9c','#e0d3b2','#8895aa'][i%5];
+  const vehicleHalf=i=>{const k=vehicleKind(i);return k==='bus'?{w:.72,l:2.25}:k==='van'?{w:.65,l:1.35}:{w:.65,l:1.15};};
+  function trafficPoseAt(index,distance){const [cx,cz]=circuits[index%circuits.length];return loopPose(cx,cz,10.7,10.7,2.1,distance);}
+  function trafficPose(index,time){return trafficPoseAt(index,time*circuits[index%circuits.length][2]+index*17);}
+  function addTraffic(builder,time,poses){
+    for(let i=0;i<TRAFFIC;i++){const p=poses?poses[i]:trafficPose(i,time),s=Math.sin(p.yaw),c=Math.cos(p.yaw),kind=vehicleKind(i),van=kind==='van',coat=['#d3ad68','#a06c50','#759d9c','#e0d3b2','#8895aa'][i%5];
       function part(x,y,z,w,h,d,color,glow=0){builder.box(p.x+x*c+z*s,y,p.z-x*s+z*c,w,h,d,color,p.yaw,glow);}
       if(kind==='bus'){part(0,1.05,0,1.4,1.55,4.4,'#c9a24f');part(0,1.25,0,1.43,.5,3.9,'#4a6a6e',.7);part(0,1.86,0,1.3,.08,4.2,'#e7dcc0');for(const side of [-1,1])for(const end of [-1.4,1.4])part(side*.66,.32,end,.2,.44,.44,'#3d4c48');for(const side of [-1,1]){part(side*.45,.6,2.21,.26,.16,.04,'#ead6a1',1);part(side*.5,.6,-2.21,.22,.14,.04,'#b5463a',.8);}part(0,1.62,2.21,1,.22,.03,'#ead6a1',.9);continue;}
       part(0,.49,0,1.25,.55,van?2.6:2.2,coat);part(0,.94,van?-.15:0,1.1,van?1:.6,van?1.8:1.25,coat);part(0,1,van?.79:.65,.93,.38,.045,'#47676b');part(0,1,van?-1.06:-.65,.93,.38,.045,'#47676b');
@@ -120,5 +134,5 @@
       for(const side of [-1,1]){part(side*.4,.56,van?1.32:1.12,.25,.18,.04,'#ead6a1',1);part(side*.45,.56,van?-1.32:-1.12,.2,.14,.04,'#b5463a',.8);}
     }
   }
-  const api={landmarks,streets,infill,blockers,mesh,loopPose,loopLength,TRAFFIC,circuits,vehicleKind,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
+  const api={vehicleHalf,landmarks,streets,infill,blockers,props,bridges,onBridge,inWater,groundAt,trafficPoseAt,mesh,loopPose,loopLength,TRAFFIC,circuits,vehicleKind,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
 })(typeof window!=='undefined'?window:globalThis);

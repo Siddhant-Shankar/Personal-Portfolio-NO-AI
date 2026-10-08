@@ -11,8 +11,8 @@
   // Every clickable mover, posed at the current simulation time.
   function pose(target){
     const t=game.wildlife.elapsed;
-    if(target.type==='vehicle'){const p=City.trafficPose(target.i,t);return {...p,y:1};}
-    if(target.type==='person'){const p=Life.personPose(target.i,t);return {...p,y:1.3};}
+    if(target.type==='vehicle'){const p=Life.vehiclePose(game.wildlife.life,target.i);return {...p,y:1};}
+    if(target.type==='person'){const p=Life.livePerson(game.wildlife.life,target.i);return {...p,y:1.3};}
     if(target.type==='boat'){const p=Life.boatPose(target.i,t);return {...p,y:.7};}
     const a=game.wildlife.animals[target.i];return {x:a.x,z:a.z,yaw:a.yaw,y:.6};
   }
@@ -20,9 +20,9 @@
   function describe(target,p){
     const place=nearestPlace(p),night=game.sky.night>.5;
     if(target.type==='vehicle'){const kind=City.vehicleKind(target.i),speed=City.circuits[target.i%City.circuits.length][2];
-      return {icon:kind==='bus'?'▣':kind==='van'?'▤':'▭',title:kind==='bus'?`City bus · Route ${target.i+1}`:kind==='van'?'Delivery van':'Car',lines:[kind==='bus'?`Next stop: ${place.name}`:kind==='van'?`Parcels for ${place.name.replace(/^The /,'the ')}`:`Passing ${place.name.replace(/^The /,'the ')}`,`Heading ${heading(p.yaw)} · ${Math.round(speed*7)} km/h`,night?'Headlights on':'Daytime loop']};}
+      return {icon:kind==='bus'?'▣':kind==='van'?'▤':'▭',title:kind==='bus'?`City bus · Route ${target.i+1}`:kind==='van'?'Delivery van':'Car',lines:[kind==='bus'?`Next stop: ${place.name}`:kind==='van'?`Parcels for ${place.name.replace(/^The /,'the ')}`:`Passing ${place.name.replace(/^The /,'the ')}`,game.wildlife.life.vehicles[target.i].waiting?'Stopped · waiting to move on':`Heading ${heading(p.yaw)} · ${Math.round(speed*7)} km/h`,night?'Headlights on':'Daytime loop']};}
     if(target.type==='person'){const list=night?errands.night:errands.day;
-      return {icon:'☺',title:names[target.i%names.length],lines:[list[(target.i*3)%list.length],`Near ${place.name.replace(/^The /,'the ')}`,`Walking ${heading(p.yaw)}`]};}
+      return {icon:'☺',title:names[target.i%names.length],lines:[game.wildlife.life.people[target.i].waiting?'Waiting for you to step aside':list[(target.i*3)%list.length],`Near ${place.name.replace(/^The /,'the ')}`,`Walking ${heading(p.yaw)}`]};}
     if(target.type==='boat'){const boat=Life.boats[target.i];
       return {icon:'⛵',title:boat.name,lines:[`Heading ${heading(p.yaw)} along the canal`,boat.kind==='barge'?'Carrying supplies to the yard':boat.kind==='ferry'?'Stops at both bridges':'Out for an afternoon row',`${(boat.speed*1.9).toFixed(1)} knots`]};}
     const a=game.wildlife.animals[target.i],state=a.pace>2?'Startled, and moving away':a.goal?'Roaming the park':'Resting';

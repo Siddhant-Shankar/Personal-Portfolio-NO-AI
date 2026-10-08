@@ -7,23 +7,38 @@
   const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
   function forward(yaw){return {x:Math.sin(yaw),z:-Math.cos(yaw)};}
   function nearest(position){return landmarks.map(p=>({place:p,distance:distance(position,p.arrival)})).sort((a,b)=>a.distance-b.distance)[0];}
-  function canWalk(x,z){return Math.abs(x)<62&&Math.abs(z)<62&&!blockers.some(p=>Math.abs(x-p.x)<5.6&&Math.abs(z-p.z)<5.5);}
+  // Feet collide with buildings, street furniture, and the canal. BODY is the visitor's radius around a prop.
+  const BODY=.3,props=City.props;
+  function canWalk(x,z){return Math.abs(x)<62&&Math.abs(z)<62&&!blockers.some(p=>Math.abs(x-p.x)<5.6&&Math.abs(z-p.z)<5.5)&&!City.inWater(x,z)&&!props.some(p=>Math.abs(x-p.x)<p.hx+BODY&&Math.abs(z-p.z)<p.hz+BODY);}
   function canFly(x,y,z){return !blockers.some(p=>Math.abs(x-p.x)<6&&Math.abs(z-p.z)<6&&y<(p.height||15)+2);}
-  function slide(position,dx,dz){let x=position.x,z=position.z;if(canWalk(x+dx,z))x+=dx;if(canWalk(x,z+dz))z+=dz;return {x,z};}
+  // Optional `blocked` adds moving obstacles (cars, people, animals) on top of the static city.
+  function slide(position,dx,dz,blocked){const ok=(x,z)=>canWalk(x,z)&&!(blocked&&blocked(x,z));let x=position.x,z=position.z;if(ok(x+dx,z))x+=dx;if(ok(x,z+dz))z+=dz;return {x,z};}
   function clearLine(a,b){const length=distance(a,b),steps=Math.ceil(length/.2);for(let i=0;i<=steps;i++){const t=steps?i/steps:0;if(!canWalk(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t))return false;}return true;}
+  // Route planning: A* over a half-metre walkability grid, then string-pulled into a few straight legs.
+  const CELL=.5,N=Math.round(124/CELL);let grid=null;
+  const centre=k=>-62+(k+.5)*CELL,cellIndex=v=>Math.max(0,Math.min(N-1,Math.floor((v+62)/CELL)));
+  function walkGrid(){if(grid)return grid;grid=new Uint8Array(N*N);for(let j=0;j<N;j++)for(let i=0;i<N;i++){const x=centre(i),z=centre(j);grid[j*N+i]=canWalk(x,z)&&canWalk(x-.26,z-.26)&&canWalk(x+.26,z-.26)&&canWalk(x-.26,z+.26)&&canWalk(x+.26,z+.26)?1:0;}return grid;}
+  function snap(p){const g=walkGrid(),ci=cellIndex(p.x),cj=cellIndex(p.z);let best=-1,bestD=Infinity;for(let r=0;r<=4&&best<0;r++)for(let j=cj-r;j<=cj+r;j++)for(let i=ci-r;i<=ci+r;i++){if(i<0||j<0||i>=N||j>=N||!g[j*N+i])continue;const q={x:centre(i),z:centre(j)},d=distance(p,q);if(d<bestD&&clearLine(p,q)){best=j*N+i;bestD=d;}}return best;}
+  function astar(start,goal){
+    const g=walkGrid(),cost=new Float32Array(N*N).fill(Infinity),from=new Int32Array(N*N).fill(-1),closed=new Uint8Array(N*N),heap=[],gx=goal%N,gz=Math.floor(goal/N);
+    const h=k=>{const dx=Math.abs(k%N-gx),dz=Math.abs(Math.floor(k/N)-gz);return Math.max(dx,dz)+.4142*Math.min(dx,dz);};
+    const push=(k,f)=>{heap.push([f,k]);let n=heap.length-1;while(n>0){const p=(n-1)>>1;if(heap[p][0]<=heap[n][0])break;[heap[p],heap[n]]=[heap[n],heap[p]];n=p;}};
+    const pop=()=>{const top=heap[0],last=heap.pop();if(heap.length){heap[0]=last;let n=0;for(;;){const l=2*n+1,r=l+1;let m=n;if(l<heap.length&&heap[l][0]<heap[m][0])m=l;if(r<heap.length&&heap[r][0]<heap[m][0])m=r;if(m===n)break;[heap[m],heap[n]]=[heap[n],heap[m]];n=m;}}return top;};
+    cost[start]=0;push(start,h(start));
+    while(heap.length){const [,k]=pop();if(closed[k])continue;if(k===goal)break;closed[k]=1;const x=k%N,z=Math.floor(k/N);
+      for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dz)continue;const nx=x+dx,nz=z+dz;if(nx<0||nz<0||nx>=N||nz>=N)continue;const n=nz*N+nx;if(!g[n]||closed[n])continue;if(dx&&dz&&(!g[z*N+nx]||!g[nz*N+x]))continue;const c=cost[k]+(dx&&dz?1.4142:1);if(c<cost[n]){cost[n]=c;from[n]=k;push(n,c+h(n));}}
+    }
+    if(start!==goal&&from[goal]<0)return null;const cells=[];for(let k=goal;k!==start;k=from[k])cells.unshift({x:centre(k%N),z:centre(Math.floor(k/N))});return cells;
+  }
   function route(position,destination){
     const end=destination.arrival||destination;
     if(!canWalk(position.x,position.z)||!canWalk(end.x,end.z))return [];
-    if(clearLine(position,end))return [{...end}];
-    // Visibility graph around expanded building footprints. Every segment is walkable.
-    const nodes=[{x:position.x,z:position.z},{...end}];
-    blockers.forEach(p=>{for(const x of [-6.4,6.4])for(const z of [-6.3,6.3]){const q={x:p.x+x,z:p.z+z};if(canWalk(q.x,q.z))nodes.push(q);}});
-    const cost=nodes.map(()=>Infinity),previous=[],done=new Set();cost[0]=0;
-    while(done.size<nodes.length){let u=-1;for(let i=0;i<nodes.length;i++)if(!done.has(i)&&(u<0||cost[i]<cost[u]))u=i;
-      if(u<0||!Number.isFinite(cost[u]))return [];if(u===1)break;done.add(u);
-      for(let v=0;v<nodes.length;v++){if(done.has(v)||!clearLine(nodes[u],nodes[v]))continue;const candidate=cost[u]+distance(nodes[u],nodes[v]);if(candidate<cost[v]){cost[v]=candidate;previous[v]=u;}}
-    }
-    const points=[];for(let i=1;i!==0;i=previous[i]){if(i===undefined)return [];points.unshift(nodes[i]);}return points;
+    if(clearLine(position,end))return [{x:end.x,z:end.z}];
+    const s=snap(position),e=snap(end);if(s<0||e<0)return [];
+    const cells=astar(s,e);if(!cells)return [];
+    const points=[{x:centre(s%N),z:centre(Math.floor(s/N))},...cells,{x:end.x,z:end.z}],legs=[];let anchor={x:position.x,z:position.z},i=0;
+    while(i<points.length){let best=i;for(let k=i+1;k<points.length&&clearLine(anchor,points[k]);k++)best=k;anchor=points[best];legs.push(anchor);i=best+1;}
+    return legs;
   }
   function perspective(fov,aspect,near,far){const f=1/Math.tan(fov/2),nf=1/(near-far);return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0]);}
   function view(x,y,z,yaw,pitch){const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);const right=[cy,0,sy],up=[-sy*sp,cp,cy*sp],back=[-sy*cp,-sp,cy*cp];return new Float32Array([right[0],up[0],back[0],0,right[1],up[1],back[1],0,right[2],up[2],back[2],0,-(right[0]*x+right[2]*z),-(up[0]*x+up[1]*y+up[2]*z),-(back[0]*x+back[1]*y+back[2]*z),1]);}
@@ -46,6 +61,6 @@
     return {box,triangle,cone,roof,finish:()=>new Float32Array(data)};
   }
   function mesh(){return City.mesh(api);}
-  const api={STRIDE,city:City,landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,canFly,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
+  const api={STRIDE,BODY,groundAt:City.groundAt,walkGrid,city:City,landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,canFly,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCore=api;
 })(typeof window!=='undefined'?window:globalThis);

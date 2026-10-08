@@ -23,6 +23,9 @@
   function skipHour(){clock.hours=S.wrap(clock.hours+1);applySky();dirty=true;}
   $('clock-run').onclick=()=>{clock.running=!clock.running;applySky();};$('clock-skip').onclick=skipHour;applySky();
   for(const place of F.landmarks){const button=document.createElement('button');button.className='field-label';button.innerHTML=`<i style="--marker:${place.color}"></i><span>${api.esc(place.company)}</span>`;button.setAttribute('aria-label',`Explore ${place.company}`);button.onclick=()=>window.FieldNavigation?.select(place);$('landmark-labels').append(button);labels.set(place.id,button);}
+  // Cars, people, and animals are solid. If one has already reached the visitor, let them step away freely.
+  let groundY=0;
+  function movers(ignore){if(ignore)return null;const solid=(x,z)=>FieldLife.solid(wildlife.life,wildlife.animals,x,z,.35);return solid(player.x,player.z)?null:solid;}
   function pause(){return !!document.querySelector('dialog[open]');}
   function enter(){entered=true;document.body.classList.add('field-entered');$('field-intro').inert=true;canvas.focus({preventScroll:true});dirty=true;}
   function unlock(){if(document.pointerLockElement===canvas)document.exitPointerLock();}
@@ -94,14 +97,14 @@
     const dt=Math.min(.04,(time-(last||time))/1000);last=time;let moving=false;
     if(!pause()&&!camera.transition){
       let forward=(keys.has('w')||keys.has('arrowup')?1:0)-(keys.has('s')||keys.has('arrowdown')?1:0),side=(keys.has('d')?1:0)-(keys.has('a')?1:0);
-      if(camera.mode==='walk'&&journey){const next=journey.points[0],distance=F.distance(player,next);if(distance<.18){journey.points.shift();if(!journey.points.length){targetYaw=Math.atan2(journey.place.x-player.x,player.z-journey.place.z);journey=null;vx=vz=0;}}else{const angle=Math.atan2(next.x-player.x,player.z-next.z);targetYaw=player.yaw+Math.atan2(Math.sin(angle-player.yaw),Math.cos(angle-player.yaw));const step=Math.min(distance,dt*5);const moved=F.slide(player,(next.x-player.x)/distance*step,(next.z-player.z)/distance*step);player.x=moved.x;player.z=moved.z;dirty=true;moving=true;}forward=0;vx=vz=0;}
+      if(camera.mode==='walk'&&journey){const next=journey.points[0],distance=F.distance(player,next);if(distance<.18){journey.points.shift();if(!journey.points.length){targetYaw=Math.atan2(journey.place.x-player.x,player.z-journey.place.z);journey=null;vx=vz=0;}}else{const angle=Math.atan2(next.x-player.x,player.z-next.z);targetYaw=player.yaw+Math.atan2(Math.sin(angle-player.yaw),Math.cos(angle-player.yaw));const step=Math.min(distance,dt*5),blocked=movers(journey.stuck>1.4);const moved=F.slide(player,(next.x-player.x)/distance*step,(next.z-player.z)/distance*step,blocked);journey.stuck=F.distance(moved,player)<step*.3?journey.stuck+dt:0;player.x=moved.x;player.z=moved.z;dirty=true;moving=true;}forward=0;vx=vz=0;}
       targetYaw+=((keys.has('arrowright')?1:0)-(keys.has('arrowleft')?1:0))*dt*1.4;
       const active=camera.mode==='world'?camera.flight:player;const yawDelta=targetYaw-active.yaw,pitchDelta=targetPitch-active.pitch;active.yaw+=yawDelta*(reduced.matches?1:1-Math.exp(-18*dt));active.pitch+=pitchDelta*(reduced.matches?1:1-Math.exp(-18*dt));
       if(camera.mode==='world'){const up=(keys.has(' ')||keys.has('pageup')?1:0)-(keys.has('c')||keys.has('pagedown')?1:0);moving=C.fly(camera,{forward,side,up,fast:keys.has('shift')},dt);}
       else{
       const f=F.forward(player.yaw),length=Math.hypot(forward,side)||1,speed=keys.has('shift')?8:4.5,tx=(f.x*forward+Math.cos(player.yaw)*side)/length*speed,tz=(f.z*forward+Math.sin(player.yaw)*side)/length*speed;
-      const a=1-Math.exp(-12*dt);vx+=(tx-vx)*a;vz+=(tz-vz)*a;const next=F.slide(player,vx*dt,vz*dt);moving=moving||Math.hypot(next.x-player.x,next.z-player.z)>.00001;player.x=next.x;player.z=next.z;
-      if(moving)walkTime+=dt;player.y=1.45+(moving&&!reduced.matches?Math.sin(walkTime*9)*.012:0);}
+      const a=1-Math.exp(-12*dt);vx+=(tx-vx)*a;vz+=(tz-vz)*a;const next=F.slide(player,vx*dt,vz*dt,movers());if(next.x===player.x&&Math.abs(vx)>.5)vx*=.5;if(next.z===player.z&&Math.abs(vz)>.5)vz*=.5;moving=moving||Math.hypot(next.x-player.x,next.z-player.z)>.00001;player.x=next.x;player.z=next.z;
+      if(moving)walkTime+=dt;groundY+=(F.groundAt(player.x,player.z)-groundY)*(1-Math.exp(-10*dt));player.y=1.45+groundY+(moving&&!reduced.matches?Math.sin(walkTime*9)*.012:0);}
       dirty=dirty||moving||Math.abs(yawDelta)>.0001||Math.abs(pitchDelta)>.0001;
     }
     if(camera.transition&&!pause())dirty=true;
@@ -117,5 +120,5 @@
   document.addEventListener('visibilitychange',()=>{stop();last=0;if(!document.hidden){cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);}});
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();cancelAnimationFrame(frame);$('field-fallback').hidden=false;});
   canvas.addEventListener('webglcontextrestored',()=>{try{renderer=new window.FieldRenderer(canvas);$('field-fallback').hidden=true;dirty=true;last=0;frame=requestAnimationFrame(tick);}catch{$('field-fallback').hidden=false;}});
-  window.Field={player,keys,visited,enter,openPlace,setMode,get mode(){return camera.mode;},get eye(){return camera.eye;},get nearest(){return nearest;},get paused(){return pause();},look(yaw,pitch){targetYaw=yaw;targetPitch=pitch;dirty=true;},invalidate(){dirty=true;},travel(place){if(camera.mode==='world')setMode('walk');enter();unlock();const points=F.route(player,place);journey=points.length?{place,points}:null;vx=vz=0;dirty=true;return !!journey;},get journey(){return journey;},clock,skipHour,camera,wildlife,get sky(){return sky;},stop,get renderer(){return renderer;}};
+  window.Field={player,keys,visited,enter,openPlace,setMode,get mode(){return camera.mode;},get eye(){return camera.eye;},get nearest(){return nearest;},get paused(){return pause();},look(yaw,pitch){targetYaw=yaw;targetPitch=pitch;dirty=true;},invalidate(){dirty=true;},travel(place){if(camera.mode==='world')setMode('walk');enter();unlock();const points=F.route(player,place);journey=points.length?{place,points,stuck:0}:null;vx=vz=0;dirty=true;return !!journey;},get journey(){return journey;},clock,skipHour,camera,wildlife,get sky(){return sky;},stop,get renderer(){return renderer;}};
 })();
