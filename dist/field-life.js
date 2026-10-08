@@ -79,7 +79,8 @@
     for(const a of animals||[]){const size={deer:.6,fox:.38,rabbit:.24,chicken:.22}[a.kind]||.3;if(Math.hypot(a.x-x,a.z-z)<size+r)return true;}
     return false;
   }
-  function add(builder,time,state){for(let i=0;i<PEOPLE;i++)addPerson(builder,i,state?state.people[i].t:time);for(let i=0;i<boats.length;i++)addBoat(builder,i,time);for(let i=0;i<BIRDS;i++)addBird(builder,i,time);addSmoke(builder,time);}
+  const Landmarks=()=>typeof module==='object'&&module.exports?require('./field-landmarks.js'):root.FieldLandmarks;
+  function add(builder,time,state){for(let i=0;i<PEOPLE;i++)addPerson(builder,i,state?state.people[i].t:time);for(let i=0;i<boats.length;i++)addBoat(builder,i,time);for(let i=0;i<BIRDS;i++)addBird(builder,i,time);addSmoke(builder,time);Landmarks()?.addAnimated(builder,time);}
   const api={PEOPLE,BIRDS,boats,blocks,PAVEMENT,personPose,boatPose,birdPose,add,create,update,solid,vehiclePose,livePerson};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldLife=api;
 })(typeof window!=='undefined'?window:globalThis);

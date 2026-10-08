@@ -47,20 +47,25 @@
   function random(seed=7391){return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};}
   const STRIDE=10;
   function color(hex){return hex.replace('#','').match(/../g).map(v=>parseInt(v,16)/255);}
+  // Box faces: outward normal plus four corners, expanded once into the two triangles each face draws.
+  const FACES=[[[1,0,0],[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]]],[[-1,0,0],[[-1,-1,1],[-1,1,1],[-1,1,-1],[-1,-1,-1]]],[[0,1,0],[[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]]],[[0,-1,0],[[-1,-1,1],[-1,-1,-1],[1,-1,-1],[1,-1,1]]],[[0,0,1],[[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,1]]],[[0,0,-1],[[-1,-1,-1],[-1,1,-1],[1,1,-1],[1,-1,-1]]]].map(([n,c])=>({n,v:[0,1,2,0,2,3].map(k=>c[k])}));
+  const colours=new Map();const colourOf=c=>{if(typeof c!=='string')return c;let v=colours.get(c);if(!v){v=color(c);colours.set(c,v);}return v;};
   function builder(){
-    const data=[],rand=random();
-    // Each vertex: position, normal, colour, and glow (how strongly it lights up after dark).
+    // Vertices are written straight into a growing Float32Array: position, normal, colour, glow.
+    let data=new Float32Array(1<<16),n=0;const rand=random();
+    const room=k=>{if(n+k<=data.length)return;let size=data.length*2;while(size<n+k)size*=2;const next=new Float32Array(size);next.set(data.subarray(0,n));data=next;};
     function box(x,y,z,w,h,d,c,angle=0,glow=0){
-      if(typeof c==='string')c=color(c);const cs=Math.cos(angle),sn=Math.sin(angle);
-      const faces=[[[1,0,0],[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]]],[[-1,0,0],[[-1,-1,1],[-1,1,1],[-1,1,-1],[-1,-1,-1]]],[[0,1,0],[[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]]],[[0,-1,0],[[-1,-1,1],[-1,-1,-1],[1,-1,-1],[1,-1,1]]],[[0,0,1],[[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,1]]],[[0,0,-1],[[-1,-1,-1],[-1,1,-1],[1,1,-1],[1,-1,-1]]]];
-      for(const [normal,points] of faces){const shade=.96+rand()*.08;for(const i of [0,1,2,0,2,3]){const p=points[i],px=p[0]*w/2,pz=p[2]*d/2;data.push(x+px*cs+pz*sn,y+p[1]*h/2,z-px*sn+pz*cs,normal[0]*cs+normal[2]*sn,normal[1],-normal[0]*sn+normal[2]*cs,c[0]*shade,c[1]*shade,c[2]*shade,glow);}}
+      c=colourOf(c);const cs=Math.cos(angle),sn=Math.sin(angle),hw=w/2,hh=h/2,hd=d/2;room(360);
+      for(const face of FACES){const shade=.96+rand()*.08,nx=face.n[0],ny=face.n[1],nz=face.n[2],wx=nx*cs+nz*sn,wz=-nx*sn+nz*cs,r=c[0]*shade,g=c[1]*shade,bl=c[2]*shade;
+        for(const p of face.v){const px=p[0]*hw,pz=p[2]*hd;data[n++]=x+px*cs+pz*sn;data[n++]=y+p[1]*hh;data[n++]=z-px*sn+pz*cs;data[n++]=wx;data[n++]=ny;data[n++]=wz;data[n++]=r;data[n++]=g;data[n++]=bl;data[n++]=glow;}}
     }
-    function triangle(a,b,c,tint,glow=0){if(typeof tint==='string')tint=color(tint);const u=b.map((v,i)=>v-a[i]),v=c.map((n,i)=>n-a[i]),n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot(...n)||1;for(const p of [a,b,c])data.push(...p,...n.map(v=>v/l),...tint,glow);}
+    function triangle(a,b,c,tint,glow=0){tint=colourOf(tint);const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;room(30);for(const p of [a,b,c]){data[n++]=p[0];data[n++]=p[1];data[n++]=p[2];data[n++]=nx;data[n++]=ny;data[n++]=nz;data[n++]=tint[0];data[n++]=tint[1];data[n++]=tint[2];data[n++]=glow;}}
     function cone(x,y,z,r,h,tint,sides=5){for(let i=0;i<sides;i++){const a=i/sides*Math.PI*2,b=(i+1)/sides*Math.PI*2;triangle([x+Math.cos(a)*r,y,z+Math.sin(a)*r],[x,y+h,z],[x+Math.cos(b)*r,y,z+Math.sin(b)*r],tint);}}
     function roof(x,y,z,w,h,d,tint){const a=[x-w/2,y,z-d/2],b=[x+w/2,y,z-d/2],c=[x-w/2,y,z+d/2],e=[x+w/2,y,z+d/2],u=[x,y+h,z-d/2],v=[x,y+h,z+d/2];triangle(a,c,v,tint);triangle(a,v,u,tint);triangle(b,u,v,tint);triangle(b,v,e,tint);triangle(a,u,b,'#cbb68d');triangle(c,e,v,'#cbb68d');}
-    return {box,triangle,cone,roof,finish:()=>new Float32Array(data)};
+    return {box,triangle,cone,roof,finish:()=>data.slice(0,n)};
   }
-  function mesh(){return City.mesh(api);}
+  const landmarks3d=()=>typeof module==='object'&&module.exports?require('./field-landmarks.js'):root.FieldLandmarks;
+  function mesh(){const L=landmarks3d();return City.mesh(api,L?b=>L.addStatic(b):null);}
   const api={STRIDE,BODY,groundAt:City.groundAt,walkGrid,city:City,landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,canFly,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCore=api;
 })(typeof window!=='undefined'?window:globalThis);

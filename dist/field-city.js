@@ -25,12 +25,13 @@
   for(const x of [-19,-5])for(const z of [5,19])prop(x,z,.9,.9,'tree');
   for(const x of [-16,-8])prop(x,11.85,1.25,.4,'bench');
   for(let z=-48;z<=48;z+=12){prop(-57,z,.9,.9,'tree');if(Math.abs(z)!==24)prop(51,z,.19,.19,'lamp');}
+  prop(15.6,-29.6,1.3,.35,'easel');
   // The canal can only be crossed on a bridge; the deck is reached by steps and stands 2.1 above the street.
   const onBridge=z=>bridges.some(b=>Math.abs(z-b)<1.6);
   const inWater=(x,z)=>x>52.7&&x<61.3&&!onBridge(z);
   function groundAt(x,z){if(!bridges.some(b=>Math.abs(z-b)<2))return 0;const d=Math.abs(x-57);return d<=5.2?2.1:d>=7.6?0:2.1*(7.6-d)/2.4;}
-  function mesh(F){
-    const {box,cone,roof,finish}=F.builder(),rand=F.random(29417),lights=F.random(5113),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
+  function mesh(F,extra){
+    const b=F.builder(),{box,cone,roof,finish}=b,rand=F.random(29417),lights=F.random(5113),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
     // A continuous city surface with clearly separated roads, curbs, and blocks.
     box(0,-.2,0,194,.4,194,'#8e9a89');box(0,.005,0,110,.045,110,'#a7ac9b');
     for(const x of [-36,-12,12,36])for(const z of [-36,-12,12,36]){
@@ -68,7 +69,7 @@
         box(x,1.1,z+3,3,1.6,3.6,c);box(x,2.3,z+2.2,1.8,1.4,1.8,c);box(x,2.5,z+3.14,1.4,.7,.08,glass);for(const a of [-1,1])for(const b of [-1,1])box(x+a*1.5,.7,z+3+b*1.1,.5,1,.9,ink);
         box(x-4,6,z-3,.3,12,.3,c);box(x,11.8,z-3,9,.35,.35,c);box(x+3.8,9.2,z-3,.045,5,.045,ink);for(let i=-3;i<4;i++)box(x+i,11.3,z-3,.1,1,.1,c,.4);
       }else if(p.kind==='observatory'){
-        tower(x,z,8.3,8.3,15,'#a8b0ae');box(x,16,z,9,.8,9,stone);cone(x,16.4,z,4,4.6,c,10);box(x,19,z+2.1,.9,.9,4.4,ink);box(x,21,z,.12,4,.12,ink);
+        tower(x,z,8.3,8.3,15,'#a8b0ae');box(x,16,z,9,.8,9,stone);cone(x,16.4,z,4,4.6,c,10);box(x,21,z,.12,4,.12,ink);
       }else if(p.kind==='welcome'){
         tower(x,z,9.4,8.5,6.8,'#cabd9c');roof(x,7.1,z,10,1.8,9.2,'#6c8c82');box(x-2.5,10,z,2.8,6,2.8,c);box(x-2.5,13.1,z,3.2,.3,3.2,stone);box(x-2.5,11.6,z+1.44,1.5,1.5,.08,warm,0,1);box(x-2.5,11.7,z+1.5,.08,.55,.03,ink);box(x-2.25,11.7,z+1.5,.55,.08,.03,ink);
       }else if(p.kind==='classroom'){
@@ -105,6 +106,7 @@
       const h=10+rand()*19;tower(n,side*72,7+rand()*2,8,h,side<0?'#a7af9e':'#a0aea5');
       if(Math.abs(n)<66)tower(side*76,n,8,7,8+rand()*17,'#a6b1a4');
     }
+    if(extra)extra(b);
     return finish();
   }
   // Rounded-rectangle circuits shared by cars, pedestrians, and boats. Travel is clockwise seen from above.

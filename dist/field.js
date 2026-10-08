@@ -109,7 +109,7 @@
     }
     if(camera.transition&&!pause())dirty=true;
     C.sample(camera,player,pause()?0:dt);
-    if(!pause()&&!wildlifePaused){FieldWildlife.update(wildlife,dt,camera.eye);wildlifeClock+=dt;if(wildlifeClock>1/65){wildlifeMesh=FieldWildlife.mesh(wildlife);wildlifeClock=0;dirty=true;}}
+    if(!pause()&&!wildlifePaused){FieldWildlife.update(wildlife,dt,camera.eye);wildlifeClock+=dt;if(wildlifeClock>1/30){wildlifeMesh=FieldWildlife.mesh(wildlife);wildlifeClock=0;dirty=true;}}
     if(!pause()&&clock.running){clock.hours=S.wrap(clock.hours+dt*24/S.DAY_SECONDS);skyClock+=dt;if(skyClock>1/24){skyClock=0;applySky();dirty=true;}}
     if(dirty&&renderer){const matrix=renderer.draw(camera.eye,wildlifeMesh,camera.mode==='world',sky);overlay(matrix);window.FieldNavigation?.update();window.FieldInspect?.update(matrix);dirty=false;}
     if(!document.hidden)frame=requestAnimationFrame(tick);

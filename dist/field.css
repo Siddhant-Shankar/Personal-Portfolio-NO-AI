@@ -53,3 +53,4 @@ body.field-mode{--night:#202b29;--ivory:#f6f0dd;--gold:#e3c896;--quiet:#b8c4b8;-
 /* Selected work in the index. */
 .case-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 26px}.case-link{display:flex;flex-direction:column;gap:7px;padding:14px;border:1px solid #c6ccaa40;border-radius:5px;background:#34503f66;color:#f3ead0}.case-link:hover{background:#3d5a48;border-color:#e2c99688}.case-link small{font:9px var(--mono);letter-spacing:.1em;color:#c4cfb5}.case-link strong{font:500 14px/1.35 var(--sans)}.case-link span{font:11px/1.5 var(--mono);color:#e5cf9d}
 @media(max-width:760px){.case-links{grid-template-columns:1fr}}
+#inspect-actions{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}#inspect-actions:empty{display:none}#inspect-actions a,#inspect-actions button{font:600 11px var(--sans);color:#24392f;background:#ecdfbe;border-radius:3px;padding:6px 9px}#inspect-actions a:hover,#inspect-actions button:hover{background:#fff2d2}
