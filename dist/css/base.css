@@ -1,13 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap');
 :root {
   --night: #07191d;
   --ivory: #f0ecd9;
   --gold: #e1c790;
   --quiet: #a1b5ae;
   --line: #a3b9ac33;
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans: 'DM Sans', Arial, sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Young Serif', Georgia, serif;
+  --sans: 'Atkinson Hyperlegible Next', Arial, sans-serif;
+  --mono: 'Atkinson Hyperlegible Mono', monospace;
   color-scheme: dark;
 }
 * {

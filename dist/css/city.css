@@ -1,11 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap');
 body.city-mode {
   --night: #202b29;
   --ivory: #f6f0dd;
   --gold: #e3c896;
   --quiet: #b8c4b8;
-  --sans: 'Manrope', Arial, sans-serif;
-  --mono: 'DM Mono', monospace;
   background: #a0b4a5;
 }
 .city-mode #viewport,

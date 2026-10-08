@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;650;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 :root {
   --paper: #f2f3ef;
   --ink: #19201d;
@@ -6,8 +5,9 @@
   --line: #ced3cc;
   --orange: #ef582f;
   --dark: #18201d;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'DM Sans', Arial, sans-serif;
+  --mono: 'Atkinson Hyperlegible Mono', monospace;
+  --sans: 'Atkinson Hyperlegible Next', Arial, sans-serif;
+  --serif: 'Young Serif', Georgia, serif;
 }
 * {
   box-sizing: border-box;
@@ -85,8 +85,7 @@ footer {
   line-height: 1.2;
 }
 .mark {
-  font-family: Georgia, serif;
-  font-style: italic;
+  font-family: var(--serif);
   background: var(--ink);
   color: var(--paper);
   font-size: 28px;
@@ -162,7 +161,7 @@ h1 {
   position: relative;
 }
 h1 em {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--serif);
   font-weight: 400;
   letter-spacing: -0.055em;
 }
@@ -540,7 +539,7 @@ h1 .title-period {
   gap: 22px;
 }
 .outcome > span {
-  font-family: Georgia, serif;
+  font-family: var(--serif);
   font-size: 70px;
   line-height: 1;
   color: var(--orange);
@@ -568,8 +567,7 @@ h1 .title-period {
   font-size: 19px;
   line-height: 1.5;
   color: var(--ink);
-  font-family: Georgia, serif;
-  font-style: italic;
+  font-family: var(--serif);
 }
 .confidential-note,
 .story-body .confidential-note {
@@ -652,7 +650,7 @@ h1 .title-period {
   margin: 28px 0;
 }
 .about h2 em {
-  font-family: Georgia, serif;
+  font-family: var(--serif);
   font-weight: 400;
 }
 .about-copy {
@@ -1379,8 +1377,7 @@ dialog h3 {
   padding: 0 49px 32px 195px;
 }
 .career-detail h3 {
-  font-family: Georgia, serif;
-  font-style: italic;
+  font-family: var(--serif);
   font-size: 24px;
   line-height: 1.35;
   font-weight: 400;
@@ -1432,7 +1429,7 @@ dialog h3 {
   letter-spacing: 0.02em;
 }
 .beyond h3 {
-  font-family: Georgia, serif;
+  font-family: var(--serif);
   font-weight: 400;
   font-size: 28px;
   line-height: 1.3;
