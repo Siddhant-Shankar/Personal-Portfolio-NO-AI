@@ -50,19 +50,25 @@
   // Box faces: outward normal plus four corners, expanded once into the two triangles each face draws.
   const FACES=[[[1,0,0],[[1,-1,-1],[1,1,-1],[1,1,1],[1,-1,1]]],[[-1,0,0],[[-1,-1,1],[-1,1,1],[-1,1,-1],[-1,-1,-1]]],[[0,1,0],[[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]]],[[0,-1,0],[[-1,-1,1],[-1,-1,-1],[1,-1,-1],[1,-1,1]]],[[0,0,1],[[1,-1,1],[1,1,1],[-1,1,1],[-1,-1,1]]],[[0,0,-1],[[-1,-1,-1],[-1,1,-1],[1,1,-1],[1,-1,-1]]]].map(([n,c])=>({n,v:[0,1,2,0,2,3].map(k=>c[k])}));
   const colours=new Map();const colourOf=c=>{if(typeof c!=='string')return c;let v=colours.get(c);if(!v){v=color(c);colours.set(c,v);}return v;};
-  function builder(){
+  // Box edges as corner-index pairs, for the hairline outlines.
+  const CORNERS=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],EDGES=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  function builder(options={}){
     // Vertices are written straight into a growing Float32Array: position, normal, colour, glow.
-    let data=new Float32Array(1<<16),n=0;const rand=random();
-    const room=k=>{if(n+k<=data.length)return;let size=data.length*2;while(size<n+k)size*=2;const next=new Float32Array(size);next.set(data.subarray(0,n));data=next;};
+    let data=new Float32Array(1<<16),n=0,lines=options.edges?new Float32Array(1<<15):null,m=0;const rand=random();
+    const grow=(a,used,k)=>{let size=a.length*2;while(size<used+k)size*=2;const next=new Float32Array(size);next.set(a.subarray(0,used));return next;};
+    const room=k=>{if(n+k>data.length)data=grow(data,n,k);};
+    // Outline only boxes big enough to read as architecture; windows, rails, and trim stay clean.
+    function edge(p,q){if(!lines)return;if(m+6>lines.length)lines=grow(lines,m,6);lines.set(p,m);lines.set(q,m+3);m+=6;}
+    function outline(x,y,z,hw,hh,hd,cs,sn){if(m+72>lines.length)lines=grow(lines,m,72);const pts=CORNERS.map(([a,b,c])=>[x+a*hw*cs+c*hd*sn,y+b*hh,z-a*hw*sn+c*hd*cs]);for(const [i,j] of EDGES){lines.set(pts[i],m);lines.set(pts[j],m+3);m+=6;}}
     function box(x,y,z,w,h,d,c,angle=0,glow=0){
-      c=colourOf(c);const cs=Math.cos(angle),sn=Math.sin(angle),hw=w/2,hh=h/2,hd=d/2;room(360);
+      c=colourOf(c);const cs=Math.cos(angle),sn=Math.sin(angle),hw=w/2,hh=h/2,hd=d/2;room(360);if(lines&&Math.max(w,h,d)>=1.7&&Math.min(w,h,d)>=.18)outline(x,y,z,hw,hh,hd,cs,sn);
       for(const face of FACES){const shade=.96+rand()*.08,nx=face.n[0],ny=face.n[1],nz=face.n[2],wx=nx*cs+nz*sn,wz=-nx*sn+nz*cs,r=c[0]*shade,g=c[1]*shade,bl=c[2]*shade;
         for(const p of face.v){const px=p[0]*hw,pz=p[2]*hd;data[n++]=x+px*cs+pz*sn;data[n++]=y+p[1]*hh;data[n++]=z-px*sn+pz*cs;data[n++]=wx;data[n++]=ny;data[n++]=wz;data[n++]=r;data[n++]=g;data[n++]=bl;data[n++]=glow;}}
     }
     function triangle(a,b,c,tint,glow=0){tint=colourOf(tint);const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;room(30);for(const p of [a,b,c]){data[n++]=p[0];data[n++]=p[1];data[n++]=p[2];data[n++]=nx;data[n++]=ny;data[n++]=nz;data[n++]=tint[0];data[n++]=tint[1];data[n++]=tint[2];data[n++]=glow;}}
-    function cone(x,y,z,r,h,tint,sides=5){for(let i=0;i<sides;i++){const a=i/sides*Math.PI*2,b=(i+1)/sides*Math.PI*2;triangle([x+Math.cos(a)*r,y,z+Math.sin(a)*r],[x,y+h,z],[x+Math.cos(b)*r,y,z+Math.sin(b)*r],tint);}}
-    function roof(x,y,z,w,h,d,tint){const a=[x-w/2,y,z-d/2],b=[x+w/2,y,z-d/2],c=[x-w/2,y,z+d/2],e=[x+w/2,y,z+d/2],u=[x,y+h,z-d/2],v=[x,y+h,z+d/2];triangle(a,c,v,tint);triangle(a,v,u,tint);triangle(b,u,v,tint);triangle(b,v,e,tint);triangle(a,u,b,'#cbb68d');triangle(c,e,v,'#cbb68d');}
-    return {box,triangle,cone,roof,finish:()=>data.slice(0,n)};
+    function cone(x,y,z,r,h,tint,sides=5){for(let i=0;i<sides;i++){const a=i/sides*Math.PI*2,b=(i+1)/sides*Math.PI*2,p=[x+Math.cos(a)*r,y,z+Math.sin(a)*r],q=[x+Math.cos(b)*r,y,z+Math.sin(b)*r];triangle(p,[x,y+h,z],q,tint);if(r>=1.5){edge(p,q);edge(p,[x,y+h,z]);}}}
+    function roof(x,y,z,w,h,d,tint){const a=[x-w/2,y,z-d/2],b=[x+w/2,y,z-d/2],c=[x-w/2,y,z+d/2],e=[x+w/2,y,z+d/2],u=[x,y+h,z-d/2],v=[x,y+h,z+d/2];triangle(a,c,v,tint);triangle(a,v,u,tint);triangle(b,u,v,tint);triangle(b,v,e,tint);triangle(a,u,b,'#cbb68d');triangle(c,e,v,'#cbb68d');if(Math.max(w,d)>=1.7)for(const [p,q] of [[a,b],[c,e],[a,c],[b,e],[u,v],[a,u],[b,u],[c,v],[e,v]])edge(p,q);}
+    return {box,triangle,cone,roof,finish:()=>{const out=data.slice(0,n);if(lines)Object.defineProperty(out,'edges',{value:lines.slice(0,m),enumerable:false});return out;}};
   }
   const landmarks3d=()=>typeof module==='object'&&module.exports?require('./field-landmarks.js'):root.FieldLandmarks;
   function mesh(){const L=landmarks3d();return City.mesh(api,L?b=>L.addStatic(b):null);}

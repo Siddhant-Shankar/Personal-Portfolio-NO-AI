@@ -1,6 +1,6 @@
 # Siddhant Shankar — The City
 
-An explorable, living city where each building holds a chapter of my work. Eleven landmarks hold eight professional chapters, public projects, research, and an about page. It is built with hand-written WebGL and plain browser JavaScript, with no framework, build step, or downloaded 3D assets.
+An explorable, living city where each building holds a chapter of my work. Eleven landmarks hold eight professional chapters, public projects, research, and an about page. It is drawn with three.js (r160, vendored in `dist/vendor`) and plain browser JavaScript, with no framework, build step, or downloaded 3D assets. All geometry is procedural.
 
 ## First screen
 
@@ -54,7 +54,8 @@ The public repository intentionally excludes `dist/resume.pdf`. To enable local 
 | `dist/career-data.js` | Experience, projects, and research content |
 | `dist/field-city.js` | City layout, landmarks, props, bridges, and traffic circuits |
 | `dist/field-core.js` | Geometry builder, matrices, collision, and A* route planning |
-| `dist/field-renderer.js` | WebGL renderer: sun and moon lighting, glowing windows, haze |
+| `dist/field-renderer.js` | three.js renderer (ES module): sun and moon shadows, hairline outlines, glowing windows, haze, adaptive quality |
+| `dist/vendor/` | three.js r160 (MIT, licence included) |
 | `dist/field-sky.js` | Six-minute day/night cycle |
 | `dist/field-life.js` | Pedestrians, braking traffic, boats, birds, and smoke |
 | `dist/field-wildlife.js` | Park animals, plus assembling the moving-object mesh |

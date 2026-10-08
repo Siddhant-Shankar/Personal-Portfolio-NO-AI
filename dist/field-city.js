@@ -31,7 +31,7 @@
   const inWater=(x,z)=>x>52.7&&x<61.3&&!onBridge(z);
   function groundAt(x,z){if(!bridges.some(b=>Math.abs(z-b)<2))return 0;const d=Math.abs(x-57);return d<=5.2?2.1:d>=7.6?0:2.1*(7.6-d)/2.4;}
   function mesh(F,extra){
-    const b=F.builder(),{box,cone,roof,finish}=b,rand=F.random(29417),lights=F.random(5113),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
+    const b=F.builder({edges:true}),{box,cone,roof,finish}=b,rand=F.random(29417),lights=F.random(5113),ink='#354f50',stone='#c9bea7',paving='#b5b2a0',asphalt='#647876',glass='#7babae',warm='#e9d39e';
     // A continuous city surface with clearly separated roads, curbs, and blocks.
     box(0,-.2,0,194,.4,194,'#8e9a89');box(0,.005,0,110,.045,110,'#a7ac9b');
     for(const x of [-36,-12,12,36])for(const z of [-36,-12,12,36]){
