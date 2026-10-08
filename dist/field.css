@@ -36,3 +36,17 @@ body.field-mode{--night:#202b29;--ivory:#f6f0dd;--gold:#e3c896;--quiet:#b8c4b8;-
 /* City-view labels: leader lines back to the roof when nudged, and a dashed border when the building is off-screen. */
 #label-stems{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}#label-stems path{stroke:#efe2bccc;stroke-width:1;fill:none}#label-stems circle{fill:#efe2bc}
 .field-label.edge{border-style:dashed;opacity:.9!important}
+/* First screen: who, what, and proof, painted before the city loads. */
+#field-intro{left:clamp(16px,5vw,72px);bottom:auto;top:50%;transform:translateY(-44%);max-width:470px;padding:26px 28px 22px;background:#1d3129d9;border:1px solid #e2d1a455;border-radius:8px;backdrop-filter:blur(10px);box-shadow:0 20px 50px #0c1a1340}
+#field-intro h1{font:400 clamp(36px,3.6vw,52px)/1.04 var(--serif);letter-spacing:-.03em;margin:14px 0 14px;color:#fbf3dc}#field-intro h1 em{color:#ecd9a8}
+#field-intro .hero-now{font:13.5px/1.7 var(--sans);color:#dfe3d0;margin:0 0 18px}.hero-now strong{color:#fbf1d6;font-weight:600}
+.hero-stats{list-style:none;margin:0 0 20px;padding:14px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;border-top:1px solid #e2d1a433;border-bottom:1px solid #e2d1a433}
+.hero-stats strong{display:block;font:400 30px/1 var(--serif);color:#f1dcaa;margin-bottom:6px}.hero-stats span{display:block;font:10px/1.5 var(--mono);color:#c4cfbb;letter-spacing:.01em}
+.hero-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap}#field-intro #enter-field{gap:28px;padding:13px 16px}
+.hero-link{font:600 13px var(--sans);color:#f0dfb6;border-bottom:1px solid #f0dfb655;padding-bottom:2px}.hero-link:hover{color:#fff}
+.hero-contact{display:flex;gap:16px;margin:18px 0 0!important;font:11px var(--mono)!important}.hero-contact a{color:#cfd8c3;border-bottom:1px solid #cfd8c344}.hero-contact a:hover{color:#fff}
+.field-entered #field-intro{transform:translateY(-40%)}
+@media(max-width:760px){#field-intro{left:12px;right:12px;top:auto;bottom:86px;transform:none;max-width:none;padding:18px 18px 16px}#field-intro h1{font-size:30px;margin:8px 0 10px}#field-intro .hero-now{font-size:12px;margin-bottom:12px}.hero-stats{gap:8px;padding:10px 0;margin-bottom:14px}.hero-stats strong{font-size:22px}.hero-stats span{font-size:8.5px}.hero-contact{gap:12px;margin-top:12px!important}.field-entered #field-intro{transform:translateY(15px)}}
+@media(max-height:700px) and (min-width:761px){#field-intro .hero-now{display:none}#field-intro{transform:translateY(-50%)}}
+@media(max-width:760px){body:not(.field-entered) #field-status,body:not(.field-entered) #field-controls{display:none}body:not(.field-entered) #field-intro{bottom:14px}}
+@media(max-height:760px) and (min-width:761px){#field-intro{transform:translateY(-36%);padding:20px 24px 18px}#field-intro h1{font-size:clamp(30px,3vw,40px);margin:10px 0 12px}.hero-stats{padding:10px 0;margin-bottom:14px}.hero-stats strong{font-size:24px}}
