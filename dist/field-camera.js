@@ -32,10 +32,20 @@
     dt=F.clamp(dt,0,.05);const p=state.flight,f=F.forward(p.yaw),norm=Math.max(1,Math.hypot(input.forward,input.side,input.up)),speed=input.fast?38:19;
     const target={x:(f.x*input.forward+Math.cos(p.yaw)*input.side)*speed/norm,z:(f.z*input.forward+Math.sin(p.yaw)*input.side)*speed/norm,y:input.up*speed/norm};
     const old=copy(p),damping=1-Math.exp(-8*dt);
-    for(const axis of ['x','y','z']){state.velocity[axis]+=(target[axis]-state.velocity[axis])*damping;p[axis]+=state.velocity[axis]*dt;}
-    p.x=F.clamp(p.x,-260,260);p.z=F.clamp(p.z,-260,260);p.y=F.clamp(p.y,7,330);
+    for(const axis of ['y','x','z']){
+      state.velocity[axis]+=(target[axis]-state.velocity[axis])*damping;
+      const next={...p,[axis]:F.clamp(p[axis]+state.velocity[axis]*dt,axis==='y'?7:-260,axis==='y'?330:260)};
+      if(F.canFly(next.x,next.y,next.z))p[axis]=next[axis];else state.velocity[axis]=0;
+    }
     return Math.hypot(p.x-old.x,p.y-old.y,p.z-old.z)>.00001;
   }
-  function zoom(state,delta){if(state.mode!=='world'||state.transition)return;const p=state.flight,step=F.clamp(delta,-100,100)*Math.max(.035,p.y*.0016),cp=Math.cos(p.pitch);p.x=F.clamp(p.x-Math.sin(p.yaw)*cp*step,-260,260);p.z=F.clamp(p.z+Math.cos(p.yaw)*cp*step,-260,260);p.y=F.clamp(p.y-Math.sin(p.pitch)*step,7,330);resetVelocity(state);}
+  function zoom(state,delta){
+    if(state.mode!=='world'||state.transition)return;
+    const p=state.flight,step=F.clamp(delta,-100,100)*Math.max(.035,p.y*.0016),cp=Math.cos(p.pitch),start=copy(p);
+    const next={x:F.clamp(p.x-Math.sin(p.yaw)*cp*step,-260,260),z:F.clamp(p.z+Math.cos(p.yaw)*cp*step,-260,260),y:F.clamp(p.y-Math.sin(p.pitch)*step,7,330)};
+    const steps=Math.max(1,Math.ceil(Math.hypot(next.x-p.x,next.y-p.y,next.z-p.z)/.2));
+    for(let i=1;i<=steps;i++){const t=i/steps,q={x:start.x+(next.x-start.x)*t,y:start.y+(next.y-start.y)*t,z:start.z+(next.z-start.z)*t};if(!F.canFly(q.x,q.y,q.z))break;Object.assign(p,q);}
+    resetVelocity(state);
+  }
   const api={overview,create,setMode,frameWorld,sample,fly,zoom,resetVelocity};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCamera=api;
 })(typeof window!=='undefined'?window:globalThis);

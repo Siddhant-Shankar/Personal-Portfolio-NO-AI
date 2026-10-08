@@ -28,3 +28,7 @@ The exact product or X post meant by “inked maps” has not been identified. S
 ## Personal content
 
 Eight professional chapters and the existing public-project, research, and about material are preserved. Landmark names are an artistic navigation device, not claims about the employers' buildings or products. All demonstration records remain fictional and clearly labelled.
+
+## City revision
+
+The user's later direction replaces the scattered meadow settlement with a compact city. The initial scene now opens from above. Eleven career buildings form a connected four-by-four block layout with four infill buildings, an urban park, street crossings, a canal, and a distant skyline. Ten procedural vehicles travel on rounded street circuits. The illustrated map reflects these same streets. First-person walking and free flight remain available, with original career content preserved.

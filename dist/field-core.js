@@ -8,6 +8,7 @@
   function forward(yaw){return {x:Math.sin(yaw),z:-Math.cos(yaw)};}
   function nearest(position){return landmarks.map(p=>({place:p,distance:distance(position,p.arrival)})).sort((a,b)=>a.distance-b.distance)[0];}
   function canWalk(x,z){return Math.abs(x)<62&&Math.abs(z)<62&&!blockers.some(p=>Math.abs(x-p.x)<5.6&&Math.abs(z-p.z)<5.5);}
+  function canFly(x,y,z){return !blockers.some(p=>Math.abs(x-p.x)<6&&Math.abs(z-p.z)<6&&y<(p.height||15)+2);}
   function slide(position,dx,dz){let x=position.x,z=position.z;if(canWalk(x+dx,z))x+=dx;if(canWalk(x,z+dz))z+=dz;return {x,z};}
   function clearLine(a,b){const length=distance(a,b),steps=Math.ceil(length/.2);for(let i=0;i<=steps;i++){const t=steps?i/steps:0;if(!canWalk(a.x+(b.x-a.x)*t,a.z+(b.z-a.z)*t))return false;}return true;}
   function route(position,destination){
@@ -43,6 +44,6 @@
     return {box,triangle,cone,roof,finish:()=>new Float32Array(data)};
   }
   function mesh(){return City.mesh(api);}
-  const api={landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
+  const api={city:City,landmarks,blockers,hub,clamp,distance,forward,nearest,canWalk,canFly,clearLine,slide,route,perspective,view,multiply,project,mesh,builder,random};
   if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCore=api;
 })(typeof window!=='undefined'?window:globalThis);

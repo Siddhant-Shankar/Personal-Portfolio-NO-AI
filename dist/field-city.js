@@ -94,5 +94,26 @@
     }
     return finish();
   }
-  const api={landmarks,streets,infill,blockers,mesh};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
+  function trafficPose(index,time){
+    // Vehicles travel on rounded loops inset within the street lanes.
+    const centers=[[-12,-12],[12,12],[-36,12],[12,-36],[36,36]];
+    const [cx,cz]=centers[index%centers.length],extent=10.7,r=2.1,straight=2*(extent-r),arc=Math.PI*r/2,total=4*(straight+arc);
+    let distance=((time*(index%3===0?3.2:4.6)+index*17)%total+total)%total;
+    const starts=[[cx-extent+r,cz-extent],[cx+extent,cz-extent+r],[cx+extent-r,cz+extent],[cx-extent,cz+extent-r]];
+    const directions=[[1,0],[0,1],[-1,0],[0,-1]],corners=[[cx+extent-r,cz-extent+r],[cx+extent-r,cz+extent-r],[cx-extent+r,cz+extent-r],[cx-extent+r,cz-extent+r]];
+    for(let side=0;side<4;side++){
+      if(distance<=straight){const [dx,dz]=directions[side];return {x:starts[side][0]+dx*distance,z:starts[side][1]+dz*distance,yaw:Math.atan2(dx,dz)};}distance-=straight;
+      if(distance<=arc){const angle=-Math.PI/2+side*Math.PI/2+distance/r;return {x:corners[side][0]+r*Math.cos(angle),z:corners[side][1]+r*Math.sin(angle),yaw:Math.atan2(-Math.sin(angle),Math.cos(angle))};}distance-=arc;
+    }
+    return {x:starts[0][0],z:starts[0][1],yaw:Math.PI/2};
+  }
+  function addTraffic(builder,time){
+    for(let i=0;i<10;i++){const p=trafficPose(i,time),s=Math.sin(p.yaw),c=Math.cos(p.yaw),van=i%4===0,coat=['#d3ad68','#a06c50','#759d9c','#e0d3b2','#8895aa'][i%5];
+      function part(x,y,z,w,h,d,color){builder.box(p.x+x*c+z*s,y,p.z-x*s+z*c,w,h,d,color,p.yaw);}
+      part(0,.49,0,1.25,.55,van?2.6:2.2,coat);part(0,.94,van?-.15:0,1.1,van?1:.6,van?1.8:1.25,coat);part(0,1,van?.79:.65,.93,.38,.045,'#47676b');part(0,1,van?-1.06:-.65,.93,.38,.045,'#47676b');
+      for(const side of [-1,1])for(const end of [-1,1])part(side*.63,.3,end*.76,.18,.4,.4,'#3d4c48');
+      for(const side of [-1,1])part(side*.4,.56,van?1.32:1.12,.25,.18,.04,'#ead6a1');
+    }
+  }
+  const api={landmarks,streets,infill,blockers,mesh,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
 })(typeof window!=='undefined'?window:globalThis);
