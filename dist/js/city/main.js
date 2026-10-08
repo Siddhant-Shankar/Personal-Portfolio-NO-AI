@@ -100,7 +100,7 @@
   for (const place of Core.landmarks) {
     const button = document.createElement('button');
     button.className = 'city-label';
-    button.innerHTML = `<i style="--marker:${place.color}"></i><span>${Portfolio.esc(place.company)}</span>`;
+    button.innerHTML = `<i style="--marker:${place.color}"></i><span>${Portfolio.esc(place.company)}</span><small class="label-meta"></small>`;
     button.setAttribute('aria-label', `Explore ${place.company}`);
     button.onclick = () => window.CityMap?.select(place);
     $('landmark-labels').append(button);
@@ -339,13 +339,37 @@
   labelStems.id = 'label-stems';
   labelStems.setAttribute('aria-hidden', 'true');
   $('landmark-labels').prepend(labelStems);
-  let lastStems = '';
+  let lastStems = '',
+    relayout = false;
+  // Only touch the DOM when a sign's distance text actually changes.
+  function setMeta(label, text) {
+    if (label.dataset.meta === text) return false;
+    label.dataset.meta = text;
+    label.querySelector('.label-meta').textContent = text;
+    return true;
+  }
+  // Is another building standing between the eye and this landmark?
+  function hiddenBehind(place, eye) {
+    const dx = place.x - eye.x,
+      dz = place.z - eye.z,
+      length = Math.hypot(dx, dz);
+    for (let t = 2; t < length - 6; t += 1.5) {
+      const x = eye.x + (dx * t) / length,
+        z = eye.z + (dz * t) / length;
+      if (
+        Core.blockers.some(o => o !== place && Math.abs(x - o.x) < 4.2 && Math.abs(z - o.z) < 4.2)
+      )
+        return true;
+    }
+    return false;
+  }
   function overlay(matrix) {
     const eye = camera.eye,
       flying = camera.mode === 'world',
       occupied = [];
     const intro = flying && !entered ? $('city-intro').getBoundingClientRect() : null;
-    let stems = '';
+    let stems = '',
+      remeasure = false;
     for (const p of [...Core.landmarks].sort(
       (a, b) => Core.distance(eye, a) - Core.distance(eye, b),
     )) {
@@ -396,8 +420,11 @@
           }
         }
         occupied.push({ x: spot.x, y: spot.y, w, h });
+        if (b.hidden || !b.offsetWidth) remeasure = true;
         b.hidden = false;
         b.classList.toggle('edge', edge);
+        b.classList.remove('near');
+        setMeta(b, '');
         if (!edge) {
           const cy = spot.y - h / 2,
             sx =
@@ -412,17 +439,82 @@
         b.style.opacity = '1';
         continue;
       }
-      b.classList.remove('edge');
-      let shown =
-        point.w > 0 && Math.abs(point.x) < 0.93 && Math.abs(point.y) < 0.77 && distance < 62;
-      if (!entered) shown = false;
-      b.hidden = !shown;
-      if (shown) {
-        occupied.push({ x, y, w: width });
-        b.style.transform = `translate(${x}px,${y}px) translate(-50%,-100%)`;
-        b.style.opacity = flying ? '1' : String(Core.clamp(1 - distance / 100, 0.45, 1));
+      // On foot: keep every nearby sign readable. A sign is pinned over its building even when the
+      // roof is out of view, crowded signs spread out with a leader line, buildings behind you or
+      // off to the side get an arrow at the screen edge, and signs for hidden buildings dim.
+      const hide = () => {
+        b.hidden = true;
+        setMeta(b, '');
+      };
+      if (!entered || distance > 75) {
+        hide();
+        continue;
       }
+      const w = b.offsetWidth || width + 40,
+        h = b.offsetHeight || 32,
+        top = 160 + h,
+        bottom = innerHeight - 130,
+        base = Core.project(matrix, p.x, 1, p.z),
+        inView = point.w > 0 && base.w > 0 && Math.abs(base.x) < 1.02,
+        metres = `${Math.round(distance)} m`;
+      let anchorX,
+        anchorY,
+        side = 0;
+      if (inView) {
+        anchorX = Math.abs(point.x) < 1 ? x : (base.x * 0.5 + 0.5) * innerWidth;
+        anchorY = Core.clamp(y, top, Math.max(top, (-base.y * 0.5 + 0.5) * innerHeight - 12));
+      } else if (distance <= 40) {
+        // Which way to turn: the target's bearing relative to where the camera faces.
+        const bearing = Math.atan2(p.x - eye.x, -(p.z - eye.z)),
+          turn = Math.atan2(Math.sin(bearing - eye.yaw), Math.cos(bearing - eye.yaw));
+        side = turn > 0 ? 1 : -1;
+        anchorX = side > 0 ? innerWidth - 16 - w / 2 : 16 + w / 2;
+        anchorY = innerHeight * 0.42 + Math.min(1, Math.abs(turn) / Math.PI) * innerHeight * 0.2;
+      } else {
+        hide();
+        continue;
+      }
+      const placeAt = (dx, dy) => ({
+        x: Core.clamp(
+          anchorX + (side ? 0 : dx * (w * 0.6 + 8)),
+          16 + w / 2,
+          innerWidth - 16 - w / 2,
+        ),
+        y: Core.clamp(anchorY - 6 + dy * (h + 6), top, bottom),
+      });
+      const free = q =>
+        !occupied.some(
+          r => Math.abs(q.x - r.x) < (w + r.w) / 2 + 4 && Math.abs(q.y - r.y) < (h + r.h) / 2 + 4,
+        );
+      let spot = placeAt(0, 0);
+      for (const [dx, dy] of LABEL_OFFSETS) {
+        if (side && dx) continue;
+        const q = placeAt(dx, dy);
+        if (free(q)) {
+          spot = q;
+          break;
+        }
+      }
+      occupied.push({ x: spot.x, y: spot.y, w, h });
+      if (b.hidden || !b.offsetWidth) remeasure = true;
+      b.hidden = false;
+      b.classList.toggle('edge', !!side);
+      b.classList.toggle('near', distance < 14);
+      // New text changes the sign's width, so lay it out again next frame.
+      if (setMeta(b, side < 0 ? `← ${metres}` : side > 0 ? `${metres} →` : metres))
+        remeasure = true;
+      if (!side) {
+        const sy = spot.y,
+          ay = Math.max(anchorY, sy + 4);
+        if (Math.hypot(anchorX - spot.x, ay - sy) > 8)
+          stems += `<path d="M${spot.x.toFixed(1)} ${sy.toFixed(1)}L${anchorX.toFixed(1)} ${ay.toFixed(1)}"/><circle cx="${anchorX.toFixed(1)}" cy="${ay.toFixed(1)}" r="2.2"/>`;
+      }
+      b.style.transform = `translate(${Math.round(spot.x)}px,${Math.round(spot.y)}px) translate(-50%,-100%)`;
+      b.style.opacity = String(
+        hiddenBehind(p, eye) ? 0.62 : Core.clamp(1.15 - distance / 90, 0.75, 1),
+      );
     }
+    relayout = remeasure;
     if (stems !== lastStems) {
       lastStems = stems;
       labelStems.innerHTML = stems;
@@ -536,7 +628,8 @@
       overlay(matrix);
       window.CityMap?.update();
       window.CityInspector?.update(matrix);
-      dirty = false;
+      // Signs that changed size this frame are placed again on the next one.
+      dirty = relayout;
     }
     if (!document.hidden) frame = requestAnimationFrame(tick);
   }

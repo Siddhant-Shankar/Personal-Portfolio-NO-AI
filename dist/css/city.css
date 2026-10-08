@@ -1508,3 +1508,23 @@ body.city-mode {
 #inspect-actions button:hover {
   background: #fff2d2;
 }
+
+/* Signs while walking: distance, edge arrows, and a stronger sign for the building you're closest to. */
+.city-label .label-meta {
+  font: 10px var(--mono);
+  color: #d9cfa9;
+  opacity: 0.85;
+  margin-left: 2px;
+}
+.city-label .label-meta:empty {
+  display: none;
+}
+.city-label.near {
+  background: #2a4237f2;
+  border-color: #e9cf96;
+  font-size: 12px;
+  padding: 8px 12px;
+}
+.city-label.edge .label-meta {
+  color: #f1dcaa;
+}
