@@ -62,15 +62,30 @@
   addEventListener('blur',stop);
   document.querySelectorAll('dialog').forEach(d=>{d.addEventListener('close',()=>{dirty=true;canvas.focus({preventScroll:true});});});
   const observer=new MutationObserver(()=>{if(pause()){stop();unlock();}});document.querySelectorAll('dialog').forEach(d=>observer.observe(d,{attributes:true,attributeFilter:['open']}));
+  const LABEL_OFFSETS=[];for(let dy=-7;dy<=7;dy++)for(let dx=-2;dx<=2;dx++)LABEL_OFFSETS.push([dx,dy]);LABEL_OFFSETS.sort((a,b)=>(Math.abs(a[1])+(a[1]>0?.4:0)+Math.abs(a[0])*1.3)-(Math.abs(b[1])+(b[1]>0?.4:0)+Math.abs(b[0])*1.3));
+  const labelStems=document.createElementNS('http://www.w3.org/2000/svg','svg');labelStems.id='label-stems';labelStems.setAttribute('aria-hidden','true');$('landmark-labels').prepend(labelStems);let lastStems='';
   function overlay(matrix){
-    const eye=camera.eye,flying=camera.mode==='world',occupied=[];
+    const eye=camera.eye,flying=camera.mode==='world',occupied=[];const intro=flying&&!entered?$('field-intro').getBoundingClientRect():null;let stems='';
     for(const p of [...F.landmarks].sort((a,b)=>F.distance(eye,a)-F.distance(eye,b))){
       const b=labels.get(p.id),distance=F.distance(eye,p),point=F.project(matrix,p.x,(p.height||5)+1.5,p.z),x=(point.x*.5+.5)*innerWidth,y=(-point.y*.5+.5)*innerHeight,width=p.company.length*6.1+32;
-      let shown=point.w>0&&Math.abs(point.x)<.93&&Math.abs(point.y)<.77&&(flying||distance<62);
-      if(!entered&&(!['about','boring','hyphenate','parasol'].includes(p.id)||(x<innerWidth*.37&&y>innerHeight*.4)))shown=false;
-      if(flying&&occupied.some(r=>Math.abs(x-r.x)<(width+r.w)/2&&Math.abs(y-r.y)<30))shown=false;
+      if(flying){
+        // City view always labels all eleven chapters. Off-screen buildings are pinned to the edge; crowded labels take the nearest free spot, with a leader line to their roof.
+        let px=point.x,py=point.y;if(point.w<=0){const m=Math.max(Math.abs(px),Math.abs(py))||1;px=-px/m*2;py=-py/m*2;}
+        const w=b.offsetWidth||width,h=b.offsetHeight||32,anchorX=(px*.5+.5)*innerWidth,anchorY=(-py*.5+.5)*innerHeight,top=165+h,bottom=innerHeight-100;
+        const place=(dx,dy)=>{let x=F.clamp(anchorX+dx*(w*.6+8),16+w/2,innerWidth-16-w/2);const y=F.clamp(anchorY-6+dy*(h+6),top,bottom);if(intro&&x-w/2<intro.right+8&&y>intro.top&&y-h<intro.bottom)x=Math.min(innerWidth-16-w/2,intro.right+8+w/2);return {x,y};};
+        const free=q=>!occupied.some(r=>Math.abs(q.x-r.x)<(w+r.w)/2+4&&Math.abs(q.y-r.y)<(h+r.h)/2+4);
+        const edge=point.w<=0||anchorX<16||anchorX>innerWidth-16||anchorY<top-h||anchorY>bottom+h;
+        let spot=place(0,0);for(const [dx,dy] of LABEL_OFFSETS){const q=place(dx,dy);if(free(q)){spot=q;break;}}
+        occupied.push({x:spot.x,y:spot.y,w,h});b.hidden=false;b.classList.toggle('edge',edge);
+        if(!edge){const cy=spot.y-h/2,sx=Math.abs(anchorY-cy)>h/2?spot.x:spot.x+Math.sign(anchorX-spot.x)*w/2,sy=anchorY>spot.y?spot.y:anchorY<spot.y-h?spot.y-h:cy;if(Math.hypot(anchorX-sx,anchorY-sy)>5)stems+=`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)}L${anchorX.toFixed(1)} ${anchorY.toFixed(1)}"/><circle cx="${anchorX.toFixed(1)}" cy="${anchorY.toFixed(1)}" r="2.2"/>`;}
+        b.style.transform=`translate(${Math.round(spot.x)}px,${Math.round(spot.y)}px) translate(-50%,-100%)`;b.style.opacity='1';continue;
+      }
+      b.classList.remove('edge');
+      let shown=point.w>0&&Math.abs(point.x)<.93&&Math.abs(point.y)<.77&&distance<62;
+      if(!entered)shown=false;
       b.hidden=!shown;if(shown){occupied.push({x,y,w:width});b.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%)`;b.style.opacity=flying?'1':String(F.clamp(1-distance/100,.45,1));}
     }
+    if(stems!==lastStems){lastStems=stems;labelStems.innerHTML=stems;}
     nearest=F.nearest(player);$('nearby-place').hidden=!entered||flying||!!camera.transition||nearest.distance>6;
     if(nearest.distance<=6){$('nearby-company').textContent=nearest.place.company;$('nearby-title').textContent=nearest.place.name;}
     const degrees=((eye.yaw*180/Math.PI)%360+360)%360;$('field-heading').textContent=['N','NE','E','SE','S','SW','W','NW'][Math.round(degrees/45)%8];
