@@ -42,7 +42,7 @@ npm start            # or: python -m http.server 8000 --directory dist
 
 Open http://localhost:8000. No dependencies are required. The live site is https://siddhant-shankar.github.io/siddhant-city/, deployed from `dist/` by `.github/workflows/pages.yml` on every push to `main`. Link previews (`og:image`, `og:url`) use that address; update them if you move to a custom domain. Run the tests with `npm test`.
 
-The public repository intentionally excludes `dist/resume.pdf`. To enable local résumé links, supply an approved PDF at that path.
+`dist/resume.pdf` is the published résumé. To update it, replace that file and push.
 
 ## How the code is organised
 

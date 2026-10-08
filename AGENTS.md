@@ -9,5 +9,5 @@
 - Retain the direct résumé and text-based field guide alongside the explorable portfolio world.
 
 - Push each completed milestone to `Siddhant-Shankar/siddhant-city` before starting the next feature. Use the connected GitHub API where authenticated CLI access is unavailable. Preserve concurrent remote changes.
-- Exclude `dist/resume.pdf` from public GitHub snapshots until the user explicitly approves publishing that PDF. Preserve its existing owner-private Sites copy.
+- `dist/resume.pdf` is public. The owner approved publishing it on 2026-10-08. Replace it only with a PDF the owner supplies.
 - Report source validation separately from browser QA; do not claim browser testing when it was unavailable.
