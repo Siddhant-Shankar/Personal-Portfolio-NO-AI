@@ -93,7 +93,7 @@
     C.sample(camera,player,pause()?0:dt);
     if(!pause()&&!wildlifePaused){FieldWildlife.update(wildlife,dt,camera.eye);wildlifeClock+=dt;if(wildlifeClock>1/65){wildlifeMesh=FieldWildlife.mesh(wildlife);wildlifeClock=0;dirty=true;}}
     if(!pause()&&clock.running){clock.hours=S.wrap(clock.hours+dt*24/S.DAY_SECONDS);skyClock+=dt;if(skyClock>1/24){skyClock=0;applySky();dirty=true;}}
-    if(dirty&&renderer){overlay(renderer.draw(camera.eye,wildlifeMesh,camera.mode==='world',sky));window.FieldNavigation?.update();dirty=false;}
+    if(dirty&&renderer){const matrix=renderer.draw(camera.eye,wildlifeMesh,camera.mode==='world',sky);overlay(matrix);window.FieldNavigation?.update();window.FieldInspect?.update(matrix);dirty=false;}
     if(!document.hidden)frame=requestAnimationFrame(tick);
   }
   C.setMode(camera,'world',player,innerWidth/innerHeight,true);targetYaw=camera.flight.yaw;targetPitch=camera.flight.pitch;modeUI();
@@ -102,5 +102,5 @@
   document.addEventListener('visibilitychange',()=>{stop();last=0;if(!document.hidden){cancelAnimationFrame(frame);frame=requestAnimationFrame(tick);}});
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();cancelAnimationFrame(frame);$('field-fallback').hidden=false;});
   canvas.addEventListener('webglcontextrestored',()=>{try{renderer=new window.FieldRenderer(canvas);$('field-fallback').hidden=true;dirty=true;last=0;frame=requestAnimationFrame(tick);}catch{$('field-fallback').hidden=false;}});
-  window.Field={player,keys,visited,enter,openPlace,setMode,get mode(){return camera.mode;},get eye(){return camera.eye;},get nearest(){return nearest;},get paused(){return pause();},look(yaw,pitch){targetYaw=yaw;targetPitch=pitch;dirty=true;},invalidate(){dirty=true;},travel(place){if(camera.mode==='world')setMode('walk');enter();unlock();const points=F.route(player,place);journey=points.length?{place,points}:null;vx=vz=0;dirty=true;return !!journey;},get journey(){return journey;},clock,skipHour,stop,get renderer(){return renderer;}};
+  window.Field={player,keys,visited,enter,openPlace,setMode,get mode(){return camera.mode;},get eye(){return camera.eye;},get nearest(){return nearest;},get paused(){return pause();},look(yaw,pitch){targetYaw=yaw;targetPitch=pitch;dirty=true;},invalidate(){dirty=true;},travel(place){if(camera.mode==='world')setMode('walk');enter();unlock();const points=F.route(player,place);journey=points.length?{place,points}:null;vx=vz=0;dirty=true;return !!journey;},get journey(){return journey;},clock,skipHour,camera,wildlife,get sky(){return sky;},stop,get renderer(){return renderer;}};
 })();

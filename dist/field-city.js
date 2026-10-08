@@ -120,5 +120,5 @@
       for(const side of [-1,1]){part(side*.4,.56,van?1.32:1.12,.25,.18,.04,'#ead6a1',1);part(side*.45,.56,van?-1.32:-1.12,.2,.14,.04,'#b5463a',.8);}
     }
   }
-  const api={landmarks,streets,infill,blockers,mesh,loopPose,loopLength,TRAFFIC,vehicleKind,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
+  const api={landmarks,streets,infill,blockers,mesh,loopPose,loopLength,TRAFFIC,circuits,vehicleKind,trafficPose,addTraffic};if(typeof module==='object'&&module.exports)module.exports=api;else root.FieldCity=api;
 })(typeof window!=='undefined'?window:globalThis);
