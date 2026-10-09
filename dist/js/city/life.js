@@ -264,12 +264,15 @@
   }
   const Landmarks = () =>
     typeof module === 'object' && module.exports ? require('./landmarks.js') : root.CityLandmarks;
+  const Rooftops = () =>
+    typeof module === 'object' && module.exports ? require('./rooftops.js') : root.CityRooftops;
   function add(builder, time, state) {
     for (let i = 0; i < PEOPLE; i++) addPerson(builder, i, state ? state.people[i].t : time);
     for (let i = 0; i < boats.length; i++) addBoat(builder, i, time);
     for (let i = 0; i < BIRDS; i++) addBird(builder, i, time);
     addSmoke(builder, time);
     Landmarks()?.addAnimated(builder, time);
+    Rooftops()?.addAnimated(builder, time);
   }
   const api = {
     PEOPLE,

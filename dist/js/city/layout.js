@@ -149,6 +149,29 @@
     const d = Math.abs(x - 57);
     return d <= 5.2 ? 2.1 : d >= 7.6 ? 0 : (2.1 * (7.6 - d)) / 2.4;
   }
+  // The city sits on an island. Its coast is a rounded square pushed in and out by a few slow waves and
+  // a fine jagged one, so the shore reads hand-drawn rather than circular. Radius is measured from the centre.
+  const COAST = [
+    [3, 6.5, 0.7],
+    [5, 4, 2.1],
+    [8, 2.4, 4.4],
+    [13, 1.6, 1.3],
+    [29, 0.9, 5.6],
+  ];
+  function coast(angle) {
+    const c = Math.abs(Math.cos(angle)),
+      s = Math.abs(Math.sin(angle));
+    let r = 96 / Math.pow(c ** 4 + s ** 4, 0.25);
+    for (const [k, a, phase] of COAST) r += a * Math.sin(k * angle + phase);
+    return r;
+  }
+  // Which stretches of shore are cliffs rather than beach: 0 is sand, 1 is rock.
+  const cliffiness = angle =>
+    Math.max(
+      0,
+      Math.min(1, (Math.sin(2 * angle + 1.1) + Math.sin(5 * angle + 0.3) * 0.6 - 0.35) * 2.2),
+    );
+  const onIsland = (x, z, margin = 0) => Math.hypot(x, z) < coast(Math.atan2(z, x)) - margin;
   function mesh(Core, extra) {
     const b = Core.builder({ edges: true }),
       { box, cone, roof, finish } = b,
@@ -161,7 +184,6 @@
       glass = '#7babae',
       warm = '#e9d39e';
     // A continuous city surface with clearly separated roads, curbs, and blocks.
-    box(0, -0.2, 0, 194, 0.4, 194, '#8e9a89');
     box(0, 0.005, 0, 110, 0.045, 110, '#a7ac9b');
     for (const x of [-36, -12, 12, 36])
       for (const z of [-36, -12, 12, 36]) {
@@ -353,13 +375,126 @@
       tree(-57, z, 0.8);
       if (Math.abs(z) !== 24) lamp(51, z);
     }
-    // A denser, muted skyline frames the playable district, without adding fake chapters.
-    for (let n = -78; n <= 78; n += 12)
-      for (const side of [-1, 1]) {
-        const h = 10 + rand() * 19;
-        tower(n, side * 72, 7 + rand() * 2, 8, h, side < 0 ? '#a7af9e' : '#a0aea5');
-        if (Math.abs(n) < 66) tower(side * 76, n, 8, 7, 8 + rand() * 17, '#a6b1a4');
+    // The island: grass out to the shore, then sandy beaches or rocky cliffs, then shallows and open sea.
+    const { triangle } = b,
+      RING = 160,
+      ring = [];
+    for (let i = 0; i <= RING; i++) {
+      const a = (i / RING) * Math.PI * 2,
+        r = coast(a),
+        cliff = cliffiness(a),
+        c = Math.cos(a),
+        sn = Math.sin(a);
+      ring.push({ a, r, cliff, c, sn, at: (d, y) => [c * (r + d), y, sn * (r + d)] });
+    }
+    const grass = '#7aa65a',
+      meadow = '#86b263',
+      sand = '#ecd59a',
+      rock = '#a39883',
+      dirt = '#8a7357';
+    for (let i = 0; i < RING; i++) {
+      const p = ring[i],
+        q = ring[i + 1],
+        inset = d => ((p.cliff + q.cliff) / 2 > 0.5 ? 0 : d);
+      // Grass: a fan from the centre, tinted in bands so the outskirts read as meadow.
+      triangle([0, 0, 0], q.at(-30, 0), p.at(-30, 0), grass);
+      triangle(p.at(-30, 0), q.at(-30, 0), q.at(-inset(7), 0), meadow);
+      triangle(p.at(-30, 0), q.at(-inset(7), 0), p.at(-inset(7), 0), meadow);
+      if ((p.cliff + q.cliff) / 2 > 0.5) {
+        // Cliff: a lip of dirt, then a rock face down into the sea.
+        triangle(p.at(0, 0), q.at(0, 0), q.at(0.4, -0.8), dirt);
+        triangle(p.at(0, 0), q.at(0.4, -0.8), p.at(0.4, -0.8), dirt);
+        triangle(p.at(0.4, -0.8), q.at(0.4, -0.8), q.at(1.6, -4), rock);
+        triangle(p.at(0.4, -0.8), q.at(1.6, -4), p.at(1.6, -4), rock);
+      } else {
+        // Beach: sand slopes gently from the grass into the water.
+        triangle(p.at(-7, 0), q.at(-7, 0), q.at(2, -1.4), sand);
+        triangle(p.at(-7, 0), q.at(2, -1.4), p.at(2, -1.4), sand);
       }
+      // Turquoise shallows hug the shore before the deeper sea.
+      triangle(p.at(0.6, -0.42), q.at(0.6, -0.42), q.at(13, -0.42), '#5fc4cc');
+      triangle(p.at(0.6, -0.42), q.at(13, -0.42), p.at(13, -0.42), '#5fc4cc');
+    }
+    box(0, -0.85, 0, 1400, 0.5, 1400, '#2b88bf');
+    // Boulders along the cliffs, and the odd rock standing out in the shallows.
+    for (let i = 0; i < RING; i += 3) {
+      const p = ring[i],
+        size = 1.2 + rand() * 2.4;
+      if (p.cliff > 0.5) {
+        const [x, , z] = p.at(1 + rand() * 2, 0);
+        box(x, -0.6, z, size, size * 1.1, size * 0.9, rand() < 0.5 ? rock : '#b5ab95', rand() * 3);
+      } else if (rand() < 0.12) {
+        const [x, , z] = p.at(6 + rand() * 4, 0);
+        box(x, -0.3, z, size, size * 0.8, size, rock, rand() * 3);
+      }
+    }
+    // Low, rolling hills and woods on the outskirts, clear of the streets and the canal.
+    const outskirts = (x, z, margin) =>
+      onIsland(x, z, margin) && (Math.abs(x) > 66 || Math.abs(z) > 66);
+    for (let k = 0; k < 26; k++) {
+      const a = rand() * Math.PI * 2,
+        d = 70 + rand() * 30,
+        x = Math.cos(a) * d,
+        z = Math.sin(a) * d,
+        r = 5 + rand() * 7;
+      if (!outskirts(x, z, r + 4)) continue;
+      const tall = 2.5 + rand() * 4,
+        tint = rand() < 0.5 ? '#6f9c50' : '#7fab58';
+      b.plain(() => cone(x, -0.2, z, r, tall, tint, 9));
+    }
+    for (let k = 0; k < 220; k++) {
+      const a = rand() * Math.PI * 2,
+        d = 64 + rand() * 40,
+        x = Math.cos(a) * d,
+        z = Math.sin(a) * d;
+      if (!outskirts(x, z, 9)) continue;
+      tree(x, z, 0.7 + rand() * 0.6);
+    }
+    // Palms lean out over the beaches.
+    function palm(x, z, lean) {
+      for (let k = 0; k < 6; k++)
+        box(
+          x + Math.cos(lean) * k * 0.28,
+          0.4 + k * 0.9,
+          z + Math.sin(lean) * k * 0.28,
+          0.42,
+          1,
+          0.42,
+          '#9b7a52',
+        );
+      const tx = x + Math.cos(lean) * 1.7,
+        tz = z + Math.sin(lean) * 1.7;
+      for (let f = 0; f < 5; f++) {
+        const a = (f / 5) * Math.PI * 2;
+        box(tx + Math.cos(a) * 1.2, 5.6, tz + Math.sin(a) * 1.2, 2.6, 0.22, 0.9, '#5fae4a', -a);
+      }
+      box(tx, 5.5, tz, 0.7, 0.6, 0.7, '#8a6a3c');
+    }
+    for (let i = 2; i < RING; i += 5) {
+      const p = ring[i];
+      if (p.cliff > 0.2 || rand() < 0.35) continue;
+      const [x, , z] = p.at(-4 - rand() * 2, 0);
+      if (outskirts(x, z, 1)) palm(x, z, p.a + (rand() - 0.5));
+    }
+    // A lighthouse on the most dramatic headland.
+    let head = ring[0];
+    for (const p of ring) if (p.cliff > 0.9 && p.r > head.r && p.a > Math.PI) head = p;
+    {
+      const [x, , z] = head.at(-5, 0);
+      box(x, 0.4, z, 4, 0.8, 4, '#d9d2c0');
+      for (let k = 0; k < 6; k++)
+        box(
+          x,
+          1.4 + k * 1.6,
+          z,
+          2.6 - k * 0.15,
+          1.6,
+          2.6 - k * 0.15,
+          k % 2 ? '#f4efe2' : '#e04a3a',
+        );
+      box(x, 11.4, z, 2, 1.4, 2, '#ffe9a6', 0, 1);
+      cone(x, 12.1, z, 1.6, 1.6, '#e04a3a', 8);
+    }
     if (extra) extra(b);
     return finish();
   }
@@ -487,6 +622,8 @@
     onBridge,
     inWater,
     groundAt,
+    coast,
+    onIsland,
     trafficPoseAt,
     mesh,
     loopPose,

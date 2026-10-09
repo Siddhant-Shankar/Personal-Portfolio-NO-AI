@@ -506,11 +506,34 @@
         ])
           edge(p, q);
     }
+    // Copy pre-built geometry in, shifted: cheap to repeat every frame for things that only move.
+    function append(source, dx = 0, dy = 0, dz = 0) {
+      room(source.length);
+      data.set(source, n);
+      for (let i = n; i < n + source.length; i += STRIDE) {
+        data[i] += dx;
+        data[i + 1] += dy;
+        data[i + 2] += dz;
+      }
+      n += source.length;
+    }
+    // Draw soft, organic shapes (hills, giant letters) without ink outlines.
+    function plain(draw) {
+      const keep = lines;
+      lines = null;
+      try {
+        draw();
+      } finally {
+        lines = keep;
+      }
+    }
     return {
       box,
       triangle,
       cone,
       roof,
+      plain,
+      append,
       finish: () => {
         const out = data.slice(0, n);
         if (lines)
@@ -521,9 +544,15 @@
   }
   const landmarks3d = () =>
     typeof module === 'object' && module.exports ? require('./landmarks.js') : root.CityLandmarks;
+  const rooftops = () =>
+    typeof module === 'object' && module.exports ? require('./rooftops.js') : root.CityRooftops;
   function mesh() {
-    const L = landmarks3d();
-    return City.mesh(api, L ? b => L.addStatic(b) : null);
+    const L = landmarks3d(),
+      R = rooftops();
+    return City.mesh(api, b => {
+      if (L) L.addStatic(b);
+      if (R) R.add(b, api);
+    });
   }
   const api = {
     STRIDE,
