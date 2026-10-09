@@ -129,8 +129,9 @@
     }
   }
 
-  // A small flock wheeling above the park; wings beat, then glide.
-  const BIRDS = 11;
+  // A small flock wheeling above the park; wings beat, then glide. Retired along with the park
+  // animals, so the sky belongs to the rooftop signs and balloons; raise the count to bring it back.
+  const BIRDS = 0;
   function birdPose(i, time) {
     const centre = { x: -12 + Math.sin(time * 0.05) * 6, z: 12 + Math.cos(time * 0.04) * 6 },
       a = time * 0.32 + i * 0.55,

@@ -3,11 +3,12 @@
   'use strict';
   const Core = typeof module === 'object' && module.exports ? require('./core.js') : root.CityCore;
   const Life = typeof module === 'object' && module.exports ? require('./life.js') : root.CityLife;
-  function create(seed = 731) {
+  // `herd` animals roam the park. The city currently ships with none; pass 16 to bring them back.
+  function create(seed = 731, herd = 16) {
     const rand = Core.random(seed),
       animals = [];
     const types = ['rabbit', 'chicken', 'fox', 'deer'];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < herd; i++) {
       let x, z;
       do {
         x = rand() * 90 - 45;
@@ -27,10 +28,12 @@
       });
     }
     // Two quiet neighbours greet you near the starting clearing.
-    Object.assign(animals[0], { x: 5, z: 17 });
-    Object.assign(animals[1], { x: -4, z: 18 });
-    Object.assign(animals[2], { x: -8, z: 9 });
-    Object.assign(animals[3], { x: -10, z: 16 });
+    [
+      { x: 5, z: 17 },
+      { x: -4, z: 18 },
+      { x: -8, z: 9 },
+      { x: -10, z: 16 },
+    ].forEach((spot, i) => animals[i] && Object.assign(animals[i], spot));
     for (const a of animals)
       if (a.kind !== 'fox') {
         a.habitat = { minX: -20, maxX: -4, minZ: 4, maxZ: 20 };

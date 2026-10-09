@@ -41,7 +41,7 @@
   let sky = Sky.sample(clock.hours),
     skyClock = 0;
   const labels = new Map(),
-    wildlife = CityWildlife.create();
+    wildlife = CityWildlife.create(731, 0); // People, cars, and boats; no park animals.
   let wildlifeMesh = CityWildlife.mesh(wildlife),
     wildlifeClock = 0,
     wildlifePaused = false;
@@ -51,7 +51,7 @@
     wildlifeButton.textContent = wildlifePaused ? 'Resume city life' : 'City alive';
     wildlifeButton.setAttribute(
       'aria-label',
-      wildlifePaused ? 'Resume animals and traffic' : 'Pause animals and traffic',
+      wildlifePaused ? 'Resume traffic and people' : 'Pause traffic and people',
     );
     wildlifeButton.setAttribute('aria-pressed', String(!wildlifePaused));
   }
