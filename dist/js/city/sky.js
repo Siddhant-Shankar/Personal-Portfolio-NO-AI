@@ -3,16 +3,16 @@
   'use strict';
   // Keyframes by hour. Colours are sky top, sky horizon, and ground haze; night is the share of lights on.
   const keys = [
-    { h: 0, top: '#0d1a28', low: '#24364a', haze: '#1c2b38', night: 1 },
-    { h: 4.8, top: '#13233a', low: '#3a4660', haze: '#2a3446', night: 1 },
-    { h: 6, top: '#4e6582', low: '#e0a483', haze: '#9a8a86', night: 0.55 },
-    { h: 7.3, top: '#86adb6', low: '#ead2a8', haze: '#c9c4a6', night: 0 },
-    { h: 12, top: '#7da8ad', low: '#d9cda7', haze: '#c7c8ac', night: 0 },
-    { h: 16.8, top: '#83a6ab', low: '#e2c99a', haze: '#cfc3a0', night: 0 },
-    { h: 18.6, top: '#5e7590', low: '#eba374', haze: '#c39a7f', night: 0.3 },
-    { h: 19.7, top: '#2c3b56', low: '#8e6a72', haze: '#5d5262', night: 0.8 },
-    { h: 21, top: '#101e30', low: '#2b3a52', haze: '#1f2c3c', night: 1 },
-    { h: 24, top: '#0d1a28', low: '#24364a', haze: '#1c2b38', night: 1 },
+    { h: 0, top: '#14204a', low: '#2e3f78', haze: '#24315c', night: 1 },
+    { h: 4.8, top: '#1b2a58', low: '#4a4f8a', haze: '#33396a', night: 1 },
+    { h: 6, top: '#5b74b8', low: '#ffab7a', haze: '#b49aa0', night: 0.55 },
+    { h: 7.3, top: '#6cb6e6', low: '#ffe2a8', haze: '#d8dcc0', night: 0 },
+    { h: 12, top: '#4aa8e8', low: '#bde6f5', haze: '#cfe6e0', night: 0 },
+    { h: 16.8, top: '#56a6df', low: '#ffe0a0', haze: '#e2d9b4', night: 0 },
+    { h: 18.6, top: '#5b6fb8', low: '#ff9a5c', haze: '#d39a86', night: 0.3 },
+    { h: 19.7, top: '#2e3a7a', low: '#b0607a', haze: '#5e4a72', night: 0.8 },
+    { h: 21, top: '#16224e', low: '#2f3f74', haze: '#24305a', night: 1 },
+    { h: 24, top: '#14204a', low: '#2e3f78', haze: '#24315c', night: 1 },
   ];
   const DAY_SECONDS = 360;
   const rgb = hex =>

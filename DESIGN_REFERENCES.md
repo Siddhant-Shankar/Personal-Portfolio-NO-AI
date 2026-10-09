@@ -42,3 +42,7 @@ The newer Dilum Sanjaya post (https://x.com/dilumsanjaya/status/2106426962738880
 ## three.js renderer
 
 The city moved from a hand-written WebGL renderer to three.js. The rendering approach follows Factory Yard's: fills are pushed back with polygon offset, so 1 px hairline outlines always draw over them, and outlines trace every building, roof, and dome. Factory Yard renders flat and unlit, with no shadow maps, which keeps it fast. The city keeps directional sun and moon light and adds real shadows where the hardware can afford them. Phones start without shadows, and adaptive quality removes them, then reduces resolution, if frames stay below 24 fps. Haze follows camera height, so street-to-sky transitions don't flash. Only the rendering approach was referenced; no Factory code was copied.
+
+## Cartoon revision
+
+The user asked for a more cartoonish look. The 1 px hairlines became ink outlines about 2.4 px wide. WebGL draws every line one pixel wide, so each edge is drawn as a screen-facing quad. The ink thins with distance, and edges are clipped at the near plane so they hold up at street level. Lambert shading became three-band toon shading, the surface grain was removed, colours are pushed brighter in the shader, and shadows have crisp edges. The day sky is a clear cartoon blue. The interface follows the same idea: cream sticker labels and chunky pill buttons with ink rims and solid offset shadows. The text-based field guide (`notes.html`) is unchanged. No outside code or assets were used.
