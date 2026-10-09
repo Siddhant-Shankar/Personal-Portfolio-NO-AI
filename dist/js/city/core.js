@@ -16,6 +16,22 @@
       .map(p => ({ place: p, distance: distance(position, p.arrival) }))
       .sort((a, b) => a.distance - b.distance)[0];
   }
+  // How far a visitor is from a building's outside, its rooftop sign included, in three dimensions:
+  // zero when touching a wall or standing on the roof. The front door no longer matters, so a
+  // chapter can be opened from any side, from the street, or while flying past.
+  const FOOTPRINT = 5.2,
+    SIGN_HEIGHT = 9;
+  function gap(position, p) {
+    const dx = Math.max(0, Math.abs(position.x - p.x) - FOOTPRINT),
+      dz = Math.max(0, Math.abs(position.z - p.z) - FOOTPRINT),
+      dy = Math.max(0, (position.y ?? 0) - ((p.height || 15) + SIGN_HEIGHT));
+    return Math.hypot(dx, dy, dz);
+  }
+  function closest(position) {
+    return landmarks
+      .map(p => ({ place: p, distance: gap(position, p) }))
+      .sort((a, b) => a.distance - b.distance)[0];
+  }
   // Feet collide with buildings, street furniture, and the canal. BODY is the visitor's radius around a prop.
   const BODY = 0.3,
     props = City.props;
@@ -567,6 +583,8 @@
     distance,
     forward,
     nearest,
+    closest,
+    gap,
     canWalk,
     canFly,
     clearLine,

@@ -28,6 +28,8 @@
     nearest = null,
     walkTime = 0,
     journey = null;
+  // How close, in metres from a building's walls or roof, before its chapter can be opened.
+  const REACH = 8;
   // Creative-mode feel: Space jumps, a double-tap of Space takes off or drops, a double-tap of W sprints.
   const air = { lift: 0, v: 0 },
     taps = { ' ': 0, w: 0 },
@@ -376,7 +378,7 @@
       skipHour();
     }
     if (k === 'escape') stop();
-    if (k === 'e' && camera.mode === 'walk' && nearest?.distance < 6) {
+    if (k === 'e' && nearest && !$('nearby-place').hidden) {
       e.preventDefault();
       openPlace(nearest.place);
     }
@@ -579,10 +581,13 @@
       lastStems = stems;
       labelStems.innerHTML = stems;
     }
-    nearest = Core.nearest(player);
-    $('nearby-place').hidden =
-      !entered || camera.mode === 'world' || !!camera.transition || nearest.distance > 6;
-    if (nearest.distance <= 6) {
+    // Within REACH of any building, on foot or in the air, the chapter prompt appears. It stays a
+    // little longer on the way out, so it does not flicker at the edge of the range.
+    const close = Core.closest(eye),
+      shown = !$('nearby-place').hidden && nearest?.place === close.place;
+    nearest = close.distance <= (shown ? REACH + 2 : REACH) ? close : null;
+    $('nearby-place').hidden = !entered || !!camera.transition || !nearest;
+    if (nearest) {
       $('nearby-company').textContent = nearest.place.company;
       $('nearby-title').textContent = nearest.place.name;
     }
