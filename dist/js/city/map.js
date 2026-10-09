@@ -109,9 +109,10 @@
   pad.id = 'city-touch';
   pad.setAttribute('aria-label', 'Touch walking controls');
   pad.innerHTML =
-    '<button data-key="w" aria-label="Walk forward">↑</button><button data-key="a" aria-label="Step left">←</button><button data-key="s" aria-label="Walk backward">↓</button><button data-key="d" aria-label="Step right">→</button>';
+    '<button data-key="w" aria-label="Walk forward">↑</button><button data-key="a" aria-label="Step left">←</button><button data-key="s" aria-label="Walk backward">↓</button><button data-key="d" aria-label="Step right">→</button><button data-key=" " aria-label="Jump, or rise while flying">⤒</button><button data-fly aria-label="Take off or land">✈</button>';
   $('city-shell').append(pad);
-  pad.querySelectorAll('button').forEach(b => {
+  pad.querySelector('[data-fly]').onclick = () => game.toggleFlight();
+  pad.querySelectorAll('button[data-key]').forEach(b => {
     b.onpointerdown = e => {
       e.preventDefault();
       game.stop();

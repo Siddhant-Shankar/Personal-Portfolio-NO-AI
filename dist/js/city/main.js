@@ -9,7 +9,7 @@
   document.body.classList.add('city-mode');
   const shell = document.createElement('div');
   shell.id = 'city-shell';
-  shell.innerHTML = `<canvas id="city-canvas" tabindex="0" aria-label="First-person landscape. Use WASD to move, drag to look, and E to read a nearby landmark."></canvas><div id="city-shade" aria-hidden="true"></div><div id="landmark-labels"></div><div class="city-compass"><span id="city-heading">N</span><i></i><span>CITY ATLAS / SIDDHANT SHANKAR</span></div><div id="city-clock" role="group" aria-label="Time of day in the city"><span id="clock-dial" aria-hidden="true"><i></i></span><span class="clock-read"><strong id="clock-time">--:--</strong><small id="clock-phase"></small></span><button id="clock-run" aria-pressed="true" aria-label="Pause the passage of time">❚❚</button><button id="clock-skip" aria-label="Skip ahead one hour">+1h <kbd>T</kbd></button></div><div id="city-status"><span class="city-kicker" id="city-mode-status">ON FOOT / STREET LEVEL</span><span id="city-visited">0 / 11 PLACES VISITED</span></div><button id="nearby-place" hidden><span class="nearby-key">E</span><span><small id="nearby-company"></small><strong id="nearby-title"></strong></span><span>↗</span></button><div id="city-perspectives" role="group" aria-label="Camera perspective"><button id="city-walk-view" aria-pressed="true">On foot</button><button id="city-world-view" aria-pressed="false">City view <kbd>V</kbd></button></div><div id="city-flight-controls" hidden><span>FREE FLIGHT</span><p>WASD move · drag to look<br>Space rise · C descend · Shift faster</p><div><button id="city-rise" aria-label="Fly higher">↑ Rise</button><button id="city-descend" aria-label="Fly lower">↓ Descend</button></div><button id="city-frame">Frame the city <kbd>R</kbd></button><small>Scroll to move closer or farther</small></div><div id="city-controls"><button id="city-look">Mouse look</button><button id="city-home">Return to start</button><button id="city-help">How to explore</button></div><div class="city-reticle" aria-hidden="true">·</div><div id="city-fallback" hidden><h2>The city needs WebGL.</h2><p>You can still explore every career story through the index, or read the complete field guide.</p><button id="fallback-index">Open experience index</button><a href="notes.html">Read the field guide ↗</a></div>`;
+  shell.innerHTML = `<canvas id="city-canvas" tabindex="0" aria-label="First-person landscape. Use WASD to move, Space to jump, double-tap Space to fly, click to capture the mouse and look around, and E to read a nearby landmark."></canvas><div id="city-shade" aria-hidden="true"></div><div id="landmark-labels"></div><div class="city-compass"><span id="city-heading">N</span><i></i><span>CITY ATLAS / SIDDHANT SHANKAR</span></div><div id="city-clock" role="group" aria-label="Time of day in the city"><span id="clock-dial" aria-hidden="true"><i></i></span><span class="clock-read"><strong id="clock-time">--:--</strong><small id="clock-phase"></small></span><button id="clock-run" aria-pressed="true" aria-label="Pause the passage of time">❚❚</button><button id="clock-skip" aria-label="Skip ahead one hour">+1h <kbd>T</kbd></button></div><div id="city-status"><span class="city-kicker" id="city-mode-status">ON FOOT / STREET LEVEL</span><span id="city-visited">0 / 11 PLACES VISITED</span></div><button id="nearby-place" hidden><span class="nearby-key">E</span><span><small id="nearby-company"></small><strong id="nearby-title"></strong></span><span>↗</span></button><div id="city-perspectives" role="group" aria-label="Camera perspective"><button id="city-walk-view" aria-pressed="true">On foot</button><button id="city-world-view" aria-pressed="false">City view <kbd>V</kbd></button></div><div id="city-flight-controls" hidden><span>FREE FLIGHT</span><p>WASD move · click to look<br>Space rise · Shift descend<br>Double-tap W to sprint<br>Double-tap Space to drop</p><div><button id="city-rise" aria-label="Fly higher">↑ Rise</button><button id="city-descend" aria-label="Fly lower">↓ Descend</button></div><button id="city-frame">Frame the city <kbd>R</kbd></button><small>Scroll to move closer or farther</small></div><div id="city-controls"><button id="city-look">Click the city to look</button><button id="city-home">Return to start</button><button id="city-help">How to explore</button></div><div class="city-reticle" aria-hidden="true">·</div><div id="city-fallback" hidden><h2>The city needs WebGL.</h2><p>You can still explore every career story through the index, or read the complete field guide.</p><button id="fallback-index">Open experience index</button><a href="notes.html">Read the field guide ↗</a></div>`;
   $('experience').append(shell);
   const canvas = $('city-canvas');
   const player = { x: 0, y: 1.45, z: 23, yaw: -0.25, pitch: 0 },
@@ -28,6 +28,11 @@
     nearest = null,
     walkTime = 0,
     journey = null;
+  // Creative-mode feel: Space jumps, a double-tap of Space takes off or drops, a double-tap of W sprints.
+  const air = { lift: 0, v: 0 },
+    taps = { ' ': 0, w: 0 },
+    DOUBLE_TAP = 0.3;
+  let sprint = false;
   const Sky = window.CitySky,
     now = new Date(),
     clock = { hours: now.getHours() + now.getMinutes() / 60, running: !reduced.matches, shown: '' };
@@ -39,7 +44,7 @@
     wildlife = CityWildlife.create();
   let wildlifeMesh = CityWildlife.mesh(wildlife),
     wildlifeClock = 0,
-    wildlifePaused = reduced.matches;
+    wildlifePaused = false;
   const wildlifeButton = document.createElement('button');
   wildlifeButton.id = 'city-wildlife-toggle';
   function wildlifeControl() {
@@ -58,8 +63,6 @@
   $('city-controls').append(wildlifeButton);
   wildlifeControl();
   reduced.addEventListener('change', () => {
-    wildlifePaused = reduced.matches;
-    wildlifeControl();
     clock.running = !reduced.matches;
     applySky();
     dirty = true;
@@ -139,29 +142,35 @@
   function stop() {
     journey = null;
     keys.clear();
+    sprint = false;
     vx = vz = 0;
     Camera.resetVelocity(camera);
   }
+  // The flight cheat sheet shows for a few seconds after take-off, then tucks itself into a small tab.
+  let tuckFlight = 0;
   function modeUI() {
     const flying = camera.mode === 'world';
+    clearTimeout(tuckFlight);
+    $('city-flight-controls').classList.remove('compact');
+    if (flying)
+      tuckFlight = setTimeout(() => $('city-flight-controls').classList.add('compact'), 6000);
     document.body.classList.toggle('city-flying', flying);
     $('city-walk-view').setAttribute('aria-pressed', String(!flying));
     $('city-world-view').setAttribute('aria-pressed', String(flying));
     $('city-flight-controls').hidden = !flying;
-    $('city-mode-status').textContent = flying
-      ? 'CITY VIEW / FREE FLIGHT'
-      : 'ON FOOT / STREET LEVEL';
+    $('city-mode-status').textContent = flying ? 'FLYING / FREE FLIGHT' : 'ON FOOT / STREET LEVEL';
     canvas.setAttribute(
       'aria-label',
       flying
-        ? 'City view. WASD to fly, Space to rise, C to descend, drag to look, V to return to walking.'
-        : 'First-person landscape. WASD to walk, drag to look, E to read, V for city view.',
+        ? 'Flying. WASD to fly, Space to rise, Shift to descend, double-tap Space to drop, drag to look, V to return to walking.'
+        : 'First-person landscape. WASD to walk, Shift to run, Space to jump, double-tap Space to fly, E to read, V for city view.',
     );
   }
   function setMode(mode) {
     enter();
     unlock();
     stop();
+    air.lift = air.v = 0;
     Camera.setMode(camera, mode, player, innerWidth / innerHeight, reduced.matches);
     const pose = mode === 'world' ? camera.flight : player;
     targetYaw = pose.yaw;
@@ -176,7 +185,40 @@
     targetPitch = camera.flight.pitch;
     dirty = true;
   }
-  $('city-walk-view').onclick = () => setMode('walk');
+  // Take off from the street, or come down onto it. Over a roof or the canal, keep flying until there is a street below.
+  function toggleFlight() {
+    if (camera.transition) return;
+    enter();
+    journey = null;
+    if (camera.mode === 'walk') {
+      Camera.takeOff(camera, player, { x: vx, z: vz });
+      air.lift = air.v = 0;
+    } else if (Core.canWalk(camera.flight.x, camera.flight.z)) {
+      const v = camera.velocity;
+      vx = v.x;
+      vz = v.z;
+      air.lift = Camera.land(camera, player);
+      air.v = 0;
+      groundY = Core.groundAt(player.x, player.z);
+      targetPitch = Core.clamp(targetPitch, -1.35, 1.35);
+    } else {
+      $('city-mode-status').textContent = 'NO STREET BELOW / KEEP FLYING';
+      return;
+    }
+    modeUI();
+    dirty = true;
+  }
+  // On foot from the air: drop onto the street below if there is one, otherwise go back to where you were.
+  $('city-walk-view').onclick = () => {
+    if (
+      camera.mode === 'world' &&
+      !camera.transition &&
+      camera.flight.y < 40 &&
+      Core.canWalk(camera.flight.x, camera.flight.z)
+    )
+      toggleFlight();
+    else setMode('walk');
+  };
   $('city-world-view').onclick = () => setMode('world');
   $('city-frame').onclick = frameWorld;
   for (const [id, key] of [
@@ -210,22 +252,35 @@
     Portfolio.modal('help');
   };
   $('fallback-index').onclick = () => $('open-index').click();
-  $('city-look').onclick = async () => {
+  // As in Minecraft: click into the city and the mouse is captured, so moving it looks around with
+  // no button held. Esc lets go. Raw, unaccelerated movement where the browser offers it.
+  async function lockMouse() {
     enter();
+    if (document.pointerLockElement === canvas) return;
     try {
-      await canvas.requestPointerLock();
+      await canvas.requestPointerLock({ unadjustedMovement: true });
     } catch {
-      $('city-look').textContent = 'Drag the scene to look';
+      // Browsers refuse a re-capture for a moment after Esc; dragging still looks around meanwhile.
+      try {
+        await canvas.requestPointerLock();
+      } catch {
+        /* Not captured this time; the next click tries again. */
+      }
     }
-  };
+  }
+  $('city-look').onclick = lockMouse;
   document.addEventListener('pointerlockchange', () => {
-    $('city-look').textContent =
-      document.pointerLockElement === canvas ? 'Mouse captured · Esc to release' : 'Mouse look';
+    const locked = document.pointerLockElement === canvas;
+    document.body.classList.toggle('city-locked', locked);
+    $('city-look').textContent = locked
+      ? 'Mouse captured · Esc to release'
+      : 'Click the city to look';
+    if (!locked) drag = null;
   });
   let drag = null;
   canvas.addEventListener('pointerdown', e => {
     enter();
-    if (e.button !== 0) return;
+    if (e.button !== 0 || document.pointerLockElement === canvas) return;
     drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
     canvas.setPointerCapture(e.pointerId);
   });
@@ -234,8 +289,8 @@
     targetYaw += (e.clientX - drag.x) * 0.004;
     targetPitch = Core.clamp(
       targetPitch - (e.clientY - drag.y) * 0.003,
-      camera.mode === 'world' ? -1.48 : -0.7,
-      camera.mode === 'world' ? 1.2 : 0.7,
+      camera.mode === 'world' ? -1.48 : -1.35,
+      camera.mode === 'world' ? 1.2 : 1.35,
     );
     drag.x = e.clientX;
     drag.y = e.clientY;
@@ -248,8 +303,8 @@
     targetYaw += e.movementX * 0.002;
     targetPitch = Core.clamp(
       targetPitch - e.movementY * 0.002,
-      camera.mode === 'world' ? -1.48 : -0.7,
-      camera.mode === 'world' ? 1.2 : 0.7,
+      camera.mode === 'world' ? -1.48 : -1.35,
+      camera.mode === 'world' ? 1.2 : 1.35,
     );
     dirty = true;
   });
@@ -284,16 +339,33 @@
       return;
     }
     if (
-      ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'shift'].includes(
-        k,
-      ) ||
-      (camera.mode === 'world' && [' ', 'c', 'pageup', 'pagedown'].includes(k))
+      [
+        'w',
+        'a',
+        's',
+        'd',
+        'arrowup',
+        'arrowdown',
+        'arrowleft',
+        'arrowright',
+        'shift',
+        ' ',
+      ].includes(k) ||
+      (camera.mode === 'world' && ['c', 'pageup', 'pagedown'].includes(k))
     ) {
       if (k === ' ' && e.target !== canvas && /BUTTON|A/.test(e.target.tagName)) return;
       e.preventDefault();
       journey = null;
       enter();
       keys.add(k);
+      const tap = k === 'arrowup' ? 'w' : k;
+      if (!e.repeat && tap in taps) {
+        const now = performance.now() / 1000,
+          double = now - taps[tap] < DOUBLE_TAP;
+        taps[tap] = double ? 0 : now;
+        if (double && tap === ' ') toggleFlight();
+        if (double && tap === 'w') sprint = true;
+      }
     }
     if (k === 'm') {
       e.preventDefault();
@@ -364,10 +436,26 @@
     return false;
   }
   function overlay(matrix) {
+    // Flying low reads like walking: nearby signs with distances. Up high, every chapter is labelled.
+    // Before the visitor starts exploring, the still overview lays all eleven out with leader lines.
     const eye = camera.eye,
-      flying = camera.mode === 'world',
+      flying = camera.mode === 'world' && eye.y > 14,
       occupied = [];
     const intro = flying && !entered ? $('city-intro').getBoundingClientRect() : null;
+    // Keep the opening overview's labels off the big name sign on the hills.
+    const banner = window.CityRooftops?.BANNER;
+    if (flying && !entered && banner) {
+      const pts = banner.corners.map(([x, y, z]) => Core.project(matrix, x, y, z));
+      if (pts.every(q => q.w > 0)) {
+        const xs = pts.map(q => (q.x * 0.5 + 0.5) * innerWidth),
+          ys = pts.map(q => (-q.y * 0.5 + 0.5) * innerHeight),
+          left = Math.min(...xs),
+          right = Math.max(...xs),
+          top = Math.min(...ys),
+          bottom = Math.max(...ys);
+        occupied.push({ x: (left + right) / 2, y: bottom, w: right - left, h: bottom - top });
+      }
+    }
     let stems = '',
       remeasure = false;
     for (const p of [...Core.landmarks].sort(
@@ -379,8 +467,51 @@
         x = (point.x * 0.5 + 0.5) * innerWidth,
         y = (-point.y * 0.5 + 0.5) * innerHeight,
         width = p.company.length * 6.1 + 32;
+      if (entered) {
+        // Exploring: every sign sits straight above its own roof and glides with it. Nothing is
+        // reshuffled or pinned to the screen edge as you move; when two signs would overlap, the
+        // nearer one stays and the farther one fades out until there is room again.
+        const w = b.offsetWidth || width,
+          h = b.offsetHeight || 32,
+          base = Core.project(matrix, p.x, 1, p.z),
+          inView =
+            distance < (flying ? 400 : 90) &&
+            (point.w > 0 || base.w > 0) &&
+            Math.abs((point.w > 0 ? point : base).x) < 1.04 &&
+            (point.w > 0 ? point.y : 1) > -1.04 &&
+            base.y < 1.04,
+          spot = {
+            x: Core.clamp(x, 16 + w / 2, innerWidth - 16 - w / 2),
+            y: Core.clamp(point.w > 0 ? y : 0, 168 + h, innerHeight - 120),
+          },
+          tucked = b.classList.contains('tucked'),
+          pad = tucked ? 12 : 3,
+          clear =
+            inView &&
+            !occupied.some(
+              r =>
+                Math.abs(spot.x - r.x) < (w + r.w) / 2 + pad &&
+                Math.abs(spot.y - r.y) < (h + r.h) / 2 + pad,
+            );
+        if (b.hidden || !b.offsetWidth) remeasure = true;
+        b.hidden = false;
+        b.classList.remove('edge');
+        b.classList.toggle('near', !flying && distance < 14);
+        b.classList.toggle('tucked', !clear);
+        // Distances only up close, in five-metre steps, so the text is not ticking as you walk.
+        if (setMeta(b, !flying && distance < 40 ? `${Math.round(distance / 5) * 5} m` : ''))
+          remeasure = true;
+        if (clear) occupied.push({ x: spot.x, y: spot.y, w, h });
+        b.style.transform = `translate(${Math.round(spot.x)}px,${Math.round(spot.y)}px) translate(-50%,-100%)`;
+        b.style.opacity = !clear
+          ? '0'
+          : flying
+            ? '1'
+            : String(hiddenBehind(p, eye) ? 0.62 : Core.clamp(1.15 - distance / 90, 0.75, 1));
+        continue;
+      }
       if (flying) {
-        // City view always labels all eleven chapters. Off-screen buildings are pinned to the edge; crowded labels take the nearest free spot, with a leader line to their roof.
+        // The opening overview labels all eleven chapters. Off-screen buildings are pinned to the edge; crowded labels take the nearest free spot, with a leader line to their roof.
         let px = point.x,
           py = point.y;
         if (point.w <= 0) {
@@ -439,80 +570,9 @@
         b.style.opacity = '1';
         continue;
       }
-      // On foot: keep every nearby sign readable. A sign is pinned over its building even when the
-      // roof is out of view, crowded signs spread out with a leader line, buildings behind you or
-      // off to the side get an arrow at the screen edge, and signs for hidden buildings dim.
-      const hide = () => {
-        b.hidden = true;
-        setMeta(b, '');
-      };
-      if (!entered || distance > 75) {
-        hide();
-        continue;
-      }
-      const w = b.offsetWidth || width + 40,
-        h = b.offsetHeight || 32,
-        top = 160 + h,
-        bottom = innerHeight - 130,
-        base = Core.project(matrix, p.x, 1, p.z),
-        inView = point.w > 0 && base.w > 0 && Math.abs(base.x) < 1.02,
-        metres = `${Math.round(distance)} m`;
-      let anchorX,
-        anchorY,
-        side = 0;
-      if (inView) {
-        anchorX = Math.abs(point.x) < 1 ? x : (base.x * 0.5 + 0.5) * innerWidth;
-        anchorY = Core.clamp(y, top, Math.max(top, (-base.y * 0.5 + 0.5) * innerHeight - 12));
-      } else if (distance <= 40) {
-        // Which way to turn: the target's bearing relative to where the camera faces.
-        const bearing = Math.atan2(p.x - eye.x, -(p.z - eye.z)),
-          turn = Math.atan2(Math.sin(bearing - eye.yaw), Math.cos(bearing - eye.yaw));
-        side = turn > 0 ? 1 : -1;
-        anchorX = side > 0 ? innerWidth - 16 - w / 2 : 16 + w / 2;
-        anchorY = innerHeight * 0.42 + Math.min(1, Math.abs(turn) / Math.PI) * innerHeight * 0.2;
-      } else {
-        hide();
-        continue;
-      }
-      const placeAt = (dx, dy) => ({
-        x: Core.clamp(
-          anchorX + (side ? 0 : dx * (w * 0.6 + 8)),
-          16 + w / 2,
-          innerWidth - 16 - w / 2,
-        ),
-        y: Core.clamp(anchorY - 6 + dy * (h + 6), top, bottom),
-      });
-      const free = q =>
-        !occupied.some(
-          r => Math.abs(q.x - r.x) < (w + r.w) / 2 + 4 && Math.abs(q.y - r.y) < (h + r.h) / 2 + 4,
-        );
-      let spot = placeAt(0, 0);
-      for (const [dx, dy] of LABEL_OFFSETS) {
-        if (side && dx) continue;
-        const q = placeAt(dx, dy);
-        if (free(q)) {
-          spot = q;
-          break;
-        }
-      }
-      occupied.push({ x: spot.x, y: spot.y, w, h });
-      if (b.hidden || !b.offsetWidth) remeasure = true;
-      b.hidden = false;
-      b.classList.toggle('edge', !!side);
-      b.classList.toggle('near', distance < 14);
-      // New text changes the sign's width, so lay it out again next frame.
-      if (setMeta(b, side < 0 ? `← ${metres}` : side > 0 ? `${metres} →` : metres))
-        remeasure = true;
-      if (!side) {
-        const sy = spot.y,
-          ay = Math.max(anchorY, sy + 4);
-        if (Math.hypot(anchorX - spot.x, ay - sy) > 8)
-          stems += `<path d="M${spot.x.toFixed(1)} ${sy.toFixed(1)}L${anchorX.toFixed(1)} ${ay.toFixed(1)}"/><circle cx="${anchorX.toFixed(1)}" cy="${ay.toFixed(1)}" r="2.2"/>`;
-      }
-      b.style.transform = `translate(${Math.round(spot.x)}px,${Math.round(spot.y)}px) translate(-50%,-100%)`;
-      b.style.opacity = String(
-        hiddenBehind(p, eye) ? 0.62 : Core.clamp(1.15 - distance / 90, 0.75, 1),
-      );
+      // Not exploring yet and not overhead: the intro covers the street, so no signs.
+      b.hidden = true;
+      setMeta(b, '');
     }
     relayout = remeasure;
     if (stems !== lastStems) {
@@ -520,7 +580,8 @@
       labelStems.innerHTML = stems;
     }
     nearest = Core.nearest(player);
-    $('nearby-place').hidden = !entered || flying || !!camera.transition || nearest.distance > 6;
+    $('nearby-place').hidden =
+      !entered || camera.mode === 'world' || !!camera.transition || nearest.distance > 6;
     if (nearest.distance <= 6) {
       $('nearby-company').textContent = nearest.place.company;
       $('nearby-title').textContent = nearest.place.name;
@@ -570,24 +631,32 @@
         forward = 0;
         vx = vz = 0;
       }
+      if (forward <= 0) sprint = false;
       targetYaw += ((keys.has('arrowright') ? 1 : 0) - (keys.has('arrowleft') ? 1 : 0)) * dt * 1.4;
       const active = camera.mode === 'world' ? camera.flight : player;
       const yawDelta = targetYaw - active.yaw,
         pitchDelta = targetPitch - active.pitch;
-      active.yaw += yawDelta * (reduced.matches ? 1 : 1 - Math.exp(-18 * dt));
-      active.pitch += pitchDelta * (reduced.matches ? 1 : 1 - Math.exp(-18 * dt));
+      // A captured mouse should feel direct, so it is barely smoothed; dragging glides a little more.
+      const follow = reduced.matches
+        ? 1
+        : 1 - Math.exp((document.pointerLockElement === canvas ? -45 : -18) * dt);
+      active.yaw += yawDelta * follow;
+      active.pitch += pitchDelta * follow;
       if (camera.mode === 'world') {
         const up =
           (keys.has(' ') || keys.has('pageup') ? 1 : 0) -
-          (keys.has('c') || keys.has('pagedown') ? 1 : 0);
-        moving = Camera.fly(camera, { forward, side, up, fast: keys.has('shift') }, dt);
+          (keys.has('shift') || keys.has('c') || keys.has('pagedown') ? 1 : 0);
+        moving = Camera.fly(camera, { forward, side, up, fast: sprint }, dt);
+        // Flying down onto a street lands you there, as in creative mode.
+        if (camera.touchdown) toggleFlight();
       } else {
         const f = Core.forward(player.yaw),
           length = Math.hypot(forward, side) || 1,
-          speed = keys.has('shift') ? 8 : 4.5,
+          speed = sprint ? 9 : keys.has('shift') ? 7.5 : 4.5,
           tx = ((f.x * forward + Math.cos(player.yaw) * side) / length) * speed,
           tz = ((f.z * forward + Math.sin(player.yaw) * side) / length) * speed;
-        const a = 1 - Math.exp(-12 * dt);
+        // Full control on the ground, a little less in the air.
+        const a = 1 - Math.exp((air.lift > 0 ? -5 : -12) * dt);
         vx += (tx - vx) * a;
         vz += (tz - vz) * a;
         const next = Core.slide(player, vx * dt, vz * dt, movers());
@@ -598,8 +667,16 @@
         player.z = next.z;
         if (moving) walkTime += dt;
         groundY += (Core.groundAt(player.x, player.z) - groundY) * (1 - Math.exp(-10 * dt));
-        player.y =
-          1.45 + groundY + (moving && !reduced.matches ? Math.sin(walkTime * 9) * 0.012 : 0);
+        // Hold Space to keep hopping. Gravity is a touch stronger than Earth's, so jumps feel snappy.
+        if (keys.has(' ') && air.lift === 0 && air.v === 0) air.v = 6.4;
+        if (air.lift > 0 || air.v > 0) {
+          air.v = Math.max(-40, air.v - 22 * dt);
+          air.lift += air.v * dt;
+          if (air.lift <= 0) air.lift = air.v = 0;
+          moving = true;
+        }
+        const bob = moving && !air.lift && !reduced.matches ? Math.sin(walkTime * 9) * 0.012 : 0;
+        player.y = 1.45 + groundY + air.lift + bob;
       }
       dirty = dirty || moving || Math.abs(yawDelta) > 0.0001 || Math.abs(pitchDelta) > 0.0001;
     }
@@ -681,6 +758,8 @@
     enter,
     openPlace,
     setMode,
+    toggleFlight,
+    lockMouse,
     get mode() {
       return camera.mode;
     },

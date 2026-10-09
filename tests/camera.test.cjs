@@ -54,7 +54,7 @@ test('free flight has altitude and horizontal bounds and brakes after input rele
   for (let i = 0; i < 150; i++) Camera.fly(s, { forward: 0, side: 0, up: 0, fast: false }, 0.02);
   assert.ok(Math.hypot(...Object.values(s.velocity)) < 0.001);
   for (let i = 0; i < 1000; i++) Camera.fly(s, { forward: 0, side: 0, up: -1, fast: true }, 0.04);
-  assert.equal(s.flight.y, 7);
+  assert.equal(s.flight.y, Camera.floor(s.flight.x, s.flight.z));
 });
 test('zoom closes distance to the ground and reduced motion changes view immediately', () => {
   const p = ground(),
@@ -79,4 +79,41 @@ test('flight and wheel zoom cannot enter a tall career building', () => {
   s.flight = { x: p.x, y: p.height + 3, z: p.z, yaw: 0, pitch: -1 };
   for (let i = 0; i < 100; i++) Camera.fly(s, { forward: 0, side: 0, up: -1, fast: true }, 0.02);
   assert.ok(s.flight.y >= p.height + 2);
+});
+test('take off from the street, fly low, and touch down where you descend', () => {
+  const p = ground(),
+    s = Camera.create(p);
+  Camera.takeOff(s, p, { x: 1, z: 0 });
+  assert.equal(s.mode, 'world');
+  assert.equal(s.transition, null);
+  for (let i = 0; i < 60; i++) Camera.fly(s, { forward: 0, side: 0, up: 1, fast: false }, 1 / 60);
+  assert.ok(s.flight.y > p.y + 3);
+  let landed = false;
+  for (let i = 0; i < 600 && !landed; i++) {
+    Camera.fly(s, { forward: 0, side: 0, up: -1, fast: false }, 1 / 60);
+    landed = s.touchdown;
+  }
+  assert.ok(landed);
+  assert.ok(Math.abs(s.flight.y - Camera.floor(s.flight.x, s.flight.z)) < 1e-6);
+  const drop = Camera.land(s, p);
+  assert.equal(s.mode, 'walk');
+  assert.ok(drop < 1e-6);
+  assert.ok(Core.canWalk(p.x, p.z));
+});
+test('flight is gentle near the street and quicker up high', () => {
+  const p = ground(),
+    low = Camera.create(p),
+    high = Camera.create(p);
+  Camera.takeOff(low, p);
+  Camera.takeOff(high, p);
+  low.velocity = { x: 0, y: 0, z: 0 };
+  high.velocity = { x: 0, y: 0, z: 0 };
+  high.flight = { x: 100, y: 120, z: 100, yaw: 0, pitch: 0 };
+  for (let i = 0; i < 120; i++) {
+    Camera.fly(low, { forward: 1, side: 0, up: 0, fast: false }, 1 / 60);
+    Camera.fly(high, { forward: 1, side: 0, up: 0, fast: false }, 1 / 60);
+  }
+  const speed = s => Math.hypot(s.velocity.x, s.velocity.z);
+  assert.ok(speed(low) < 14 && speed(low) > 8, `low ${speed(low)}`);
+  assert.ok(speed(high) > speed(low) * 2.5, `high ${speed(high)}`);
 });

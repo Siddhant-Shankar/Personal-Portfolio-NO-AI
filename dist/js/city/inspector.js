@@ -249,14 +249,20 @@
     if (selected) $('inspect-follow').textContent = 'Follow ◎';
   });
   canvas.addEventListener('pointerup', e => {
-    if (!press || document.pointerLockElement === canvas) return;
-    const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y),
+    if (!press) return;
+    const locked = document.pointerLockElement === canvas,
+      moved = locked ? 0 : Math.hypot(e.clientX - press.x, e.clientY - press.y),
       quick = performance.now() - press.time < 450;
     press = null;
     if (moved > 6 || !quick) return;
-    const hit = pick(e.clientX, e.clientY);
+    // With the mouse captured, clicks act on whatever sits under the crosshair.
+    const hit = locked ? pick(innerWidth / 2, innerHeight / 2) : pick(e.clientX, e.clientY);
     if (hit) open(hit);
-    else if (selected) close();
+    else {
+      if (selected) close();
+      // A plain click on the city captures the mouse, Minecraft-style. Touch keeps drag-to-look.
+      if (!locked && e.pointerType === 'mouse') game.lockMouse();
+    }
   });
   canvas.addEventListener('pointermove', e => {
     if (press || e.pointerType !== 'mouse') return;

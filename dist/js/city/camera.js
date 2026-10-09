@@ -1,4 +1,5 @@
-/* Creative-style flight, kept independent from the grounded visitor and the renderer. */
+/* Creative-style flight: take off from wherever you stand, fly anywhere, and touch down on any street.
+   Kept independent from the renderer. */
 (function (root) {
   'use strict';
   const Core = typeof module === 'object' && module.exports ? require('./core.js') : root.CityCore;
@@ -12,6 +13,11 @@
       z = (distance * 0.65) / norm;
     return { x, y, z, yaw: Math.atan2(-x, z), pitch: Math.atan2(-y, Math.hypot(x, z)) };
   }
+  // The lowest a flier can go: eye height over a street, or hovering clear of water, roofs, and props.
+  const EYE = 1.45;
+  function floor(x, z) {
+    return Core.canWalk(x, z) ? Core.groundAt(x, z) + EYE : 2.5;
+  }
   function create(ground) {
     return {
       mode: 'walk',
@@ -19,6 +25,7 @@
       eye: copy(ground),
       velocity: { x: 0, y: 0, z: 0 },
       transition: null,
+      touchdown: false,
     };
   }
   function resetVelocity(state) {
@@ -37,6 +44,26 @@
     state.mode = mode;
     if (mode === 'world') state.flight = overview(aspect);
     transition(state, mode === 'world' ? state.flight : ground, reduced);
+  }
+  // Double-tap Space on foot: lift off from exactly where you are, keeping your momentum.
+  function takeOff(state, ground, carry = { x: 0, z: 0 }) {
+    state.mode = 'world';
+    state.transition = null;
+    state.touchdown = false;
+    state.flight = copy(ground);
+    state.velocity = { x: carry.x, y: 4, z: carry.z };
+    state.eye = copy(ground);
+  }
+  // Back on foot where the flier is. Returns how far above the street they are, so they can fall the rest.
+  function land(state, ground) {
+    const p = state.flight;
+    Object.assign(ground, copy(p));
+    state.mode = 'walk';
+    state.transition = null;
+    state.touchdown = false;
+    resetVelocity(state);
+    state.eye = copy(ground);
+    return Math.max(0, p.y - floor(p.x, p.z));
   }
   function frameWorld(state, reduced = false, aspect = 16 / 9) {
     state.flight = overview(aspect);
@@ -64,7 +91,8 @@
     const p = state.flight,
       f = Core.forward(p.yaw),
       norm = Math.max(1, Math.hypot(input.forward, input.side, input.up)),
-      speed = input.fast ? 38 : 19;
+      // Gentle near the street, quick up high, so both a rooftop glide and a crossing of town feel right.
+      speed = (input.fast ? 2.2 : 1) * 10 * (1 + Math.max(0, p.y - 2) / 40);
     const target = {
       x: ((f.x * input.forward + Math.cos(p.yaw) * input.side) * speed) / norm,
       z: ((f.z * input.forward + Math.sin(p.yaw) * input.side) * speed) / norm,
@@ -72,16 +100,21 @@
     };
     const old = copy(p),
       damping = 1 - Math.exp(-8 * dt);
+    state.touchdown = false;
     for (const axis of ['y', 'x', 'z']) {
       state.velocity[axis] += (target[axis] - state.velocity[axis]) * damping;
-      const next = {
-        ...p,
-        [axis]: Core.clamp(
-          p[axis] + state.velocity[axis] * dt,
-          axis === 'y' ? 7 : -260,
-          axis === 'y' ? 330 : 260,
-        ),
-      };
+      let value = p[axis] + state.velocity[axis] * dt;
+      if (axis === 'y') {
+        // Never sink through the floor. Gliding in over a bench or the canal eases up instead of popping.
+        const low = floor(p.x, p.z);
+        value = Math.min(330, Math.max(value, Math.min(low, p.y)));
+        if (p.y < low) value = Math.max(value, p.y + (low - p.y) * (1 - Math.exp(-12 * dt)));
+        if (value <= low + 0.001 && state.velocity.y < 0) {
+          state.velocity.y = 0;
+          state.touchdown = input.up < 0 && Core.canWalk(p.x, p.z);
+        }
+      } else value = Core.clamp(value, -260, 260);
+      const next = { ...p, [axis]: value };
       if (Core.canFly(next.x, next.y, next.z)) p[axis] = next[axis];
       else state.velocity[axis] = 0;
     }
@@ -96,7 +129,7 @@
     const next = {
       x: Core.clamp(p.x - Math.sin(p.yaw) * cp * step, -260, 260),
       z: Core.clamp(p.z + Math.cos(p.yaw) * cp * step, -260, 260),
-      y: Core.clamp(p.y - Math.sin(p.pitch) * step, 7, 330),
+      y: Core.clamp(p.y - Math.sin(p.pitch) * step, 2.5, 330),
     };
     const steps = Math.max(
       1,
@@ -114,7 +147,19 @@
     }
     resetVelocity(state);
   }
-  const api = { overview, create, setMode, frameWorld, sample, fly, zoom, resetVelocity };
+  const api = {
+    overview,
+    create,
+    setMode,
+    takeOff,
+    land,
+    floor,
+    frameWorld,
+    sample,
+    fly,
+    zoom,
+    resetVelocity,
+  };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CityCamera = api;
 })(typeof window !== 'undefined' ? window : globalThis);
