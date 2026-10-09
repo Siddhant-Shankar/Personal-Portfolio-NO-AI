@@ -51,7 +51,7 @@ dist/                     everything the site serves (no build step)
 ├── index.html            the city page: first screen, dialogs, script order
 ├── notes.html            the text-only portfolio and three case studies
 ├── css/                  base.css (shared), city.css (city UI), notes.css
-├── images/og-image.png   social preview
+├── images/og-island.png  social preview
 └── js/
     ├── content/          what the site says
     │   ├── career-data.js    every role, project, and research note (edit this to change content)
